@@ -16,8 +16,10 @@ HEIGHT = 480
 PADY = 5
 PADX = 5
 
+#simulation variables
 pressure = "7284"
 ionCurrent = "9790"
+leDAQ = "USB-2408-yeeeeeee"
 
 class MainWindow(ctk.CTk):
     def __init__(self, *args, **kwargs):
@@ -28,35 +30,27 @@ class MainWindow(ctk.CTk):
         self.title("IRUI082")
         self.geometry(f"{WIDTH}x{HEIGHT}")
         
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure((0, 1), weight=1)
         
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure((0, 1), weight=1)
         
-        self.frameDaq = SubFrame(self)
-        self.frameDaq.grid(row=0, column=0, padx=PADX, pady=PADY, sticky="nsew")
-        self.frameDaq.label.configure(text="DAQ")
+        self.frameDaq = SubFrame(self, 0, 0, "DAQ")
         self.frameDaq.switch_var = ctk.StringVar(value="off")
         self.frameDaq.switch = ctk.CTkSwitch(self.frameDaq, text="DAQ UP", command=self.switch_event,
+                                             switch_width=100, switch_height=50,
                                              variable=self.frameDaq.switch_var, onvalue="on", offvalue="off")
         self.frameDaq.switch.grid(row=1, column=0,)
+        self.frameDaq.label = ctk.CTkLabel(self, text=leDAQ)
+        self.frameDaq.label.grid(row=2, column=0, padx=PADX, pady=PADY, sticky="nsew")
         
-        self.frameAnalogOut = SubFrame(self)
-        self.frameAnalogOut.grid(row=0, column=1, padx=PADX, pady=PADY, sticky="nsew")
-        self.frameAnalogOut.label.configure(text="Analog Voltage")
+        self.frameAnalogOut = SubFrame(self, 0, 1, "Analog Voltage")
         
-        self.framePressure = SubFrame(self)
-        self.framePressure.grid(row=1, column=0, padx=PADX, pady=PADY, sticky="nsew")
-        self.framePressure.label.configure(text="Pressure")
+        self.framePressure = SubFrame(self, 1, 0, "Pressure")
         
-        self.frameSerial = SubFrame(self)
-        self.frameSerial.grid(row=1, column=1, padx=PADX, pady=PADY, sticky="nsew")
-        self.frameSerial.label.configure(text="LOG or sum, idk")
+        self.frameSerial = SubFrame(self, 1, 1, "LOG or sum, idk")
         
-        self.frameVoltages = SubFrame(self)
-        self.frameVoltages.grid(row=2, column=0, padx=PADX, pady=PADY, sticky="nsew", columnspan=2)
-        self.frameVoltages.label.configure(text="IRG080 Voltages")
+        self.frameVoltages = SubFrame(self, 2, 0, "IRG080 Voltages")
+        self.frameVoltages.grid(columnspan=2)
              
         
     def daqConnect(self):
@@ -72,9 +66,10 @@ class MainWindow(ctk.CTk):
         print("switch toggled, current value:", self.frameDaq.switch_var.get())
 
 class SubFrame(ctk.CTkFrame):
-    def __init__(self, master, **kwargs):
+    def __init__(self, master, row, col, title, **kwargs):
         super().__init__(master, **kwargs)
-        self.label = ctk.CTkLabel(self)
+        self.label = ctk.CTkLabel(self, text=title)
+        self.grid(row=row, column=col, padx=PADX, pady=PADY, sticky="nsew")
         self.label.grid(row=0, column=0, padx=PADX, pady=PADY, sticky="w")
         
         
