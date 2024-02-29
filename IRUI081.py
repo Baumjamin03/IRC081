@@ -44,7 +44,7 @@ class MainWindow(ctk.CTk):
         self.frameDaq.switch = ctk.CTkSwitch(self.frameDaq, text="DAQ UP", command=self.switch_event,
                                              switch_width=100, switch_height=50,
                                              variable=self.frameDaq.switch_var, onvalue="on", offvalue="off")
-        self.frameDaq.switch.grid(row=1, column=0,)
+        self.frameDaq.switch.grid(row=1, column=0)
         self.frameDaq.label = ctk.CTkLabel(self.frameDaq, text=leDAQ)
         self.frameDaq.label.grid(row=2, column=0, padx=PADX, pady=PADY, sticky="nsew")
         
@@ -52,10 +52,7 @@ class MainWindow(ctk.CTk):
         
         self.framePressure = SubFrame(self, 1, 0, "Pressure")
         self.framePressure.pressure = ctk.StringVar()
-        self.framePressure.pDisplay = ctk.CTkLabel(self.framePressure, text="pressure in mb: ")
-        self.framePressure.pDisplay.grid(row=1, column=0, padx=PADX, pady=PADY, sticky="nsew")
-        self.framePressure.pDisplay = ctk.CTkLabel(self.framePressure, textvariable=self.framePressure.pressure)
-        self.framePressure.pDisplay.grid(row=1, column=1, padx=PADX, pady=PADY, sticky="nsew")
+        self.framePressure.pDisplay = ValueDisplay(self.framePressure, 1, 0, "pressure")
         
         self.frameEmission = SubFrame(self, 1, 1, "Emission Current")
         self.frameEmission.entryCurrent = ctk.CTkEntry(self.frameEmission, placeholder_text="enter Emission Current",
@@ -68,19 +65,15 @@ class MainWindow(ctk.CTk):
         self.frameVoltages = SubFrame(self, 2, 0, "IRG080 Voltages")
         self.frameVoltages.grid(columnspan=2)
         self.frameVoltages.grid_columnconfigure((0, 1, 2), weight=1)
-        self.frameVoltages.lblBias = ctk.CTkLabel(self.frameVoltages, text="FARADAY: ")
-        self.frameVoltages.lblBias.grid(row=1, column=0, padx=PADX, pady=PADY, sticky="w")
-        self.frameVoltages.lblWehnelt = ctk.CTkLabel(self.frameVoltages, text="WEHNELT: ")
-        self.frameVoltages.lblWehnelt.grid(row=1, column=1, padx=PADX, pady=PADY, sticky="w")
-        self.frameVoltages.lblCage = ctk.CTkLabel(self.frameVoltages, text="CAGE: ")
-        self.frameVoltages.lblCage.grid(row=2, column=0, padx=PADX, pady=PADY, sticky="w")
-        self.frameVoltages.lblDeflector = ctk.CTkLabel(self.frameVoltages, text="DEFLECTOR: ")
-        self.frameVoltages.lblDeflector.grid(row=2, column=1, padx=PADX, pady=PADY, sticky="w")
-        self.frameVoltages.lblFaraday = ctk.CTkLabel(self.frameVoltages, text="FIL HIGH: ")
-        self.frameVoltages.lblFaraday.grid(row=1, column=2, padx=PADX, pady=PADY, sticky="w")
-        self.frameVoltages.lblFaraday = ctk.CTkLabel(self.frameVoltages, text="FIL LOW: ")
-        self.frameVoltages.lblFaraday.grid(row=2, column=2, padx=PADX, pady=PADY, sticky="w")
-        
+
+        self.frameVoltages.uWehnelt = ValueDisplay(self.frameVoltages, 1, 0, "WEHNELT:")
+        self.frameVoltages.uCage = ValueDisplay(self.frameVoltages, 2, 0, "CAGE:")
+        self.frameVoltages.uDeflector = ValueDisplay(self.frameVoltages, 1, 1, "DEFLECTOR:")
+        self.frameVoltages.uFaraday = ValueDisplay(self.frameVoltages, 2, 1, "FARADAY:")
+        self.frameVoltages.uFilLow = ValueDisplay(self.frameVoltages, 1, 2, "FIL LOW:")
+        self.frameVoltages.uFilHigh = ValueDisplay(self.frameVoltages, 2, 2, "FIL HIGH:")
+
+
     def daqConnect(self):
         print("test")
     
@@ -91,33 +84,34 @@ class MainWindow(ctk.CTk):
         return ionCurrent
 
     def setEmissionCurr(self):
-        self.framePressure.pressure.set(self.frameEmission.entryCurrent.get())
+        self.framePressure.pDisplay.value.set(self.frameEmission.entryCurrent.get())
     
     def switch_event(self):
         print("switch toggled, current value:", self.frameDaq.switch_var.get())
 
 
-class SubFrame(ctk.CTkFrame):
-    def __init__(self, master, row, col, title, **kwargs):
-        super().__init__(master, **kwargs)
-        self.configure(fg_color=infBlue)
-        self.grid(row=row, column=col, padx=PADX, pady=PADY, sticky="nsew")
-        self.lblTitle = ctk.CTkLabel(self, text=title, text_color=txtColor, anchor="center", corner_radius=5)
-        self.lblTitle.grid(row=0, column=0, padx=PADX, pady=PADY, columnspan=9)
-        self.lblTitle.cget("font").configure(size=20, weight="bold")
-        self.grid_columnconfigure(len(self.grid_slaves(row=0)), weight=1)
-
-class uDisplay(ctk.CTkFrame):
+class BaseFrame(ctk.CTkFrame):
     def __init__(self, master, row, col, title, **kwargs):
         super().__init__(master, **kwargs)
         self.configure(fg_color=infBlue)
         self.grid(row=row, column=col, padx=PADX, pady=PADY, sticky="nsew")
         self.lblTitle = ctk.CTkLabel(self, text=title, text_color=txtColor, anchor="center", corner_radius=5)
         self.lblTitle.grid(row=0, column=0, padx=PADX, pady=PADY, sticky="nsew")
+
+class SubFrame(BaseFrame):
+    def __init__(self, master, row, col, title, **kwargs):
+        super().__init__(master, row, col, title, **kwargs)
+        self.lblTitle.cget("font").configure(size=20, weight="bold")
+        self.lblTitle.grid(columnspan=9)
+        self.grid_columnconfigure(len(self.grid_slaves(row=0)), weight=1)
+
+
+class ValueDisplay(BaseFrame):
+    def __init__(self, master, row, col, title, **kwargs):
+        super().__init__(master, row, col, title, **kwargs)
         self.value = ctk.StringVar()
         self.lblValue = ctk.CTkLabel(self, textvariable=self.value)
         self.lblValue.grid(row=0, column=1, padx=PADX, pady=PADY, sticky="nsew")
-
 
 
 if __name__ == "__main__":
