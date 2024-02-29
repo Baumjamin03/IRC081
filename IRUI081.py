@@ -52,7 +52,7 @@ class MainWindow(ctk.CTk):
         
         self.framePressure = SubFrame(self, 1, 0, "Pressure")
         self.framePressure.pressure = ctk.StringVar()
-        self.framePressure.pDisplay = ValueDisplay(self.framePressure, 1, 0, "pressure")
+        self.framePressure.pDisplay = ValueDisplay(self.framePressure, 1, 0, "PRESSURE:")
         
         self.frameEmission = SubFrame(self, 1, 1, "Emission Current")
         self.frameEmission.entryCurrent = ctk.CTkEntry(self.frameEmission, placeholder_text="enter Emission Current",
