@@ -5,8 +5,6 @@ Created on Wed Feb 28 10:55:21 2024
 @author: benj002
 """
 
-
-# touchscreen_gui_customtkinter.py
 import customtkinter as ctk
 from customtkinter import CTkLabel
 
@@ -103,13 +101,25 @@ class SubFrame(ctk.CTkFrame):
     def __init__(self, master, row, col, title, **kwargs):
         super().__init__(master, **kwargs)
         self.configure(fg_color=infBlue)
-        self.title = ctk.CTkLabel(self, text=title, text_color=txtColor, anchor="center", corner_radius=5)
         self.grid(row=row, column=col, padx=PADX, pady=PADY, sticky="nsew")
-        self.title.grid(row=0, column=0, padx=PADX, pady=PADY, columnspan=9)
-        self.title.cget("font").configure(size=20, weight="bold")
+        self.lblTitle = ctk.CTkLabel(self, text=title, text_color=txtColor, anchor="center", corner_radius=5)
+        self.lblTitle.grid(row=0, column=0, padx=PADX, pady=PADY, columnspan=9)
+        self.lblTitle.cget("font").configure(size=20, weight="bold")
         self.grid_columnconfigure(len(self.grid_slaves(row=0)), weight=1)
 
-    
+class uDisplay(ctk.CTkFrame):
+    def __init__(self, master, row, col, title, **kwargs):
+        super().__init__(master, **kwargs)
+        self.configure(fg_color=infBlue)
+        self.grid(row=row, column=col, padx=PADX, pady=PADY, sticky="nsew")
+        self.lblTitle = ctk.CTkLabel(self, text=title, text_color=txtColor, anchor="center", corner_radius=5)
+        self.lblTitle.grid(row=0, column=0, padx=PADX, pady=PADY, sticky="nsew")
+        self.value = ctk.StringVar()
+        self.lblValue = ctk.CTkLabel(self, textvariable=self.value)
+        self.lblValue.grid(row=0, column=1, padx=PADX, pady=PADY, sticky="nsew")
+
+
+
 if __name__ == "__main__":
     app = MainWindow()
     app.mainloop()
