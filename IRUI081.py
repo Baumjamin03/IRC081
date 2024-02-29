@@ -53,6 +53,11 @@ class MainWindow(ctk.CTk):
         self.frameAnalogOut = SubFrame(self, 0, 1, "Analog Voltage")
         
         self.framePressure = SubFrame(self, 1, 0, "Pressure")
+        self.framePressure.pressure = ctk.StringVar()
+        self.framePressure.pDisplay = ctk.CTkLabel(self.framePressure, text="pressure in mb: ")
+        self.framePressure.pDisplay.grid(row=1, column=0, padx=PADX, pady=PADY, sticky="nsew")
+        self.framePressure.pDisplay = ctk.CTkLabel(self.framePressure, textvariable=self.framePressure.pressure)
+        self.framePressure.pDisplay.grid(row=1, column=1, padx=PADX, pady=PADY, sticky="nsew")
         
         self.frameEmission = SubFrame(self, 1, 1, "Emission Current")
         self.frameEmission.entryCurrent = ctk.CTkEntry(self.frameEmission, placeholder_text="enter Emission Current",
@@ -88,7 +93,7 @@ class MainWindow(ctk.CTk):
         return ionCurrent
 
     def setEmissionCurr(self):
-        print(self.frameEmission.entryCurrent.get())
+        self.framePressure.pressure.set(self.frameEmission.entryCurrent.get())
     
     def switch_event(self):
         print("switch toggled, current value:", self.frameDaq.switch_var.get())
@@ -98,8 +103,7 @@ class SubFrame(ctk.CTkFrame):
     def __init__(self, master, row, col, title, **kwargs):
         super().__init__(master, **kwargs)
         self.configure(fg_color=infBlue)
-        self.title = ctk.CTkLabel(self, text=title, text_color=txtColor, anchor="center",
-                                  corner_radius=5)
+        self.title = ctk.CTkLabel(self, text=title, text_color=txtColor, anchor="center", corner_radius=5)
         self.grid(row=row, column=col, padx=PADX, pady=PADY, sticky="nsew")
         self.title.grid(row=0, column=0, padx=PADX, pady=PADY, columnspan=9)
         self.title.cget("font").configure(size=20, weight="bold")
