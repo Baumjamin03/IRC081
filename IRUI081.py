@@ -6,24 +6,18 @@ Created on Wed Feb 28 10:55:21 2024
 """
 
 import customtkinter as ctk
-from customtkinter import CTkLabel
+from GlobalVariables import *
+from ValueDisplay import ValueDisplay
+from SubFrame import SubFrame
 
 # Define the custom window dimensions
 WIDTH = 800
 HEIGHT = 480
 
-# Default padding
-PADY = 5
-PADX = 5
-
 # simulation variables
 pressure = "7284"
 ionCurrent = "9790"
 leDAQ = "USB-2408-yeeee"
-
-# color variables
-infBlue = "#1f457a"
-txtColor = "lightgrey"
 
 
 class MainWindow(ctk.CTk):
@@ -88,30 +82,6 @@ class MainWindow(ctk.CTk):
     
     def switch_event(self):
         print("switch toggled, current value:", self.frameDaq.switch_var.get())
-
-
-class BaseFrame(ctk.CTkFrame):
-    def __init__(self, master, row, col, title, **kwargs):
-        super().__init__(master, **kwargs)
-        self.configure(fg_color=infBlue)
-        self.grid(row=row, column=col, padx=PADX, pady=PADY, sticky="nsew")
-        self.lblTitle = ctk.CTkLabel(self, text=title, text_color=txtColor, anchor="center", corner_radius=5)
-        self.lblTitle.grid(row=0, column=0, padx=PADX, pady=PADY, sticky="nsew")
-
-class SubFrame(BaseFrame):
-    def __init__(self, master, row, col, title, **kwargs):
-        super().__init__(master, row, col, title, **kwargs)
-        self.lblTitle.cget("font").configure(size=20, weight="bold")
-        self.lblTitle.grid(columnspan=9)
-        self.grid_columnconfigure(len(self.grid_slaves(row=0)), weight=1)
-
-
-class ValueDisplay(BaseFrame):
-    def __init__(self, master, row, col, title, **kwargs):
-        super().__init__(master, row, col, title, **kwargs)
-        self.value = ctk.StringVar()
-        self.lblValue = ctk.CTkLabel(self, textvariable=self.value)
-        self.lblValue.grid(row=0, column=1, padx=PADX, pady=PADY, sticky="nsew")
 
 
 if __name__ == "__main__":
