@@ -60,7 +60,9 @@ class MainWindow(ctk.CTk):
         self.frameEmission.btnSet = ctk.CTkButton(self.frameEmission, text="Set Current", command=self.setEmissionCurr)
         self.frameEmission.btnSet.grid(row=1, column=0, padx=PADX, pady=PADY, sticky="nsew")
         self.frameEmission.grid_columnconfigure((0, 1), weight=1)
-        self.numPad = NumbPad(self.frameEmission.entryCurrent)
+        self.frameEmission.entryCurrent.bind("<Button-1>", self.entry_clicked)
+
+        self.numPad = None
         
         self.frameVoltages = SubFrame(self, 2, 0, "IRG080 Voltages")
         self.frameVoltages.grid(columnspan=2, padx=PADX*2, pady=(PADY, PADY*2))
@@ -90,6 +92,11 @@ class MainWindow(ctk.CTk):
     
     def switch_event(self):
         print("switch toggled, current value:", self.frameDaq.switch_var.get())
+
+    def entry_clicked(self, event):
+        if self.numPad is None or not self.numPad.winfo_exists():
+            self.numPad = NumbPad(self.frameEmission.entryCurrent)
+        self.numPad.focus()
 
 
 if __name__ == "__main__":
