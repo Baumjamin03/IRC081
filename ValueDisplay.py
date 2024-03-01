@@ -9,4 +9,4 @@ class ValueDisplay(BaseFrame):
         super().__init__(master, row, col, title, **kwargs)
         self.value = ctk.StringVar()
         self.lblValue = ctk.CTkLabel(self, textvariable=self.value)
-        self.lblValue.grid(row=0, column=1, padx=PADX, pady=PADY, sticky="nsew")
+        self.lblValue.grid(row=0, column=1, sticky="nsew")

@@ -9,6 +9,7 @@ import customtkinter as ctk
 from GlobalVariables import *
 from ValueDisplay import ValueDisplay
 from SubFrame import SubFrame
+from NumbPad import NumbPad
 
 # Define the custom window dimensions
 WIDTH = 800
@@ -41,23 +42,28 @@ class MainWindow(ctk.CTk):
         self.frameDaq.switch.grid(row=1, column=0)
         self.frameDaq.label = ctk.CTkLabel(self.frameDaq, text=leDAQ)
         self.frameDaq.label.grid(row=2, column=0, padx=PADX, pady=PADY, sticky="nsew")
+        self.frameDaq.grid(padx=(PADX*2, PADX), pady=(PADY*2, PADY))
         
         self.frameAnalogOut = SubFrame(self, 0, 1, "Analog Voltage")
+        self.frameAnalogOut.grid(padx=(PADX, PADX*2), pady=(PADY*2, PADY))
         
         self.framePressure = SubFrame(self, 1, 0, "Pressure")
+        self.framePressure.grid(padx=(PADX*2, PADX))
         self.framePressure.pressure = ctk.StringVar()
         self.framePressure.pDisplay = ValueDisplay(self.framePressure, 1, 0, "PRESSURE:")
         
         self.frameEmission = SubFrame(self, 1, 1, "Emission Current")
+        self.frameEmission.grid(padx=(PADX, PADX*2))
         self.frameEmission.entryCurrent = ctk.CTkEntry(self.frameEmission, placeholder_text="enter Emission Current",
                                                        placeholder_text_color="darkgrey")
         self.frameEmission.entryCurrent.grid(row=1, column=1, padx=PADX, pady=PADY, sticky="nsew")
         self.frameEmission.btnSet = ctk.CTkButton(self.frameEmission, text="Set Current", command=self.setEmissionCurr)
         self.frameEmission.btnSet.grid(row=1, column=0, padx=PADX, pady=PADY, sticky="nsew")
         self.frameEmission.grid_columnconfigure((0, 1), weight=1)
+        self.numPad = NumbPad(self.frameEmission.entryCurrent)
         
         self.frameVoltages = SubFrame(self, 2, 0, "IRG080 Voltages")
-        self.frameVoltages.grid(columnspan=2)
+        self.frameVoltages.grid(columnspan=2, padx=PADX*2, pady=(PADY, PADY*2))
         self.frameVoltages.grid_columnconfigure((0, 1, 2), weight=1)
 
         self.frameVoltages.uWehnelt = ValueDisplay(self.frameVoltages, 1, 0, "WEHNELT:")
@@ -66,6 +72,8 @@ class MainWindow(ctk.CTk):
         self.frameVoltages.uFaraday = ValueDisplay(self.frameVoltages, 2, 1, "FARADAY:")
         self.frameVoltages.uFilLow = ValueDisplay(self.frameVoltages, 1, 2, "FIL LOW:")
         self.frameVoltages.uFilHigh = ValueDisplay(self.frameVoltages, 2, 2, "FIL HIGH:")
+
+        self.frameVoltages.uCage.value.set("yeeee")
 
 
     def daqConnect(self):
@@ -86,4 +94,5 @@ class MainWindow(ctk.CTk):
 
 if __name__ == "__main__":
     app = MainWindow()
+    app.resizable(False, False)
     app.mainloop()
