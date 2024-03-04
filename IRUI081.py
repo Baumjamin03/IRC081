@@ -8,7 +8,7 @@ Created on Wed Feb 28 10:55:21 2024
 import customtkinter as ctk
 from GlobalVariables import *
 from BaseFrame import BaseFrame
-from ValueDisplay import HotizontalValueDisplay, VerticalValueDisplay
+from ValueDisplay import HorizontalValueDisplay, VerticalValueDisplay
 from SubFrame import SubFrame
 from TouchEntry import TouchEntry
 from RangeEntry import RangeEntry
@@ -56,17 +56,12 @@ class MainWindow(ctk.CTk):
 
         self.frameAnalogOut.grid_columnconfigure((0, 1), weight=1)
         self.frameAnalogOut.grid_rowconfigure((1, 2), weight=1)
-        self.frameAnalogOut.frameVoltageDisplay = BaseFrame(self.frameAnalogOut, 1, 0, "U Out:", pady=0)
-        self.frameAnalogOut.frameVoltageDisplay.grid_columnconfigure(0, weight=1)
-        self.frameAnalogOut.frameVoltageDisplay.grid_rowconfigure(1, weight=1)
-        self.frameAnalogOut.frameVoltageDisplay.uOut = ctk.CTkLabel(self.frameAnalogOut.frameVoltageDisplay,
-                                                                    bg_color="black")
-        self.frameAnalogOut.frameVoltageDisplay.uOut.grid(sticky="nsew")
+        self.frameAnalogOut.frameVoltageDisplay = VerticalValueDisplay(self.frameAnalogOut, 1, 0, "U Out:")
 
         self.framePressure = SubFrame(self, 1, 0, "Pressure")
         self.framePressure.grid(padx=(PADX * 2, PADX))
-        self.framePressure.pressure = ctk.StringVar()
-        self.framePressure.pDisplay = HotizontalValueDisplay(self.framePressure, 1, 0, "PRESSURE:")
+        self.framePressure.grid_columnconfigure(0, weight=1)
+        self.framePressure.pDisplay = VerticalValueDisplay(self.framePressure, 1, 0, "mbar:")
 
         self.frameEmission = SubFrame(self, 1, 1, "Emission Current")
         self.frameEmission.grid(padx=(PADX, PADX * 2))
@@ -81,14 +76,12 @@ class MainWindow(ctk.CTk):
         self.frameVoltages.grid(columnspan=2, padx=PADX * 2, pady=(PADY, PADY * 2))
         self.frameVoltages.grid_columnconfigure((0, 1, 2), weight=1)
 
-        self.frameVoltages.uWehnelt = HotizontalValueDisplay(self.frameVoltages, 1, 0, "WEHNELT:")
-        self.frameVoltages.uCage = HotizontalValueDisplay(self.frameVoltages, 2, 0, "CAGE:")
-        self.frameVoltages.uDeflector = HotizontalValueDisplay(self.frameVoltages, 1, 1, "DEFLECTOR:")
-        self.frameVoltages.uFaraday = HotizontalValueDisplay(self.frameVoltages, 2, 1, "FARADAY:")
-        self.frameVoltages.uFilLow = HotizontalValueDisplay(self.frameVoltages, 1, 2, "FIL LOW:")
-        self.frameVoltages.uFilHigh = HotizontalValueDisplay(self.frameVoltages, 2, 2, "FIL HIGH:")
-
-        self.frameVoltages.uCage.value.set("yeeee")
+        self.frameVoltages.uWehnelt = HorizontalValueDisplay(self.frameVoltages, 1, 0, "WEHNELT:")
+        self.frameVoltages.uCage = HorizontalValueDisplay(self.frameVoltages, 2, 0, "CAGE:")
+        self.frameVoltages.uDeflector = HorizontalValueDisplay(self.frameVoltages, 1, 1, "DEFLECTOR:")
+        self.frameVoltages.uFaraday = HorizontalValueDisplay(self.frameVoltages, 2, 1, "FARADAY:")
+        self.frameVoltages.uFilLow = HorizontalValueDisplay(self.frameVoltages, 1, 2, "FIL LOW:")
+        self.frameVoltages.uFilHigh = HorizontalValueDisplay(self.frameVoltages, 2, 2, "FIL HIGH:")
 
     def daq_connect(self):
         print("test")
