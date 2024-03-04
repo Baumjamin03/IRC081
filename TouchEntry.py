@@ -5,8 +5,8 @@ from GlobalVariables import *
 
 
 class TouchEntry(ctk.CTkEntry):
-    def __init__(self, master, row, col, padx=PADX, pady=PADY, *args, **kwargs):
-        super().__init__(master, placeholder_text_color="darkgrey", *args, **kwargs)
+    def __init__(self, master, row, col, title, padx=PADX, pady=PADY, *args, **kwargs):
+        super().__init__(master, placeholder_text_color="darkgrey", placeholder_text=title, *args, **kwargs)
         self.grid(row=row, column=col, padx=padx, pady=pady, sticky="nsew")
         self.numPad = None
         self.bind("<Button-1>", lambda event, entry=self: self.entry_clicked(self, event))
@@ -15,4 +15,4 @@ class TouchEntry(ctk.CTkEntry):
         entry.delete(0, ctk.END)
         if self.numPad is None or not self.numPad.winfo_exists():
             self.numPad = NumbPad(entry)
-        self.numPad.attributes('-topmost', True)
+        self.numPad.grab_set()

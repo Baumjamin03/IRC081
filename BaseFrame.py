@@ -10,3 +10,4 @@ class BaseFrame(ctk.CTkFrame):
         self.grid(row=row, column=col, padx=padx, pady=pady, sticky="nsew")
         self.lblTitle = ctk.CTkLabel(self, text=title, text_color=txtColor, anchor="center", corner_radius=5)
         self.lblTitle.grid(row=0, column=0, padx=padx, pady=pady, sticky="nsew")
+        self.lblTitle.cget("font").configure(weight="bold")

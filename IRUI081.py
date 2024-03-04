@@ -7,7 +7,8 @@ Created on Wed Feb 28 10:55:21 2024
 
 import customtkinter as ctk
 from GlobalVariables import *
-from ValueDisplay import ValueDisplay
+from BaseFrame import BaseFrame
+from ValueDisplay import HotizontalValueDisplay, VerticalValueDisplay
 from SubFrame import SubFrame
 from TouchEntry import TouchEntry
 from RangeEntry import RangeEntry
@@ -24,9 +25,8 @@ leDAQ = "USB-2408-yeeee"
 
 class MainWindow(ctk.CTk):
     def __init__(self, *args, **kwargs):
-        super().__init__()
+        super().__init__(*args, **kwargs)
 
-        self.maxsize(WIDTH, HEIGHT)
         self.configure(fg_color="black")
 
         self.title("IRUI082")
@@ -51,15 +51,26 @@ class MainWindow(ctk.CTk):
         self.frameAnalogOut.entryUpperRange = RangeEntry(self.frameAnalogOut, 1, 1, "Upper Range Limit")
         self.frameAnalogOut.entryLowerRange = RangeEntry(self.frameAnalogOut, 2, 1, "Lower Range Limit")
 
+        self.frameAnalogOut.btnSetRange = ctk.CTkButton(self.frameAnalogOut, text="Set Range")
+        self.frameAnalogOut.btnSetRange.grid(row=2, column=0, padx=PADX, pady=PADY, sticky="nsew")
+
+        self.frameAnalogOut.grid_columnconfigure((0, 1), weight=1)
+        self.frameAnalogOut.grid_rowconfigure((1, 2), weight=1)
+        self.frameAnalogOut.frameVoltageDisplay = BaseFrame(self.frameAnalogOut, 1, 0, "U Out:", pady=0)
+        self.frameAnalogOut.frameVoltageDisplay.grid_columnconfigure(0, weight=1)
+        self.frameAnalogOut.frameVoltageDisplay.grid_rowconfigure(1, weight=1)
+        self.frameAnalogOut.frameVoltageDisplay.uOut = ctk.CTkLabel(self.frameAnalogOut.frameVoltageDisplay,
+                                                                    bg_color="black")
+        self.frameAnalogOut.frameVoltageDisplay.uOut.grid(sticky="nsew")
+
         self.framePressure = SubFrame(self, 1, 0, "Pressure")
         self.framePressure.grid(padx=(PADX * 2, PADX))
         self.framePressure.pressure = ctk.StringVar()
-        self.framePressure.pDisplay = ValueDisplay(self.framePressure, 1, 0, "PRESSURE:")
+        self.framePressure.pDisplay = HotizontalValueDisplay(self.framePressure, 1, 0, "PRESSURE:")
 
         self.frameEmission = SubFrame(self, 1, 1, "Emission Current")
         self.frameEmission.grid(padx=(PADX, PADX * 2))
-        self.frameEmission.entryCurrent = TouchEntry(self.frameEmission, 1, 1,
-                                                     placeholder_text="enter emission current")
+        self.frameEmission.entryCurrent = TouchEntry(self.frameEmission, 1, 1, "Enter Emission Current")
         self.frameEmission.btnSet = ctk.CTkButton(self.frameEmission, text="Set Current",
                                                   command=self.set_emission_curr)
         self.frameEmission.btnSet.grid(row=1, column=0, padx=PADX, pady=PADY, sticky="nsew")
@@ -70,12 +81,12 @@ class MainWindow(ctk.CTk):
         self.frameVoltages.grid(columnspan=2, padx=PADX * 2, pady=(PADY, PADY * 2))
         self.frameVoltages.grid_columnconfigure((0, 1, 2), weight=1)
 
-        self.frameVoltages.uWehnelt = ValueDisplay(self.frameVoltages, 1, 0, "WEHNELT:")
-        self.frameVoltages.uCage = ValueDisplay(self.frameVoltages, 2, 0, "CAGE:")
-        self.frameVoltages.uDeflector = ValueDisplay(self.frameVoltages, 1, 1, "DEFLECTOR:")
-        self.frameVoltages.uFaraday = ValueDisplay(self.frameVoltages, 2, 1, "FARADAY:")
-        self.frameVoltages.uFilLow = ValueDisplay(self.frameVoltages, 1, 2, "FIL LOW:")
-        self.frameVoltages.uFilHigh = ValueDisplay(self.frameVoltages, 2, 2, "FIL HIGH:")
+        self.frameVoltages.uWehnelt = HotizontalValueDisplay(self.frameVoltages, 1, 0, "WEHNELT:")
+        self.frameVoltages.uCage = HotizontalValueDisplay(self.frameVoltages, 2, 0, "CAGE:")
+        self.frameVoltages.uDeflector = HotizontalValueDisplay(self.frameVoltages, 1, 1, "DEFLECTOR:")
+        self.frameVoltages.uFaraday = HotizontalValueDisplay(self.frameVoltages, 2, 1, "FARADAY:")
+        self.frameVoltages.uFilLow = HotizontalValueDisplay(self.frameVoltages, 1, 2, "FIL LOW:")
+        self.frameVoltages.uFilHigh = HotizontalValueDisplay(self.frameVoltages, 2, 2, "FIL HIGH:")
 
         self.frameVoltages.uCage.value.set("yeeee")
 
@@ -97,5 +108,4 @@ class MainWindow(ctk.CTk):
 
 if __name__ == "__main__":
     app = MainWindow()
-    app.resizable(False, False)
     app.mainloop()

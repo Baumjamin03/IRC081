@@ -1,8 +1,8 @@
 # File for global variables
 
 # Default padding
-PADY = 4
-PADX = 4
+PADY = 3
+PADX = 3
 
 # color variables
 infBlue = "#1f457a"

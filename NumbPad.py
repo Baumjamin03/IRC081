@@ -7,7 +7,7 @@ class NumbPad(ctk.CTkToplevel):
     def __init__(self, entry, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.geometry("300x400")
-        self.resizable(False, False)
+        self.title(entry.cget("placeholder_text"))
 
         self.buttonArray = [12]
         row = 0
