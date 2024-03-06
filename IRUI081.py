@@ -44,6 +44,7 @@ class MainWindow(ctk.CTk):
         self.frameDaq.label = ctk.CTkLabel(self.frameDaq, text=leDAQ)
         self.frameDaq.label.grid(row=2, column=0, padx=PADX, pady=PADY, sticky="nsew")
         self.frameDaq.grid(padx=(PADX * 2, PADX), pady=(PADY * 2, PADY))
+        self.frameDaq.grid_columnconfigure(0, weight=1)
 
         self.frameAnalogOut = SubFrame(self, 0, 1, "Analog Voltage")
         self.frameAnalogOut.grid(padx=(PADX, PADX * 2), pady=(PADY * 2, PADY))
@@ -60,8 +61,10 @@ class MainWindow(ctk.CTk):
 
         self.framePressure = SubFrame(self, 1, 0, "Pressure")
         self.framePressure.grid(padx=(PADX * 2, PADX))
-        self.framePressure.grid_columnconfigure(0, weight=1)
-        self.framePressure.pDisplay = VerticalValueDisplay(self.framePressure, 1, 0, "mbar:")
+        self.framePressure.grid_columnconfigure((0, 1), weight=1)
+        self.framePressure.grid_rowconfigure(1, weight=1)
+        self.framePressure.barDisplay = VerticalValueDisplay(self.framePressure, 1, 0, "mbar:")
+        self.framePressure.torrDisplay = VerticalValueDisplay(self.framePressure, 1, 1, "torr:")
 
         self.frameEmission = SubFrame(self, 1, 1, "Emission Current")
         self.frameEmission.grid(padx=(PADX, PADX * 2))
