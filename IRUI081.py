@@ -12,6 +12,7 @@ from ValueDisplay import HorizontalValueDisplay, VerticalValueDisplay
 from SubFrame import SubFrame
 from TouchEntry import TouchEntry
 from RangeEntry import RangeEntry
+from IRC081 import IRC081
 
 # Define the custom window dimensions
 WIDTH = 800
@@ -28,6 +29,8 @@ class MainWindow(ctk.CTk):
         super().__init__(*args, **kwargs)
 
         self.configure(fg_color="black")
+
+        self.irc081 = IRC081()
 
         self.title("IRUI082")
         self.geometry(f"{WIDTH}x{HEIGHT}")
@@ -101,7 +104,17 @@ class MainWindow(ctk.CTk):
     def switch_event(self):
         print("switch toggled, current value:", self.frameDaq.switch_var.get())
 
+    def update_voltages(self):
+        self.frameVoltages.uFaraday.value.set(self.irc081.get_voltage_faraday())
+        self.frameVoltages.uCage.value.set(self.irc081.get_voltage_cage())
+        self.frameVoltages.uDeflector.value.set(self.irc081.get_voltage_deflector())
+        self.frameVoltages.uWehnelt.value.set(self.irc081.get_voltage_wehnelt())
+
+        self.after(2000, self.update_voltages)
+
 
 if __name__ == "__main__":
     app = MainWindow()
+    app.update_voltages()
+
     app.mainloop()

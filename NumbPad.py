@@ -31,6 +31,16 @@ class NumbPad(ctk.CTkToplevel):
     def fo_sho(self):
         self.destroy()
 
+    def raise_numbpad(self):
+        if self.winfo_exists() and self is not None:
+            print("test")
+            self.wm_deiconify()
+            self.wm_attributes("-topmost", 1)
+            self.focus_force()
+            self.wm_focusmodel('active')
+
+            self.after(500, self.raise_numbpad)
+
 
 class ButtonNumber(ctk.CTkButton):
     def __init__(self, master, row, col, text, entry, *args, **kwargs):

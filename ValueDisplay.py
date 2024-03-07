@@ -16,9 +16,10 @@ class BaseValueFrame(BaseFrame):
 class HorizontalValueDisplay(BaseValueFrame):
     def __init__(self, master, row, col, title, *args, **kwargs):
         super().__init__(master, row, col, title, pady=0, *args, **kwargs)
-        self.lblValue.grid(row=0, column=1, sticky="w")
+        self.lblValue.grid(row=0, column=1, sticky="e")
         self.grid_columnconfigure((0, 1), weight=1)
         self.lblTitle.configure(anchor="w")
+        self.lblTitle.grid(sticky="ew")
 
 
 class VerticalValueDisplay(BaseValueFrame):
