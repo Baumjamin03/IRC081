@@ -23,7 +23,7 @@ class NumbPad(ctk.CTkToplevel):
 
         self.buttonArray.append(ButtonNumber(self, 3, 0, ".", entry))
 
-        self.buttonArray.append(ctk.CTkButton(self, text="fo\nsho", width=100, height=100, border_width=3,
+        self.buttonArray.append(ctk.CTkButton(self, text="ENTER", width=100, height=100, border_width=3,
                                               border_color="black", fg_color=infBlue, command=self.fo_sho))
         self.buttonArray[12].grid(row=3, column=2)
         self.buttonArray[12].cget("font").configure(size=29)
@@ -33,12 +33,7 @@ class NumbPad(ctk.CTkToplevel):
 
     def raise_numbpad(self):
         if self.winfo_exists() and self is not None:
-            print("test")
-            self.wm_deiconify()
-            self.wm_attributes("-topmost", 1)
-            self.focus_force()
-            self.wm_focusmodel('active')
-
+            self.focus()
             self.after(500, self.raise_numbpad)
 
 

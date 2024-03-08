@@ -29,9 +29,9 @@ class IRC081(usb_2408_2AO):
 
         print('\nMFG Calibration date: ', self.getMFGCAL())
 
-        self.mode = self.DIFFERENTIAL
+        self.mode = self.SINGLE_ENDED
         self.gain = self.BP_10V
-        self.rate = self.HZ1000
+        self.rate = self.HZ25
 
     def set_emission_curr(self, current):
         pass

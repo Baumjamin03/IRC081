@@ -92,8 +92,8 @@ class MainWindow(ctk.CTk):
     def daq_connect(self):
         print("test")
 
-    def get_pressure(self):
-        return pressure
+    def update_pressure(self):
+        self.framePressure.barDisplay.value.set(self.irc081.get_pressure_mbar())
 
     def get_ion_current(self):
         return ionCurrent
@@ -104,17 +104,19 @@ class MainWindow(ctk.CTk):
     def switch_event(self):
         print("switch toggled, current value:", self.frameDaq.switch_var.get())
 
-    def update_voltages(self):
+    def update_values(self):
         self.frameVoltages.uFaraday.value.set(self.irc081.get_voltage_faraday())
         self.frameVoltages.uCage.value.set(self.irc081.get_voltage_cage())
         self.frameVoltages.uDeflector.value.set(self.irc081.get_voltage_deflector())
         self.frameVoltages.uWehnelt.value.set(self.irc081.get_voltage_wehnelt())
 
-        self.after(2000, self.update_voltages)
+        self.update_pressure()
+
+        self.after(2000, self.update_values)
 
 
 if __name__ == "__main__":
     app = MainWindow()
-    app.update_voltages()
+    app.update_values()
 
     app.mainloop()
