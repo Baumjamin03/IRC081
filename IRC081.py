@@ -33,6 +33,18 @@ class IRC081(usb_2408_2AO):
         self.gain = self.BP_10V
         self.rate = self.HZ25
 
+    def get_coll_current(self, coll_range):
+        volts = self.get_voltage(7)
+        c = coll_range // 4
+        coll_range = coll_range % 4
+        b = coll_range // 2
+        coll_range = coll_range % 2
+        a = coll_range
+        self.DOut(a, 7)
+        self.DOut(b, 6)
+        self.DOut(c, 5)
+        return volts    # scale to current
+
     def set_emission_curr(self, current):
         pass
 

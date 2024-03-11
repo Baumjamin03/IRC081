@@ -112,6 +112,8 @@ class MainWindow(ctk.CTk):
 
         self.update_pressure()
 
+
+
         self.after(2000, self.update_values)
 
 
