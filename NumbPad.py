@@ -26,7 +26,7 @@ class NumbPad(ctk.CTkToplevel):
         self.buttonArray.append(ctk.CTkButton(self, text="ENTER", width=100, height=100, border_width=3,
                                               border_color="black", fg_color=infBlue, command=self.fo_sho))
         self.buttonArray[12].grid(row=3, column=2)
-        self.buttonArray[12].cget("font").configure(size=29)
+        self.buttonArray[12].cget("font").configure(size=25)
 
     def fo_sho(self):
         self.destroy()
