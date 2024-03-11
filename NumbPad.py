@@ -28,13 +28,18 @@ class NumbPad(ctk.CTkToplevel):
         self.buttonArray[12].grid(row=3, column=2)
         self.buttonArray[12].cget("font").configure(size=25)
 
+        try:
+            self.grab_set()
+        except Exception as e:
+            print("grab_set() goofed, " + str(e))
+
     def fo_sho(self):
         self.destroy()
 
     def raise_numbpad(self):
         if self.winfo_exists() and self is not None:
             self.focus()
-            self.after(500, self.raise_numbpad)
+            self.after(100, self.raise_numbpad)
 
 
 class ButtonNumber(ctk.CTkButton):
@@ -42,10 +47,17 @@ class ButtonNumber(ctk.CTkButton):
         super().__init__(master=master, text=text, width=100, height=100, border_width=3, border_color="black",
                          fg_color=infBlue, command=lambda: self.button_clicked(entry), *args, **kwargs)
         self.grid(row=row, column=col)
-        self.cget("font").configure(size=29, weight="bold")
+        self.cget("font").configure(size=32, weight="bold")
 
     def button_clicked(self, entry):
         current_value = entry.get()
-        new_value = current_value + str(self.cget("text"))
+        if '.' in current_value and str(self.cget("text")) == '.':
+            return
+
+        if current_value == "" and str(self.cget("text")) == '.':
+            new_value = '0' + str(self.cget("text"))
+        else:
+            new_value = current_value + str(self.cget("text"))
+
         entry.delete(0, ctk.END)
         entry.insert(0, new_value)
