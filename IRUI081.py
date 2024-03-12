@@ -93,8 +93,13 @@ class MainWindow(ctk.CTk):
         self.frameVoltages.uFilLow = HorizontalValueDisplay(self.frameVoltages, 1, 2, "FIL LOW:")
         self.frameVoltages.uFilHigh = HorizontalValueDisplay(self.frameVoltages, 2, 2, "FIL HIGH:")
 
-    def daq_connect(self):
-        print("test")
+    def measurement_loop(self):
+
+        if self.frameDaq.switch_var.get() == "on":
+            print("test")
+#            self.update_values()
+
+            self.after(1000, self.measurement_loop)
 
     def update_pressure(self):
         self.framePressure.barDisplay.value.set(self.irc081.get_pressure_mbar())
@@ -106,7 +111,11 @@ class MainWindow(ctk.CTk):
         self.framePressure.pDisplay.value.set(self.frameEmission.entryCurrent.get())
 
     def switch_event(self):
-        print("switch toggled, current value:", self.frameDaq.switch_var.get())
+        if self.frameDaq.switch_var.get() == "on":
+            self.irc081.measurement_start()
+            self.measurement_loop()
+        else:
+            print("measurement end")
 
     def update_values(self):
         self.frameVoltages.uFaraday.value.set(self.irc081.get_voltage_faraday())
@@ -116,11 +125,8 @@ class MainWindow(ctk.CTk):
 
         self.update_pressure()
 
-        self.after(1000, self.update_values)
-
 
 if __name__ == "__main__":
     app = MainWindow()
-    app.update_values()
 
     app.mainloop()

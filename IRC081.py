@@ -81,6 +81,9 @@ class IRC081(usb_2408_2AO):
         print('Channel %2i = %#x  Volts = %lf' % (channel, data, self.volts(self.gain, data)))
         return "{:.3f}".format(self.volts(self.gain, data))
 
+    def measurement_star(self):
+        pass
+
 
 if __name__ == "__main__":
     irc081 = IRC081()
