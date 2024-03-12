@@ -103,11 +103,8 @@ class MainWindow(ctk.CTk):
     def update_pressure(self):
         self.framePressure.barDisplay.value.set(self.irc081.get_pressure_mbar())
 
-    def get_ion_current(self):
-        return ionCurrent
-
     def set_emission_curr(self):
-        self.framePressure.pDisplay.value.set(self.frameEmission.entryCurrent.get())
+        self.irc081.set_emission_curr(self.frameEmission.entryCurrent.get())
 
     def switch_event(self):
         if self.frameDaq.switch_var.get() == "on":

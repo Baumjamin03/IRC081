@@ -49,7 +49,7 @@ class IRC081(usb_2408_2AO):
         return volts    # scale to current
 
     def set_emission_curr(self, current):
-        pass
+        emission_current = Decimal(current)
 
     def set_analog_range(self):
         pass
@@ -61,16 +61,24 @@ class IRC081(usb_2408_2AO):
         pass
 
     def get_voltage_wehnelt(self):
-        return Decimal(self.get_voltage(1)) * self.factorAI1
+        value = Decimal(self.get_voltage(1)) * Decimal(10.1) * self.factorAI1
+#        print("Wehnelt: " + str(value))
+        return "{:.3f}".format(value)
 
     def get_voltage_deflector(self):
-        return Decimal(self.get_voltage(0)) * self.factorAI0
+        value = Decimal(self.get_voltage(0)) * Decimal(10.1) * self.factorAI0
+#        print("Deflector: " + str(value))
+        return "{:.3f}".format(value)
 
     def get_voltage_cage(self):
-        return Decimal(self.get_voltage(3)) * self.factorAI3
+        value = Decimal(self.get_voltage(2)) * Decimal(51) * self.factorAI2
+#        print("Cage: " + str(value))
+        return "{:.3f}".format(value)
 
     def get_voltage_faraday(self):
-        return Decimal(self.get_voltage(2)) * self.factorAI2
+        value = Decimal(self.get_voltage(3)) * Decimal(51) * self.factorAI3
+#        print("Faraday: " + str(value))
+        return "{:.3f}".format(value)
 
     def get_voltage_fillow(self):
         pass
@@ -81,11 +89,15 @@ class IRC081(usb_2408_2AO):
     def get_voltage(self, channel):
         data, flags = self.AIn(channel, self.measMode, self.measGain, self.measRate)
         data = int(data * self.Cal[self.measGain].slope + self.Cal[self.measGain].intercept)
-        print('Channel %2i = %#x  Volts = %lf' % (channel, data, self.volts(self.measGain, data)))
-        return "{:.3f}".format(self.volts(self.measGain, data))
+#        print('Channel %2i = %#x  Volts = %lf' % (channel, data, self.volts(self.measGain, data)))
+        return self.volts(self.measGain, data)
 
     def measurement_start(self):
-        pass
+
+        print("start")
+        print(f"Channel 1 state before setting: {self.DOutR(1)}")
+        self.DOut(1, 1)
+        print(f"Channel 1 state after setting: {self.DOutR(1)}")
 
     def config_corr_factors(self):
         factor_array = get_calibration_values(self.getSerialNumber())
