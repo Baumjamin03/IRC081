@@ -1,5 +1,7 @@
 # Backend File for IRC081 raspi extension
 from mccDAQ.usb_2400 import *
+from GetCalibrationValues import *
+from decimal import *
 
 
 class IRC081(usb_2408_2AO):
@@ -28,9 +30,11 @@ class IRC081(usb_2408_2AO):
 
         print('\nMFG Calibration date: ', self.getMFGCAL())
 
-        self.mode = self.SINGLE_ENDED
-        self.gain = self.BP_10V
-        self.rate = self.HZ25
+        self.measMode = self.SINGLE_ENDED
+        self.measGain = self.BP_10V
+        self.measRate = self.HZ25
+
+        self.config_corr_factors()
 
     def get_coll_current(self, coll_range):
         volts = self.get_voltage(7)
@@ -75,16 +79,36 @@ class IRC081(usb_2408_2AO):
         pass
 
     def get_voltage(self, channel):
-        data, flags = self.AIn(channel, self.mode, self.gain, self.rate)
-        data = int(data * self.Cal[self.gain].slope + self.Cal[self.gain].intercept)
-        print('Channel %2i = %#x  Volts = %lf' % (channel, data, self.volts(self.gain, data)))
-        return "{:.3f}".format(self.volts(self.gain, data))
+        data, flags = self.AIn(channel, self.measMode, self.measGain, self.measRate)
+        data = int(data * self.Cal[self.measGain].slope + self.Cal[self.measGain].intercept)
+        print('Channel %2i = %#x  Volts = %lf' % (channel, data, self.volts(self.measGain, data)))
+        return "{:.3f}".format(self.volts(self.measGain, data))
 
     def measurement_start(self):
         pass
 
-
-if __name__ == "__main__":
-    irc081 = IRC081()
-    print(irc081.getSerialNumber())
-    # irc081.get_all_voltages()
+    def config_corr_factors(self):
+        factor_array = get_calibration_values(self.getSerialNumber())
+        print(factor_array)
+        self.factorAI0 = Decimal(factor_array[2])
+        self.factorAI1 = Decimal(factor_array[3])
+        self.factorAI2 = Decimal(factor_array[4])
+        self.factorAI3 = Decimal(factor_array[5])
+        self.factorAI5 = Decimal(factor_array[6])
+        self.factorAI6 = Decimal(factor_array[7])
+        self.factorAI8 = Decimal(factor_array[8])
+        self.factorAI9 = Decimal(factor_array[9])
+        self.factorICage0 = Decimal(factor_array[10])
+        self.factorICage1 = Decimal(factor_array[11])
+        self.factorIFaraday0 = Decimal(factor_array[12])
+        self.factorIFaraday1 = Decimal(factor_array[13])
+        self.factorIEmission0 = Decimal(factor_array[14])
+        self.factorIEmission1 = Decimal(factor_array[15])
+        self.factorIIon0 = Decimal(factor_array[16])
+        self.factorIIon1 = Decimal(factor_array[17])
+        self.factorIIon2 = Decimal(factor_array[18])
+        self.factorIIon3 = Decimal(factor_array[19])
+        self.factorIIon4 = Decimal(factor_array[20])
+        self.factorIIon5 = Decimal(factor_array[21])
+        self.factorIIon6 = Decimal(factor_array[22])
+        return

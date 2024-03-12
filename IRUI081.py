@@ -96,8 +96,7 @@ class MainWindow(ctk.CTk):
     def measurement_loop(self):
 
         if self.frameDaq.switch_var.get() == "on":
-            print("test")
-#            self.update_values()
+            self.update_values()
 
             self.after(1000, self.measurement_loop)
 
