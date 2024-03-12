@@ -115,12 +115,16 @@ class MainWindow(ctk.CTk):
             self.measurement_loop()
         else:
             print("measurement end")
+            self.frameVoltages.uDeflector.value.set(0)
+            self.frameVoltages.uWehnelt.value.set(0)
+            self.frameVoltages.uFaraday.value.set(0)
+            self.frameVoltages.uCage.value.set(0)
 
     def update_values(self):
-        self.frameVoltages.uFaraday.value.set(self.irc081.get_voltage_faraday())
-        self.frameVoltages.uCage.value.set(self.irc081.get_voltage_cage())
         self.frameVoltages.uDeflector.value.set(self.irc081.get_voltage_deflector())
         self.frameVoltages.uWehnelt.value.set(self.irc081.get_voltage_wehnelt())
+        self.frameVoltages.uFaraday.value.set(self.irc081.get_voltage_faraday())
+        self.frameVoltages.uCage.value.set(self.irc081.get_voltage_cage())
 
         self.update_pressure()
 

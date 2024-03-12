@@ -61,16 +61,16 @@ class IRC081(usb_2408_2AO):
         pass
 
     def get_voltage_wehnelt(self):
-        return self.get_voltage(1)
+        return Decimal(self.get_voltage(1)) * self.factorAI1
 
     def get_voltage_deflector(self):
-        return self.get_voltage(0)
+        return Decimal(self.get_voltage(0)) * self.factorAI0
 
     def get_voltage_cage(self):
-        return self.get_voltage(3)
+        return Decimal(self.get_voltage(3)) * self.factorAI3
 
     def get_voltage_faraday(self):
-        return self.get_voltage(2)
+        return Decimal(self.get_voltage(2)) * self.factorAI2
 
     def get_voltage_fillow(self):
         pass
