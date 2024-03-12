@@ -8,6 +8,7 @@ class NumbPad(ctk.CTkToplevel):
         super().__init__(*args, **kwargs)
         self.geometry("300x400")
         self.title(entry.cget("placeholder_text"))
+        self.overrideredirect(False)
 
         self.buttonArray = [12]
         row = 0
@@ -29,6 +30,8 @@ class NumbPad(ctk.CTkToplevel):
         self.buttonArray[12].cget("font").configure(size=25)
 
         try:
+            self.wait_visibility()
+            self.attributes('-topmost', 1)
             self.grab_set()
         except Exception as e:
             print("grab_set() goofed, " + str(e))

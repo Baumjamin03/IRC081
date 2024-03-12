@@ -79,7 +79,7 @@ class IRC081(usb_2408_2AO):
         data, flags = self.AIn(channel, self.mode, self.gain, self.rate)
         data = int(data * self.Cal[self.gain].slope + self.Cal[self.gain].intercept)
         print('Channel %2i = %#x  Volts = %lf' % (channel, data, self.volts(self.gain, data)))
-        return self.volts(self.gain, data)
+        return "{:.3f}".format(self.volts(self.gain, data))
 
 
 if __name__ == "__main__":

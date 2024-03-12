@@ -7,7 +7,6 @@ Created on Wed Feb 28 10:55:21 2024
 
 import customtkinter as ctk
 from GlobalVariables import *
-from BaseFrame import BaseFrame
 from ValueDisplay import HorizontalValueDisplay, VerticalValueDisplay
 from SubFrame import SubFrame
 from TouchEntry import TouchEntry
@@ -32,8 +31,13 @@ class MainWindow(ctk.CTk):
 
         self.irc081 = IRC081()
 
+        self.windowWidth = WIDTH
+        self.windowHeight = HEIGHT
+
         self.title("IRUI082")
-        self.geometry(f"{WIDTH}x{HEIGHT}")
+        self.geometry(f"{self.windowWidth}x{self.windowHeight}")
+
+        self.state('normal')
 
         self.grid_columnconfigure((0, 1), weight=1)
         self.grid_rowconfigure((0, 1), weight=1)
@@ -112,9 +116,7 @@ class MainWindow(ctk.CTk):
 
         self.update_pressure()
 
-
-
-        self.after(2000, self.update_values)
+        self.after(1000, self.update_values)
 
 
 if __name__ == "__main__":
