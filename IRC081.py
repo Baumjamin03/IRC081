@@ -9,7 +9,6 @@ class IRC081(usb_2408_2AO):
         except OSError as e:
             print("no, " + str(e))
             return
-        print("daq ume")
         print('wMaxPacketSize =', self.wMaxPacketSize)
         for gain in range(1, 10):
             print('Calibration Table: Range =', gain,
@@ -81,7 +80,7 @@ class IRC081(usb_2408_2AO):
         print('Channel %2i = %#x  Volts = %lf' % (channel, data, self.volts(self.gain, data)))
         return "{:.3f}".format(self.volts(self.gain, data))
 
-    def measurement_star(self):
+    def measurement_start(self):
         pass
 
 
