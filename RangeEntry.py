@@ -10,3 +10,5 @@ class RangeEntry(BaseFrame):
         self.entry = TouchEntry(self, 1, 0, title=("Enter " + title))
         self.grid_rowconfigure(1, weight=1)
         self.grid_columnconfigure(0, weight=1)
+        self.lblTitle.grid(columnspan=2)
+        self.expEntry = TouchEntry(self, 1, 1, title="e-[ENTER]")
