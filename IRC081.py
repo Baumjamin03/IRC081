@@ -3,6 +3,8 @@ from mccDAQ.usb_2400 import *
 from GetCalibrationValues import *
 from decimal import *
 
+SENSITIVITY = Decimal(29)
+
 
 class IRC081(usb_2408_2AO):
     def __init__(self, *args, **kwargs):
@@ -36,7 +38,7 @@ class IRC081(usb_2408_2AO):
 
         self.config_corr_factors()
 
-        self.AOut(0, 1.6)
+        self.set_filament_current_limitation(2)
 
     def get_coll_current(self, coll_range):
         volts = self.get_voltage(7)
@@ -48,108 +50,100 @@ class IRC081(usb_2408_2AO):
         self.DOut(a, 7)
         self.DOut(b, 6)
         self.DOut(c, 5)
-        return volts    # scale to current
+        return volts  # scale to current
 
     def set_emission_curr(self, current):
         emission_current = Decimal(current)
 
-    def set_analog_range(self):
-        pass
-
     def get_pressure_mbar(self):
-        pass
-
-    def get_pressure_torr(self):
         pass
 
     def get_voltage_wehnelt(self):
         value = Decimal(self.get_voltage(1)) * Decimal(10.1) * self.factorAI1
-#        print("Wehnelt: " + str(value))
+        #        print("Wehnelt: " + str(value))
         return "{:.3f}".format(value)
 
     def get_voltage_deflector(self):
         value = Decimal(self.get_voltage(0)) * Decimal(10.1) * self.factorAI0
-#        print("Deflector: " + str(value))
+        #        print("Deflector: " + str(value))
         return "{:.3f}".format(value)
 
     def get_voltage_cage(self):
         value = Decimal(self.get_voltage(2)) * Decimal(51) * self.factorAI2
-#        print("Cage: " + str(value))
+        #        print("Cage: " + str(value))
         return "{:.3f}".format(value)
 
     def get_voltage_faraday(self):
         value = Decimal(self.get_voltage(3)) * Decimal(51) * self.factorAI3
-#        print("Faraday: " + str(value))
+        #        print("Faraday: " + str(value))
         return "{:.3f}".format(value)
 
-    #############################
     def get_voltage_bias(self):
         value = Decimal(self.get_voltage(5)) * Decimal(10.1) * self.factorAI5
-#        print("bias: " + str(value))
+        #        print("bias: " + str(value))
         return value
 
     def get_current_filament(self):
         value = Decimal(self.get_voltage(6)) * self.factorAI5
-#        print("filament: " + str(value))
+        #        print("filament: " + str(value))
         return "{:.3f}".format(value)
 
     def get_current_ion_50p(self):
         value = Decimal(self.get_voltage(15)) * (10 ** -11) * self.factorAI15 * (10 ** 0) * self.factorIIon0
-#        print("current_ion_50pA: " + str(value))
+        #        print("current_ion_50pA: " + str(value))
         return value
 
     def get_current_ion_500p(self):
         value = Decimal(self.get_voltage(15)) * (10 ** -11) * self.factorAI15 * (10 ** 1) * self.factorIIon1
-#        print("current_ion_50uA: " + str(value))
+        #        print("current_ion_50uA: " + str(value))
         return value
 
     def get_current_ion_5n(self):
         value = Decimal(self.get_voltage(15)) * (10 ** -11) * self.factorAI15 * (10 ** 2) * self.factorIIon2
-#        print("current_ion_50uA: " + str(value))
+        #        print("current_ion_50uA: " + str(value))
         return value
 
     def get_current_ion_50n(self):
         value = Decimal(self.get_voltage(15)) * (10 ** -11) * self.factorAI15 * (10 ** 3) * self.factorIIon3
-#        print("current_ion_50uA: " + str(value))
+        #        print("current_ion_50uA: " + str(value))
         return value
 
     def get_current_ion_500n(self):
         value = Decimal(self.get_voltage(15)) * (10 ** -11) * self.factorAI15 * (10 ** 4) * self.factorIIon4
-#        print("current_ion_50uA: " + str(value))
+        #        print("current_ion_50uA: " + str(value))
         return value
 
     def get_current_ion_5u(self):
         value = Decimal(self.get_voltage(15)) * (10 ** -11) * self.factorAI15 * (10 ** 5) * self.factorIIon5
-#        print("current_ion_50uA: " + str(value))
+        #        print("current_ion_50uA: " + str(value))
         return value
 
     def get_current_ion_50u(self):
         value = Decimal(self.get_voltage(15)) * (10 ** -11) * self.factorAI15 * (10 ** 6) * self.factorIIon6
-#        print("current_ion_50uA: " + str(value))
+        #        print("current_ion_50uA: " + str(value))
         return value
 
     def set_filament_current_limitation(self, i_fil_max):
         value = i_fil_max / self.factorAI6
-#        print("filament_current_limitation: " + str(value))
+        #        print("filament_current_limitation: " + str(value))
         self.AOut(0, value)
 
     def set_emission_current_should_100u(self, i_e_should):
         voltage_bias = Decimal(self.get_voltage_bias())
         value = ((i_e_should - (voltage_bias / (1.11 * (10 ** 9)))) * (10 ** 5)) / self.factorIEmission0
-#        print("emission_current_should 01mA: " + str(value))
+        #        print("emission_current_should 01mA: " + str(value))
         self.AOut(1, value)
 
     def set_emission_current_should_1m(self, i_e_should):
         voltage_bias = Decimal(self.get_voltage_bias())
         value = ((i_e_should - (voltage_bias / (1.11 * (10 ** 9)))) * (10 ** 4)) / self.factorIEmission1
-#        print("emission_current_should 1mA: " + str(value))
+        #        print("emission_current_should 1mA: " + str(value))
         self.AOut(1, value)
-    ################################
 
     def get_voltage(self, channel):
         data, flags = self.AIn(channel, self.measMode, self.measGain, self.measRate)
         data = int(data * self.Cal[self.measGain].slope + self.Cal[self.measGain].intercept)
-#        print('Channel %2i = %#x  Volts = %lf' % (channel, data, self.volts(self.measGain, data)))
+        #        print('Channel %2i = %#x  Volts = %lf' % (channel, data, self.volts(self.measGain, data)))
         return self.volts(self.measGain, data)
 
     def measurement_start(self):
@@ -165,6 +159,8 @@ class IRC081(usb_2408_2AO):
         print(self.DOut(value))
 
         print(f"Channel 1 state after setting: {hex(self.DOutR())}")
+
+
 
     def measurement_end(self):
         self.DOut(0)
