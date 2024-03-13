@@ -82,11 +82,69 @@ class IRC081(usb_2408_2AO):
 #        print("Faraday: " + str(value))
         return "{:.3f}".format(value)
 
-    def get_voltage_fillow(self):
-        pass
+    #############################
+    def get_voltage_bias(self):
+        value = Decimal(self.get_voltage(5)) * Decimal(10.1) * self.factorAI5
+#        print("bias: " + str(value))
+        return value
 
-    def get_voltage_filhigh(self):
-        pass
+    def get_current_filament(self):
+        value = Decimal(self.get_voltage(6)) * self.factorAI5
+#        print("filament: " + str(value))
+        return "{:.3f}".format(value)
+
+    def get_current_ion_50p(self):
+        value = Decimal(self.get_voltage(15)) * (10 ** -11) * self.factorAI15 * (10 ** 0) * self.factorIIon0
+#        print("current_ion_50pA: " + str(value))
+        return value
+
+    def get_current_ion_500p(self):
+        value = Decimal(self.get_voltage(15)) * (10 ** -11) * self.factorAI15 * (10 ** 1) * self.factorIIon1
+#        print("current_ion_50uA: " + str(value))
+        return value
+
+    def get_current_ion_5n(self):
+        value = Decimal(self.get_voltage(15)) * (10 ** -11) * self.factorAI15 * (10 ** 2) * self.factorIIon2
+#        print("current_ion_50uA: " + str(value))
+        return value
+
+    def get_current_ion_50n(self):
+        value = Decimal(self.get_voltage(15)) * (10 ** -11) * self.factorAI15 * (10 ** 3) * self.factorIIon3
+#        print("current_ion_50uA: " + str(value))
+        return value
+
+    def get_current_ion_500n(self):
+        value = Decimal(self.get_voltage(15)) * (10 ** -11) * self.factorAI15 * (10 ** 4) * self.factorIIon4
+#        print("current_ion_50uA: " + str(value))
+        return value
+
+    def get_current_ion_5u(self):
+        value = Decimal(self.get_voltage(15)) * (10 ** -11) * self.factorAI15 * (10 ** 5) * self.factorIIon5
+#        print("current_ion_50uA: " + str(value))
+        return value
+
+    def get_current_ion_50u(self):
+        value = Decimal(self.get_voltage(15)) * (10 ** -11) * self.factorAI15 * (10 ** 6) * self.factorIIon6
+#        print("current_ion_50uA: " + str(value))
+        return value
+
+    def set_filament_current_limitation(self, i_fil_max):
+        value = i_fil_max / self.factorAI6
+#        print("filament_current_limitation: " + str(value))
+        self.AOut(0, value)
+
+    def set_emission_current_should_100u(self, i_e_should):
+        voltage_bias = Decimal(self.get_voltage_bias())
+        value = ((i_e_should - (voltage_bias / (1.11 * (10 ** 9)))) * (10 ** 5)) / self.factorIEmission0
+#        print("emission_current_should 01mA: " + str(value))
+        self.AOut(1, value)
+
+    def set_emission_current_should_1m(self, i_e_should):
+        voltage_bias = Decimal(self.get_voltage_bias())
+        value = ((i_e_should - (voltage_bias / (1.11 * (10 ** 9)))) * (10 ** 4)) / self.factorIEmission1
+#        print("emission_current_should 1mA: " + str(value))
+        self.AOut(1, value)
+    ################################
 
     def get_voltage(self, channel):
         data, flags = self.AIn(channel, self.measMode, self.measGain, self.measRate)
@@ -96,7 +154,6 @@ class IRC081(usb_2408_2AO):
 
     def measurement_start(self):
         print("start")
-
 
         print(self.get_voltage(4))
         print(self.get_voltage(12))
@@ -108,7 +165,6 @@ class IRC081(usb_2408_2AO):
         print(self.DOut(value))
 
         print(f"Channel 1 state after setting: {hex(self.DOutR())}")
-
 
     def measurement_end(self):
         self.DOut(0)

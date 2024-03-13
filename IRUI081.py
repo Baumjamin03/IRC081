@@ -93,8 +93,8 @@ class MainWindow(ctk.CTk):
         self.frameVoltages.uCage = HorizontalValueDisplay(self.frameVoltages, 2, 0, "CAGE:")
         self.frameVoltages.uDeflector = HorizontalValueDisplay(self.frameVoltages, 1, 1, "DEFLECTOR:")
         self.frameVoltages.uFaraday = HorizontalValueDisplay(self.frameVoltages, 2, 1, "FARADAY:")
-        self.frameVoltages.uFilLow = HorizontalValueDisplay(self.frameVoltages, 1, 2, "FIL LOW:")
-        self.frameVoltages.uFilHigh = HorizontalValueDisplay(self.frameVoltages, 2, 2, "FIL HIGH:")
+        self.frameVoltages.uBias = HorizontalValueDisplay(self.frameVoltages, 1, 2, "BIAS:")
+        self.frameVoltages.iFil = HorizontalValueDisplay(self.frameVoltages, 2, 2, "FIL CURRENT:")
 
     def measurement_loop(self):
 
@@ -127,6 +127,8 @@ class MainWindow(ctk.CTk):
         self.frameVoltages.uWehnelt.value.set(self.irc081.get_voltage_wehnelt())
         self.frameVoltages.uFaraday.value.set(self.irc081.get_voltage_faraday())
         self.frameVoltages.uCage.value.set(self.irc081.get_voltage_cage())
+        self.frameVoltages.uBias.value.set("{:.3f}".format(self.irc081.get_voltage_bias()))
+        self.frameVoltages.iFil.value.set(self.irc081.get_current_filament())
 
         self.update_pressure()
 
