@@ -11,7 +11,7 @@ from ValueDisplay import HorizontalValueDisplay, VerticalValueDisplay
 from SubFrame import SubFrame
 from TouchEntry import TouchEntry
 from RangeEntry import RangeEntry
-#from IRC081 import IRC081
+from IRC081 import IRC081
 
 # Define the custom window dimensions
 WIDTH = 800
@@ -29,7 +29,7 @@ class MainWindow(ctk.CTk):
 
         self.configure(fg_color="black")
 
-#        self.irc081 = IRC081()
+        self.irc081 = IRC081()
 
         self.windowWidth = WIDTH
         self.windowHeight = HEIGHT
@@ -104,7 +104,7 @@ class MainWindow(ctk.CTk):
             self.after(1000, self.measurement_loop)
 
     def update_pressure(self):
-        self.framePressure.barDisplay.value.set(self.irc081.get_pressure_mbar())
+        self.framePressure.pressure.set(self.irc081.get_pressure_mbar())
 
     def set_emission_curr(self):
         self.irc081.set_emission_curr(self.frameEmission.entryCurrent.get())
