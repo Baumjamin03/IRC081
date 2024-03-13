@@ -36,6 +36,8 @@ class IRC081(usb_2408_2AO):
 
         self.config_corr_factors()
 
+        self.AOut(0, 1.6)
+
     def get_coll_current(self, coll_range):
         volts = self.get_voltage(7)
         c = coll_range // 4
@@ -93,11 +95,24 @@ class IRC081(usb_2408_2AO):
         return self.volts(self.measGain, data)
 
     def measurement_start(self):
-
         print("start")
-        print(f"Channel 1 state before setting: {self.DOutR(1)}")
-        self.DOut(1, 1)
-        print(f"Channel 1 state after setting: {self.DOutR(1)}")
+
+
+        print(self.get_voltage(4))
+        print(self.get_voltage(12))
+
+        print(f"Channel 1 state before setting: {hex(self.DOutR())}")
+
+        value = 0x02 + 0x08
+        print(value)
+        print(self.DOut(value))
+
+        print(f"Channel 1 state after setting: {hex(self.DOutR())}")
+
+
+    def measurement_end(self):
+        self.DOut(0)
+        self.AOut(1, 0)
 
     def config_corr_factors(self):
         factor_array = get_calibration_values(self.getSerialNumber())
