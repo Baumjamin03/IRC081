@@ -13,15 +13,10 @@ from TouchEntry import TouchEntry
 from RangeEntry import RangeEntry
 from IRC081 import IRC081
 
+
 # Define the custom window dimensions
 WIDTH = 800
 HEIGHT = 480
-
-# simulation variables
-pressure = "7284"
-ionCurrent = "9790"
-leDAQ = "USB-2408-yeeee"
-
 
 class MainWindow(ctk.CTk):
     def __init__(self, *args, **kwargs):
@@ -103,7 +98,7 @@ class MainWindow(ctk.CTk):
         if self.frameDaq.switch_var.get() == "on":
             self.update_values()
 
-            self.after(500, self.measurement_loop)
+            self.after(1000, self.measurement_loop)
 
     def update_pressure(self):
         self.framePressure.pressure.set(self.irc081.get_pressure_mbar())
