@@ -32,6 +32,8 @@ class IRC081(usb_2408_2AO):
 
         print('\nMFG Calibration date: ', self.getMFGCAL())
 
+        getcontext().prec = 20
+
         self.measMode = self.SINGLE_ENDED
         self.measGain = self.BP_10V
         self.measRate = self.HZ25
@@ -40,20 +42,39 @@ class IRC081(usb_2408_2AO):
 
         self.set_filament_current_limitation(2)
 
-    def get_coll_current(self, coll_range):
-        volts = self.get_voltage(7)
-        c = coll_range // 4
+        self.bitA = 0
+        self.bitB = 0
+        self.bitC = 0
+        self.bitD = 0
+        self.bitE = 0
+        self.bitF = 0
+        self.bitOn = 0
+
+    def update_digital_output(self):
+        output_value = ((self.bitA << 7) | (self.bitB << 6) | (self.bitC << 5) | (self.bitD << 4) | (self.bitE << 3) |
+                        (self.bitF << 2) | (self.bitOn << 1))
+        print("digital output: " + str(output_value))
+        self.DOut(output_value)
+        return
+
+    def ion_range_handler(self, coll_range):
+        self.bitC = coll_range // 4
         coll_range = coll_range % 4
-        b = coll_range // 2
+        self.bitB = coll_range // 2
         coll_range = coll_range % 2
-        a = coll_range
-        self.DOut(a, 7)
-        self.DOut(b, 6)
-        self.DOut(c, 5)
-        return volts  # scale to current
+        self.bitA = coll_range
+        self.update_digital_output()
+        return
 
     def set_emission_curr(self, current):
         emission_current = Decimal(current)
+        if emission_current < 100:
+            self.set_emission_current_should_100u(emission_current)
+        elif emission_current < 1000:
+            self.set_emission_current_should_1m(emission_current)
+        else:
+            print("current too big")
+        return
 
     def get_pressure_mbar(self):
         pass
@@ -126,19 +147,26 @@ class IRC081(usb_2408_2AO):
     def set_filament_current_limitation(self, i_fil_max):
         value = i_fil_max / self.factorAI6
         #        print("filament_current_limitation: " + str(value))
-        self.AOut(0, value)
+        self.AOut(0, float(value))
+        return
 
     def set_emission_current_should_100u(self, i_e_should):
+        i_e_should = i_e_should * (10 ** -6)
         voltage_bias = Decimal(self.get_voltage_bias())
         value = ((i_e_should - (voltage_bias / (1.11 * (10 ** 9)))) * (10 ** 5)) / self.factorIEmission0
         #        print("emission_current_should 01mA: " + str(value))
-        self.AOut(1, value)
+
+        self.AOut(1, float(value))
+        return
 
     def set_emission_current_should_1m(self, i_e_should):
+        i_e_should = i_e_should * (10 ** -6)
         voltage_bias = Decimal(self.get_voltage_bias())
         value = ((i_e_should - (voltage_bias / (1.11 * (10 ** 9)))) * (10 ** 4)) / self.factorIEmission1
         #        print("emission_current_should 1mA: " + str(value))
-        self.AOut(1, value)
+
+        self.AOut(1, float(value))
+        return
 
     def get_voltage(self, channel):
         data, flags = self.AIn(channel, self.measMode, self.measGain, self.measRate)
@@ -152,19 +180,16 @@ class IRC081(usb_2408_2AO):
         print(self.get_voltage(4))
         print(self.get_voltage(12))
 
-        print(f"Channel 1 state before setting: {hex(self.DOutR())}")
+        self.bitOn = 1
+        self.update_digital_output()
 
-        value = 0x02 + 0x08
-        print(value)
-        print(self.DOut(value))
-
-        print(f"Channel 1 state after setting: {hex(self.DOutR())}")
-
-
+        return
 
     def measurement_end(self):
-        self.DOut(0)
+        self.bitOn = 0
+        self.update_digital_output()
         self.AOut(1, 0)
+        return
 
     def config_corr_factors(self):
         factor_array = get_calibration_values(self.getSerialNumber())

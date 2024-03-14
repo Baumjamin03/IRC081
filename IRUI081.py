@@ -48,6 +48,7 @@ class MainWindow(ctk.CTk):
                                              switch_width=100, switch_height=50,
                                              variable=self.frameDaq.switch_var, onvalue="on", offvalue="off")
         self.frameDaq.switch.grid(row=1, column=0)
+        self.frameDaq.switch.cget("font").configure(size=20)
         self.frameDaq.grid(padx=(PADX * 2, PADX))
         self.frameDaq.grid_columnconfigure(0, weight=1)
 
@@ -75,6 +76,7 @@ class MainWindow(ctk.CTk):
         self.frameEmission.lblUnit = ctk.CTkLabel(self.frameEmission, text="uA")
         self.frameEmission.lblUnit.grid(column=2, row=1, padx=(PADX, PADX * 2))
         self.frameEmission.lblUnit.cget("font").configure(weight="bold", size=20)
+        self.frameEmission.entryCurrent.insert(0, 30)
 
         self.framePressure = SubFrame(self, 0, 0, "Pressure")
         self.framePressure.grid(padx=(PADX * 2, PADX), pady=(PADY * 2, PADY))
@@ -101,7 +103,7 @@ class MainWindow(ctk.CTk):
         if self.frameDaq.switch_var.get() == "on":
             self.update_values()
 
-            self.after(1000, self.measurement_loop)
+            self.after(500, self.measurement_loop)
 
     def update_pressure(self):
         self.framePressure.pressure.set(self.irc081.get_pressure_mbar())
