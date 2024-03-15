@@ -32,7 +32,7 @@ class IRC081(usb_2408_2AO):
 
         print('\nMFG Calibration date: ', self.getMFGCAL())
 
-        getcontext().prec = 15
+        getcontext().prec = 18
 
         self.measMode = self.SINGLE_ENDED
         self.measGain = self.BP_10V
@@ -47,10 +47,10 @@ class IRC081(usb_2408_2AO):
         self.bitA = 1
         self.bitB = 1
         self.bitC = 1
-        self.bitD = 0
-        self.bitE = 0
-        self.bitF = 0
-        self.bitOn = 0
+        self.bitD = 1
+        self.bitE = 1
+        self.bitF = 1
+        self.bitOn = 1
 
         self.ionRange = 0
 
@@ -70,6 +70,7 @@ class IRC081(usb_2408_2AO):
         self.bitA = 1 - coll_range
         self.update_digital_output()
         print(self.ionRange)
+        print("A: " + str(self.bitA) + " B: " + str(self.bitB) + " C: " + str(self.bitC))
         return
 
     def get_pressure_mbar(self):
@@ -78,7 +79,7 @@ class IRC081(usb_2408_2AO):
 
         pressure = ion_current / (self.sensitivity * emission_current)
 
-        return pressure
+        return "{:.5} mbar".format(pressure)
 
     def set_emission_curr(self, current):
         if (current == 0) or (current is None) or (current is ""):
@@ -127,11 +128,12 @@ class IRC081(usb_2408_2AO):
         voltage = self.get_voltage(13)
         u_bias = self.get_voltage_bias()
 
-        if self.bitD == 1:
+        if self.bitE == 0:
             value = (Decimal(voltage) * Decimal("2e-5") * 10 + (u_bias / RESISTOR1G11)) * self.factorIEmission1
         else:
             value = (Decimal(voltage) * Decimal("2e-5") + (u_bias / RESISTOR1G11)) * self.factorIEmission0
 
+        print("emission volt: " + str(voltage))
         print("emission ist: " + str(value))
         return value
 
@@ -213,9 +215,7 @@ class IRC081(usb_2408_2AO):
         voltage_bias = Decimal(self.get_voltage_bias())
         value = ((i_e_should - (voltage_bias / RESISTOR1G11)) * (10 ** 5)) / self.factorIEmission0
         print("emission_current_should 100uA: " + str(value))
-        self.bitD = 0
-        self.bitE = 0
-        self.bitF = 0
+        self.bitE = 1
 
         self.update_digital_output()
         self.AOut(1, float(value))
@@ -226,9 +226,7 @@ class IRC081(usb_2408_2AO):
         voltage_bias = Decimal(self.get_voltage_bias())
         value = ((i_e_should - (voltage_bias / RESISTOR1G11)) * (10 ** 4)) / self.factorIEmission1
         print("emission_current_should 1mA: " + str(value))
-        self.bitD = 0
-        self.bitE = 1
-        self.bitF = 0
+        self.bitE = 0
 
         self.update_digital_output()
         self.AOut(1, float(value))
@@ -253,6 +251,12 @@ class IRC081(usb_2408_2AO):
 
     def measurement_end(self):
         print("measurement end")
+        self.bitA = 1
+        self.bitB = 1
+        self.bitC = 1
+        self.bitD = 0
+        self.bitE = 0
+        self.bitF = 0
         self.bitOn = 0
         self.update_digital_output()
         self.AOut(1, 0)

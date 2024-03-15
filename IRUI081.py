@@ -18,6 +18,7 @@ from IRC081 import IRC081
 WIDTH = 800
 HEIGHT = 480
 
+
 class MainWindow(ctk.CTk):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -78,8 +79,9 @@ class MainWindow(ctk.CTk):
         self.framePressure.grid_columnconfigure(0, weight=1)
 
         self.framePressure.pressure = ctk.DoubleVar()
-        self.framePressure.barDisplay = ctk.CTkLabel(self.framePressure, textvariable=self.framePressure.pressure)
+        self.framePressure.barDisplay = ctk.CTkLabel(self.framePressure, text_color="white", textvariable=self.framePressure.pressure)
         self.framePressure.barDisplay.grid(columnspan=2)
+        self.framePressure.barDisplay.cget("font").configure(size=30)
 
         self.frameVoltages = SubFrame(self, 2, 0, "IRG080 Voltages")
         self.frameVoltages.grid(columnspan=2, padx=PADX * 2, pady=(PADY, PADY * 2))
@@ -97,7 +99,7 @@ class MainWindow(ctk.CTk):
         if self.frameDaq.switch_var.get() == "on":
             self.update_values()
 
-            self.after(1000, self.measurement_loop)
+            self.after(750, self.measurement_loop)
 
     def update_pressure(self):
         self.framePressure.pressure.set(self.irc081.get_pressure_mbar())
