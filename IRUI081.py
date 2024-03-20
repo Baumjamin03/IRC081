@@ -7,7 +7,7 @@ Created on Wed Feb 28 10:55:21 2024
 
 from GlobalVariables import *
 from SubFrame import *
-from IRC081 import IRC081
+# from IRC081 import IRC081
 
 # Define the custom window dimensions
 WIDTH = 800
@@ -20,7 +20,7 @@ class MainWindow(ctk.CTk):
 
         self.configure(fg_color="black")
 
-        self.irc081 = IRC081()
+        # self.irc081 = IRC081()
 
         self.windowWidth = WIDTH
         self.windowHeight = HEIGHT
@@ -72,6 +72,8 @@ class MainWindow(ctk.CTk):
         self.frameVoltages.uCage.value.set("{:.3f}".format(self.irc081.get_voltage_cage()))
         self.frameVoltages.uBias.value.set("{:.3f}".format(self.irc081.get_voltage_bias()))
         self.frameVoltages.iFil.value.set("{:.3f}".format(self.irc081.get_current_filament()))
+
+        self.frameDaq.emission.set("{:.5e}".format(self.irc081.get_emission_current()))
 
         self.framePressure.pressure.set("{:.5e}".format(self.irc081.get_pressure_mbar()))
 

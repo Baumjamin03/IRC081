@@ -8,9 +8,6 @@ class BaseValueFrame(BaseFrame):
         super().__init__(master, row, col, title, *args, **kwargs)
         self.value = ctk.DoubleVar()
         self.lblValue = ctk.CTkLabel(self, textvariable=self.value, anchor="center")
-        self.lblValue.grid(pady=0, padx=0)
-        self.grid_rowconfigure(1, weight=1)
-        self.grid_columnconfigure(0, weight=1)
 
 
 class HorizontalValueDisplay(BaseValueFrame):
@@ -19,6 +16,7 @@ class HorizontalValueDisplay(BaseValueFrame):
         self.lblValue.grid(row=0, column=1, sticky="nsew")
         self.lblValue.configure(anchor="w")
         self.grid_columnconfigure((0, 1), weight=1)
+        self.grid_rowconfigure(0, weight=1)
         self.lblTitle.configure(pady=0, padx=0, width=82)
 
 

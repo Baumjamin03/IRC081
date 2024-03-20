@@ -23,7 +23,7 @@ class VoltagesFrame(SubFrame):
         self.uDeflector = HorizontalValueDisplay(self, 1, 1, "DEFLECTOR:")
         self.uFaraday = HorizontalValueDisplay(self, 2, 1, "FARADAY:")
         self.uBias = HorizontalValueDisplay(self, 1, 2, "BIAS:")
-        self.iFil = HorizontalValueDisplay(self, 2, 2, "FIL CURRENT:")
+        self.iFil = HorizontalValueDisplay(self, 2, 2, "FIL CURR:")
 
 
 class PressureFrame(SubFrame):
@@ -60,8 +60,12 @@ class DaqFrame(SubFrame):
                                     switch_height=50, variable=self.switch_var, onvalue="on", offvalue="off")
         self.switch.grid(row=1, column=0)
         self.switch.cget("font").configure(size=20)
+        self.emissionDisplay = HorizontalValueDisplay(self, 2, 0, "Emission: ")
+        self.emissionDisplay.grid(sticky="nsew")
+
         self.grid(padx=(PADX * 2, PADX))
-        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_rowconfigure(2, weight=1)
 
 
 class AnalogFrame(SubFrame):
