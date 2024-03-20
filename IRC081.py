@@ -155,12 +155,13 @@ class IRC081(usb_2408_2AO):
 
     def read_emission_curr(self):
         emission_voltage = Decimal(self.get_voltage(13))
+        bias_voltage = self.get_voltage_bias()
         if self.bitE == 0:
-            value = (emission_voltage * Decimal("2e-5") * 10 + (self.uBias / RESISTOR1G11)) * self.factorIEmission1
+            value = (emission_voltage * Decimal("2e-5") * 10 + (bias_voltage / RESISTOR1G11)) * self.factorIEmission1
         else:
-            value = (emission_voltage * Decimal("2e-5") + (self.uBias / RESISTOR1G11)) * self.factorIEmission0
-        # print("emission volt: " + str(voltage))
-        # print("emission ist: " + str(value))
+            value = (emission_voltage * Decimal("2e-5") + (bias_voltage / RESISTOR1G11)) * self.factorIEmission0
+        print("emission volt: " + str(emission_voltage))
+        print("emission ist: " + str(value))
         return value
 
     def read_ion_current(self):
@@ -187,9 +188,9 @@ class IRC081(usb_2408_2AO):
         elif (voltage < 0.4) and (self.ionRange < 6):
             self.ionRange = self.ionRange + 1
             self.ion_range_handler()
-        # print("ion range: " + str(self.ionRange))
-        # print("ion volts: " + str(voltage))
-        # print("ion: " + str(current))
+        print("ion range: " + str(self.ionRange))
+        print("ion volts: " + str(voltage))
+        print("ion: " + str(current))
         return current
 
     def set_filament_current_limitation(self, i_fil_max):
@@ -200,7 +201,8 @@ class IRC081(usb_2408_2AO):
 
     def set_emission_current_should_100u(self, i_e_should):
         i_e_should = Decimal(i_e_should * Decimal("1e-6"))
-        value = ((i_e_should - (self.uBias / RESISTOR1G11)) * (10 ** 5)) / self.factorIEmission0
+        bias_voltage = self.get_voltage_bias()
+        value = ((i_e_should - (bias_voltage / RESISTOR1G11)) * (10 ** 5)) / self.factorIEmission0
         print("emission_current_should 100uA: " + str(value))
         self.bitE = 1
         self.update_digital_output()
@@ -209,7 +211,8 @@ class IRC081(usb_2408_2AO):
 
     def set_emission_current_should_1m(self, i_e_should):
         i_e_should = Decimal(i_e_should * Decimal("1e-6"))
-        value = ((i_e_should - (self.uBias / RESISTOR1G11)) * (10 ** 4)) / self.factorIEmission1
+        bias_voltage = self.get_voltage_bias()
+        value = ((i_e_should - (bias_voltage / RESISTOR1G11)) * (10 ** 4)) / self.factorIEmission1
         print("emission_current_should 1mA: " + str(value))
         self.bitE = 0
         self.update_digital_output()

@@ -50,13 +50,10 @@ class MainWindow(ctk.CTk):
 
         self.frameAnalogOut = SubFrame(self, 0, 1, "Analog Voltage")
         self.frameAnalogOut.grid(padx=(PADX, PADX * 2), pady=(PADY * 2, PADY))
-
         self.frameAnalogOut.entryUpperRange = RangeEntry(self.frameAnalogOut, 1, 1, "Upper Range Limit")
         self.frameAnalogOut.entryLowerRange = RangeEntry(self.frameAnalogOut, 2, 1, "Lower Range Limit")
-
         self.frameAnalogOut.btnSetRange = ctk.CTkButton(self.frameAnalogOut, text="Set Range")
         self.frameAnalogOut.btnSetRange.grid(row=2, column=0, padx=PADX, pady=PADY, sticky="nsew")
-
         self.frameAnalogOut.grid_columnconfigure((0, 1), weight=1)
         self.frameAnalogOut.grid_rowconfigure((1, 2), weight=1)
         self.frameAnalogOut.frameVoltageDisplay = VerticalValueDisplay(self.frameAnalogOut, 1, 0, "U Out:")
@@ -77,7 +74,6 @@ class MainWindow(ctk.CTk):
         self.framePressure.grid(padx=(PADX * 2, PADX), pady=(PADY * 2, PADY))
         self.framePressure.grid_rowconfigure(1, weight=1)
         self.framePressure.grid_columnconfigure(0, weight=1)
-
         self.framePressure.pressure = ctk.DoubleVar()
         self.framePressure.barDisplay = ctk.CTkLabel(self.framePressure, text_color="white", textvariable=self.framePressure.pressure)
         self.framePressure.barDisplay.grid(columnspan=2)
@@ -86,7 +82,6 @@ class MainWindow(ctk.CTk):
         self.frameVoltages = SubFrame(self, 2, 0, "IRG080 Voltages")
         self.frameVoltages.grid(columnspan=2, padx=PADX * 2, pady=(PADY, PADY * 2))
         self.frameVoltages.grid_columnconfigure((0, 1, 2), weight=1)
-
         self.frameVoltages.uWehnelt = HorizontalValueDisplay(self.frameVoltages, 1, 0, "WEHNELT:")
         self.frameVoltages.uCage = HorizontalValueDisplay(self.frameVoltages, 2, 0, "CAGE:")
         self.frameVoltages.uDeflector = HorizontalValueDisplay(self.frameVoltages, 1, 1, "DEFLECTOR:")
@@ -111,7 +106,6 @@ class MainWindow(ctk.CTk):
             self.set_emission_curr()
         else:
             print("measurement end")
-
             self.irc081.measurement_end()
 
     def update_values(self):
