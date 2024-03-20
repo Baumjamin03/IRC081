@@ -97,13 +97,14 @@ class MainWindow(ctk.CTk):
     def set_emission_curr(self):
         current = self.frameEmission.entryCurrent.get()
         print("i emission set: " + current)
-        self.irc081.set_emission_curr(current)
+        self.irc081.set_emission(current)
 
     def switch_event(self):
         if self.frameDaq.switch_var.get() == "on":
+            self.set_emission_curr()
             self.irc081.measurement_start()
             self.measurement_loop()
-            self.set_emission_curr()
+
         else:
             print("measurement end")
             self.irc081.measurement_end()

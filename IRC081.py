@@ -75,10 +75,11 @@ class IRC081(usb_2408_2AO):
         self.uFaraday = 0
         self.uCage = 0
         self.iFil = 0
-        self.uEmission = 0
+        self.setEmission = 0
         self.iCollector = 0
         self.iEmission = 0
         self.pressure = 0
+        self.uEmission = 0
 
     def refresh_controller_data(self):
         self.uBias = Decimal(self.get_voltage(5)) * Decimal(10.1) * self.factorAI5
@@ -90,6 +91,10 @@ class IRC081(usb_2408_2AO):
         self.iCollector = self.read_ion_current()
         self.iEmission = self.read_emission_curr()
         self.pressure = self.calculate_pressure_mbar()
+        self.uEmission = self.set_emission_curr()
+        print("ion: " + "{:.5e}".format(self.iCollector) + ", bias: " + "{:.5f}".format(self.uBias))
+        print("iEm: " + "{:.5e}".format(self.iEmission) + ", uEm: " + "{:.5f}".format(self.uEmission))
+        print(self.pressure)
 
     def update_digital_output(self):
         output_value = ((self.bitA << 7) | (self.bitB << 6) | (self.bitC << 5) | (self.bitD << 4) | (self.bitE << 3) |
@@ -111,20 +116,27 @@ class IRC081(usb_2408_2AO):
         return
 
     def calculate_pressure_mbar(self):
-        pressure = Decimal(self.get_ion_current() / (self.sensitivity * self.get_emission_current()))
+        ion_curr = self.get_ion_current()
+        emission_curr = self.get_emission_current()
+        pressure = Decimal(ion_curr / (self.sensitivity * emission_curr))
         return pressure
 
-    def set_emission_curr(self, current):
+    def set_emission(self, curr):
+        self.setEmission = curr
+
+    def set_emission_curr(self):
+        current = self.setEmission
         if (current == 0) or (current is None) or (current is ""):
             current = 30
         emission_current = Decimal(current)
+        voltage = 0
         if emission_current < 100:
-            self.set_emission_current_should_100u(emission_current)
+            voltage = self.set_emission_current_should_100u(emission_current)
         elif emission_current < 1000:
-            self.set_emission_current_should_1m(emission_current)
+            voltage = self.set_emission_current_should_1m(emission_current)
         else:
             print("current too big")
-        return
+        return voltage
 
     def get_pressure_mbar(self):
         return self.pressure
@@ -153,6 +165,9 @@ class IRC081(usb_2408_2AO):
     def get_emission_current(self):
         return self.iEmission
 
+    def get_emission_voltage(self):
+        return self.uEmission
+
     def read_emission_curr(self):
         emission_voltage = Decimal(self.get_voltage(13))
         bias_voltage = self.get_voltage_bias()
@@ -160,12 +175,13 @@ class IRC081(usb_2408_2AO):
             value = (emission_voltage * Decimal("2e-5") * 10 + (bias_voltage / RESISTOR1G11)) * self.factorIEmission1
         else:
             value = (emission_voltage * Decimal("2e-5") + (bias_voltage / RESISTOR1G11)) * self.factorIEmission0
-        print("emission volt: " + str(emission_voltage))
-        print("emission ist: " + str(value))
+        # print("emission volt: " + str(emission_voltage))
+        # print("emission ist: " + str(value))
         return value
 
     def read_ion_current(self):
         voltage = self.get_voltage(15)
+        print("u Ion: {:.5e}".format(voltage) + ", range: " + str(self.ionRange))
         current = 0
         if self.ionRange == 0:
             current = Decimal(voltage) * Decimal("1e-11") * Decimal("1e6") * self.factorIIon6
@@ -188,9 +204,9 @@ class IRC081(usb_2408_2AO):
         elif (voltage < 0.4) and (self.ionRange < 6):
             self.ionRange = self.ionRange + 1
             self.ion_range_handler()
-        print("ion range: " + str(self.ionRange))
-        print("ion volts: " + str(voltage))
-        print("ion: " + str(current))
+        # print("ion range: " + str(self.ionRange))
+        # print("ion volts: " + str(voltage))
+        # print("ion: " + str(current))
         return current
 
     def set_filament_current_limitation(self, i_fil_max):
@@ -207,7 +223,7 @@ class IRC081(usb_2408_2AO):
         self.bitE = 1
         self.update_digital_output()
         self.AOut(1, float(value))
-        return
+        return value
 
     def set_emission_current_should_1m(self, i_e_should):
         i_e_should = Decimal(i_e_should * Decimal("1e-6"))
@@ -217,7 +233,7 @@ class IRC081(usb_2408_2AO):
         self.bitE = 0
         self.update_digital_output()
         self.AOut(1, float(value))
-        return
+        return value
 
     def get_voltage(self, channel):
         data, flags = self.AIn(channel, self.measMode, self.measGain, self.measRate)
