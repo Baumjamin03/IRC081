@@ -124,7 +124,7 @@ class MainWindow(ctk.CTk):
         self.frameVoltages.uBias.value.set("{:.3f}".format(self.irc081.get_voltage_bias()))
         self.frameVoltages.iFil.value.set("{:.3f}".format(self.irc081.get_current_filament()))
 
-        self.framePressure.pressure.set("{:.3f}".format(self.irc081.get_pressure_mbar()))
+        self.framePressure.pressure.set("{:.5e}".format(self.irc081.get_pressure_mbar()))
 
 
 if __name__ == "__main__":

@@ -87,7 +87,6 @@ class IRC081(usb_2408_2AO):
         self.uFaraday = Decimal(self.get_voltage(3)) * Decimal(51) * self.factorAI3
         self.uCage = Decimal(self.get_voltage(2)) * Decimal(51) * self.factorAI2
         self.iFil = Decimal(self.get_voltage(6)) * self.factorAI6
-        self.uEmission = Decimal(self.get_voltage(13))
         self.iCollector = self.read_ion_current()
         self.iEmission = self.read_emission_curr()
         self.pressure = self.calculate_pressure_mbar()
@@ -112,7 +111,7 @@ class IRC081(usb_2408_2AO):
         return
 
     def calculate_pressure_mbar(self):
-        pressure = self.iCollector / (self.sensitivity * self.iEmission)
+        pressure = Decimal(self.get_ion_current() / (self.sensitivity * self.get_emission_current()))
         return pressure
 
     def set_emission_curr(self, current):
@@ -155,10 +154,11 @@ class IRC081(usb_2408_2AO):
         return self.iEmission
 
     def read_emission_curr(self):
+        emission_voltage = Decimal(self.get_voltage(13))
         if self.bitE == 0:
-            value = (self.uEmission * Decimal("2e-5") * 10 + (self.uBias / RESISTOR1G11)) * self.factorIEmission1
+            value = (emission_voltage * Decimal("2e-5") * 10 + (self.uBias / RESISTOR1G11)) * self.factorIEmission1
         else:
-            value = (self.uEmission * Decimal("2e-5") + (self.uBias / RESISTOR1G11)) * self.factorIEmission0
+            value = (emission_voltage * Decimal("2e-5") + (self.uBias / RESISTOR1G11)) * self.factorIEmission0
         # print("emission volt: " + str(voltage))
         # print("emission ist: " + str(value))
         return value
