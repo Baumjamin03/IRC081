@@ -142,19 +142,19 @@ class IRC081(usb_2408_2AO):
         current = 0
 
         if self.ionRange == 0:
-            current = self.get_current_ion_50u(voltage)
+            current = Decimal(voltage) * Decimal("1e-11") * Decimal("1e6") * self.factorIIon6
         elif self.ionRange == 1:
-            current = self.get_current_ion_5u(voltage)
+            current = Decimal(voltage) * Decimal("1e-11") * Decimal("1e5") * self.factorIIon5
         elif self.ionRange == 2:
-            current = self.get_current_ion_500n(voltage)
+            current = Decimal(voltage) * Decimal("1e-11") * Decimal("1e4") * self.factorIIon4
         elif self.ionRange == 3:
-            current = self.get_current_ion_50n(voltage)
+            current = Decimal(voltage) * Decimal("1e-11") * Decimal("1e3") * self.factorIIon3
         elif self.ionRange == 4:
-            current = self.get_current_ion_5n(voltage)
+            current = Decimal(voltage) * Decimal("1e-11") * Decimal("1e2") * self.factorIIon2
         elif self.ionRange == 5:
-            current = self.get_current_ion_500p(voltage)
+            current = Decimal(voltage) * Decimal("1e-11") * Decimal("1e1") * self.factorIIon1
         elif self.ionRange == 6:
-            current = self.get_current_ion_50p(voltage)
+            current = Decimal(voltage) * Decimal("1e-11") * Decimal("1e0") * self.factorIIon0
 
         if (voltage > 4.5) and (self.ionRange > 0):
             self.ionRange = self.ionRange - 1
@@ -168,41 +168,6 @@ class IRC081(usb_2408_2AO):
         print("ion: " + str(current))
 
         return current
-
-    def get_current_ion_50p(self, voltage):
-        value = Decimal(voltage) * Decimal("1e-11") * Decimal("1e0") * self.factorIIon0
-        #        print("current_ion_50pA: " + str(value))
-        return value
-
-    def get_current_ion_500p(self, voltage):
-        value = Decimal(voltage) * Decimal("1e-11") * Decimal("1e1") * self.factorIIon1
-        #        print("current_ion_50uA: " + str(value))
-        return value
-
-    def get_current_ion_5n(self, voltage):
-        value = Decimal(voltage) * Decimal("1e-11") * Decimal("1e2") * self.factorIIon2
-        #        print("current_ion_50uA: " + str(value))
-        return value
-
-    def get_current_ion_50n(self, voltage):
-        value = Decimal(voltage) * Decimal("1e-11") * Decimal("1e3") * self.factorIIon3
-        #        print("current_ion_50uA: " + str(value))
-        return value
-
-    def get_current_ion_500n(self, voltage):
-        value = Decimal(voltage) * Decimal("1e-11") * Decimal("1e4") * self.factorIIon4
-        #        print("current_ion_50uA: " + str(value))
-        return value
-
-    def get_current_ion_5u(self, voltage):
-        value = Decimal(voltage) * Decimal("1e-11") * Decimal("1e5") * self.factorIIon5
-        #        print("current_ion_50uA: " + str(value))
-        return value
-
-    def get_current_ion_50u(self, voltage):
-        value = Decimal(voltage) * Decimal("1e-11") * Decimal("1e6") * self.factorIIon6
-        #        print("current_ion_50uA: " + str(value))
-        return value
 
     def set_filament_current_limitation(self, i_fil_max):
         value = i_fil_max / self.factorAI6
@@ -254,12 +219,12 @@ class IRC081(usb_2408_2AO):
         self.bitA = 1
         self.bitB = 1
         self.bitC = 1
-        self.bitD = 0
-        self.bitE = 0
-        self.bitF = 0
+        self.bitD = 1
+        self.bitE = 1
+        self.bitF = 1
         self.bitOn = 0
         self.update_digital_output()
-        self.AOut(1, 0)
+        self.set_emission_curr(0)
         return
 
     def config_corr_factors(self):
@@ -273,10 +238,6 @@ class IRC081(usb_2408_2AO):
         self.factorAI6 = Decimal(factor_array[7])
         self.factorAI8 = Decimal(factor_array[8])
         self.factorAI9 = Decimal(factor_array[9])
-        self.factorICage0 = Decimal(factor_array[10])
-        self.factorICage1 = Decimal(factor_array[11])
-        self.factorIFaraday0 = Decimal(factor_array[12])
-        self.factorIFaraday1 = Decimal(factor_array[13])
         self.factorIEmission0 = Decimal(factor_array[14])
         self.factorIEmission1 = Decimal(factor_array[15])
         self.factorIIon0 = Decimal(factor_array[16])
