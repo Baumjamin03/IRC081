@@ -115,6 +115,8 @@ class MainWindow(ctk.CTk):
             self.irc081.measurement_end()
 
     def update_values(self):
+        self.irc081.refresh_controller_data()
+
         self.frameVoltages.uDeflector.value.set("{:.3f}".format(self.irc081.get_voltage_deflector()))
         self.frameVoltages.uWehnelt.value.set("{:.3f}".format(self.irc081.get_voltage_wehnelt()))
         self.frameVoltages.uFaraday.value.set("{:.3f}".format(self.irc081.get_voltage_faraday()))
