@@ -78,6 +78,7 @@ class IRC081(usb_2408_2AO):
         self.uEmission = 0
         self.iCollector = 0
         self.iEmission = 0
+        self.pressure = 0
 
     def refresh_controller_data(self):
         self.uBias = Decimal(self.get_voltage(5)) * Decimal(10.1) * self.factorAI5
@@ -89,6 +90,7 @@ class IRC081(usb_2408_2AO):
         self.uEmission = Decimal(self.get_voltage(13))
         self.iCollector = self.read_ion_current()
         self.iEmission = self.read_emission_curr()
+        self.pressure = self.calculate_pressure_mbar()
 
     def update_digital_output(self):
         output_value = ((self.bitA << 7) | (self.bitB << 6) | (self.bitC << 5) | (self.bitD << 4) | (self.bitE << 3) |
@@ -109,7 +111,7 @@ class IRC081(usb_2408_2AO):
         print("A: " + str(self.bitA) + " B: " + str(self.bitB) + " C: " + str(self.bitC))
         return
 
-    def get_pressure_mbar(self):
+    def calculate_pressure_mbar(self):
         pressure = self.iCollector / (self.sensitivity * self.iEmission)
         return pressure
 
@@ -124,6 +126,9 @@ class IRC081(usb_2408_2AO):
         else:
             print("current too big")
         return
+
+    def get_pressure_mbar(self):
+        return self.pressure
 
     def get_voltage_wehnelt(self):
         return self.uWehnelt
