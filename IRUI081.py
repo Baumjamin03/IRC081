@@ -95,14 +95,9 @@ class MainWindow(ctk.CTk):
         self.frameVoltages.iFil = HorizontalValueDisplay(self.frameVoltages, 2, 2, "FIL CURRENT:")
 
     def measurement_loop(self):
-
         if self.frameDaq.switch_var.get() == "on":
             self.update_values()
-
-            self.after(750, self.measurement_loop)
-
-    def update_pressure(self):
-        self.framePressure.pressure.set(self.irc081.get_pressure_mbar())
+            self.after(1000, self.measurement_loop)
 
     def set_emission_curr(self):
         current = self.frameEmission.entryCurrent.get()
@@ -120,17 +115,16 @@ class MainWindow(ctk.CTk):
             self.irc081.measurement_end()
 
     def update_values(self):
-        self.frameVoltages.uDeflector.value.set(self.irc081.get_voltage_deflector())
-        self.frameVoltages.uWehnelt.value.set(self.irc081.get_voltage_wehnelt())
-        self.frameVoltages.uFaraday.value.set(self.irc081.get_voltage_faraday())
-        self.frameVoltages.uCage.value.set(self.irc081.get_voltage_cage())
+        self.frameVoltages.uDeflector.value.set("{:.3f}".format(self.irc081.get_voltage_deflector()))
+        self.frameVoltages.uWehnelt.value.set("{:.3f}".format(self.irc081.get_voltage_wehnelt()))
+        self.frameVoltages.uFaraday.value.set("{:.3f}".format(self.irc081.get_voltage_faraday()))
+        self.frameVoltages.uCage.value.set("{:.3f}".format(self.irc081.get_voltage_cage()))
         self.frameVoltages.uBias.value.set("{:.3f}".format(self.irc081.get_voltage_bias()))
-        self.frameVoltages.iFil.value.set(self.irc081.get_current_filament())
+        self.frameVoltages.iFil.value.set("{:.3f}".format(self.irc081.get_current_filament()))
 
-        self.update_pressure()
+        self.framePressure.pressure.set("{:.3f}".format(self.irc081.get_pressure_mbar()))
 
 
 if __name__ == "__main__":
     app = MainWindow()
-
     app.mainloop()

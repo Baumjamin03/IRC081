@@ -3,15 +3,16 @@ from mccDAQ.usb_2400 import *  # https://github.com/wjasper/Linux_Drivers/tree/m
 from GetCalibrationValues import *
 from decimal import *
 
-RESISTOR1G11 = Decimal("1.11E9")
+RESISTOR1G11 = Decimal("1.11E9")  # ohm
+SENSITIVITY = 29  # 1/mbar
 
 
 class IRC081(usb_2408_2AO):
     def __init__(self, *args, **kwargs):
         try:
             super().__init__(*args, **kwargs)
-        except OSError as e:
-            print("no, " + str(e))
+        except Exception as e:
+            print("where he at? ERROR: " + str(e))
             return
         print('wMaxPacketSize =', self.wMaxPacketSize)
         for gain in range(1, 10):
@@ -29,19 +30,34 @@ class IRC081(usb_2408_2AO):
         for chan in range(8):
             print('CJC Gradient: Chan =', chan,
                   ' CJC Gradient =', format(self.CJCGradient[chan], '.5f'))
-
         print('\nMFG Calibration date: ', self.getMFGCAL())
 
         getcontext().prec = 18
-
         self.measMode = self.SINGLE_ENDED
         self.measGain = self.BP_10V
         self.measRate = self.HZ25
 
-        self.config_corr_factors()
+        factor_array = get_calibration_values(self.getSerialNumber())
+        print(factor_array)
+        self.factorAI0 = Decimal(factor_array[2])
+        self.factorAI1 = Decimal(factor_array[3])
+        self.factorAI2 = Decimal(factor_array[4])
+        self.factorAI3 = Decimal(factor_array[5])
+        self.factorAI5 = Decimal(factor_array[6])
+        self.factorAI6 = Decimal(factor_array[7])
+        self.factorAI8 = Decimal(factor_array[8])
+        self.factorAI9 = Decimal(factor_array[9])
+        self.factorIEmission0 = Decimal(factor_array[14])
+        self.factorIEmission1 = Decimal(factor_array[15])
+        self.factorIIon0 = Decimal(factor_array[16])
+        self.factorIIon1 = Decimal(factor_array[17])
+        self.factorIIon2 = Decimal(factor_array[18])
+        self.factorIIon3 = Decimal(factor_array[19])
+        self.factorIIon4 = Decimal(factor_array[20])
+        self.factorIIon5 = Decimal(factor_array[21])
+        self.factorIIon6 = Decimal(factor_array[22])
 
-        self.sensitivity = Decimal(29)
-
+        self.sensitivity = Decimal(SENSITIVITY)
         self.set_filament_current_limitation(2)  # 2V = 2A
 
         self.bitA = 1
@@ -51,8 +67,28 @@ class IRC081(usb_2408_2AO):
         self.bitE = 1
         self.bitF = 1
         self.bitOn = 1
-
         self.ionRange = 0
+
+        self.uBias = 0
+        self.uWehnelt = 0
+        self.uDeflector = 0
+        self.uFaraday = 0
+        self.uCage = 0
+        self.iFil = 0
+        self.uEmission = 0
+        self.iCollector = 0
+        self.iEmission = 0
+
+    def refresh_controller_data(self):
+        self.uBias = Decimal(self.get_voltage(5)) * Decimal(10.1) * self.factorAI5
+        self.uWehnelt = Decimal(self.get_voltage(1)) * Decimal(10.1) * self.factorAI1
+        self.uDeflector = Decimal(self.get_voltage(0)) * Decimal(10.1) * self.factorAI0
+        self.uFaraday = Decimal(self.get_voltage(3)) * Decimal(51) * self.factorAI3
+        self.uCage = Decimal(self.get_voltage(2)) * Decimal(51) * self.factorAI2
+        self.iFil = Decimal(self.get_voltage(6)) * self.factorAI6
+        self.uEmission = Decimal(self.get_voltage(13))
+        self.iCollector = self.read_ion_current()
+        self.iEmission = self.read_emission_curr()
 
     def update_digital_output(self):
         output_value = ((self.bitA << 7) | (self.bitB << 6) | (self.bitC << 5) | (self.bitD << 4) | (self.bitE << 3) |
@@ -69,22 +105,17 @@ class IRC081(usb_2408_2AO):
         coll_range = coll_range % 2
         self.bitA = 1 - coll_range
         self.update_digital_output()
-        print(self.ionRange)
+        print("new range: " + str(self.ionRange))
         print("A: " + str(self.bitA) + " B: " + str(self.bitB) + " C: " + str(self.bitC))
         return
 
     def get_pressure_mbar(self):
-        ion_current = self.get_ion_current()
-        emission_current = self.get_emission_curr()
-
-        pressure = ion_current / (self.sensitivity * emission_current)
-
-        return "{:.5} mbar".format(pressure)
+        pressure = self.iCollector / (self.sensitivity * self.iEmission)
+        return pressure
 
     def set_emission_curr(self, current):
         if (current == 0) or (current is None) or (current is ""):
             current = 30
-
         emission_current = Decimal(current)
         if emission_current < 100:
             self.set_emission_current_should_100u(emission_current)
@@ -95,52 +126,41 @@ class IRC081(usb_2408_2AO):
         return
 
     def get_voltage_wehnelt(self):
-        value = Decimal(self.get_voltage(1)) * Decimal(10.1) * self.factorAI1
-        #        print("Wehnelt: " + str(value))
-        return "{:.3f}".format(value)
+        return self.uWehnelt
 
     def get_voltage_deflector(self):
-        value = Decimal(self.get_voltage(0)) * Decimal(10.1) * self.factorAI0
-        #        print("Deflector: " + str(value))
-        return "{:.3f}".format(value)
+        return self.uDeflector
 
     def get_voltage_cage(self):
-        value = Decimal(self.get_voltage(2)) * Decimal(51) * self.factorAI2
-        #        print("Cage: " + str(value))
-        return "{:.3f}".format(value)
+        return self.uCage
 
     def get_voltage_faraday(self):
-        value = Decimal(self.get_voltage(3)) * Decimal(51) * self.factorAI3
-        #        print("Faraday: " + str(value))
-        return "{:.3f}".format(value)
+        return self.uFaraday
 
     def get_voltage_bias(self):
-        value = Decimal(self.get_voltage(5)) * Decimal(10.1) * self.factorAI5
-        #        print("bias: " + str(value))
-        return value
+        return self.uBias
 
     def get_current_filament(self):
-        value = Decimal(self.get_voltage(6)) * self.factorAI6
-        #        print("filament: " + str(value))
-        return "{:.3f}".format(value)
-
-    def get_emission_curr(self):
-        voltage = self.get_voltage(13)
-        u_bias = self.get_voltage_bias()
-
-        if self.bitE == 0:
-            value = (Decimal(voltage) * Decimal("2e-5") * 10 + (u_bias / RESISTOR1G11)) * self.factorIEmission1
-        else:
-            value = (Decimal(voltage) * Decimal("2e-5") + (u_bias / RESISTOR1G11)) * self.factorIEmission0
-
-        print("emission volt: " + str(voltage))
-        print("emission ist: " + str(value))
-        return value
+        return self.iFil
 
     def get_ion_current(self):
+        return self.iCollector
+
+    def get_emission_current(self):
+        return self.iEmission
+
+    def read_emission_curr(self):
+        if self.bitE == 0:
+            value = (self.uEmission * Decimal("2e-5") * 10 + (self.uBias / RESISTOR1G11)) * self.factorIEmission1
+        else:
+            value = (self.uEmission * Decimal("2e-5") + (self.uBias / RESISTOR1G11)) * self.factorIEmission0
+        # print("emission volt: " + str(voltage))
+        # print("emission ist: " + str(value))
+        return value
+
+    def read_ion_current(self):
         voltage = self.get_voltage(15)
         current = 0
-
         if self.ionRange == 0:
             current = Decimal(voltage) * Decimal("1e-11") * Decimal("1e6") * self.factorIIon6
         elif self.ionRange == 1:
@@ -162,11 +182,9 @@ class IRC081(usb_2408_2AO):
         elif (voltage < 0.4) and (self.ionRange < 6):
             self.ionRange = self.ionRange + 1
             self.ion_range_handler()
-
-        print("ion range: " + str(self.ionRange))
-        print("ion volts: " + str(voltage))
-        print("ion: " + str(current))
-
+        # print("ion range: " + str(self.ionRange))
+        # print("ion volts: " + str(voltage))
+        # print("ion: " + str(current))
         return current
 
     def set_filament_current_limitation(self, i_fil_max):
@@ -177,22 +195,18 @@ class IRC081(usb_2408_2AO):
 
     def set_emission_current_should_100u(self, i_e_should):
         i_e_should = Decimal(i_e_should * Decimal("1e-6"))
-        voltage_bias = Decimal(self.get_voltage_bias())
-        value = ((i_e_should - (voltage_bias / RESISTOR1G11)) * (10 ** 5)) / self.factorIEmission0
+        value = ((i_e_should - (self.uBias / RESISTOR1G11)) * (10 ** 5)) / self.factorIEmission0
         print("emission_current_should 100uA: " + str(value))
         self.bitE = 1
-
         self.update_digital_output()
         self.AOut(1, float(value))
         return
 
     def set_emission_current_should_1m(self, i_e_should):
         i_e_should = Decimal(i_e_should * Decimal("1e-6"))
-        voltage_bias = Decimal(self.get_voltage_bias())
-        value = ((i_e_should - (voltage_bias / RESISTOR1G11)) * (10 ** 4)) / self.factorIEmission1
+        value = ((i_e_should - (self.uBias / RESISTOR1G11)) * (10 ** 4)) / self.factorIEmission1
         print("emission_current_should 1mA: " + str(value))
         self.bitE = 0
-
         self.update_digital_output()
         self.AOut(1, float(value))
         return
@@ -200,18 +214,13 @@ class IRC081(usb_2408_2AO):
     def get_voltage(self, channel):
         data, flags = self.AIn(channel, self.measMode, self.measGain, self.measRate)
         data = int(data * self.Cal[self.measGain].slope + self.Cal[self.measGain].intercept)
-        #        print('Channel %2i = %#x  Volts = %lf' % (channel, data, self.volts(self.measGain, data)))
         return self.volts(self.measGain, data)
 
     def measurement_start(self):
         print("start")
-
-        print(self.get_voltage(4))
-        print(self.get_voltage(12))
-
+        print("interlock < 2.5V = good: " + self.get_voltage(4))
         self.bitOn = 1
         self.update_digital_output()
-
         return
 
     def measurement_end(self):
@@ -224,27 +233,5 @@ class IRC081(usb_2408_2AO):
         self.bitF = 1
         self.bitOn = 0
         self.update_digital_output()
-        self.set_emission_curr(0)
-        return
-
-    def config_corr_factors(self):
-        factor_array = get_calibration_values(self.getSerialNumber())
-        print(factor_array)
-        self.factorAI0 = Decimal(factor_array[2])
-        self.factorAI1 = Decimal(factor_array[3])
-        self.factorAI2 = Decimal(factor_array[4])
-        self.factorAI3 = Decimal(factor_array[5])
-        self.factorAI5 = Decimal(factor_array[6])
-        self.factorAI6 = Decimal(factor_array[7])
-        self.factorAI8 = Decimal(factor_array[8])
-        self.factorAI9 = Decimal(factor_array[9])
-        self.factorIEmission0 = Decimal(factor_array[14])
-        self.factorIEmission1 = Decimal(factor_array[15])
-        self.factorIIon0 = Decimal(factor_array[16])
-        self.factorIIon1 = Decimal(factor_array[17])
-        self.factorIIon2 = Decimal(factor_array[18])
-        self.factorIIon3 = Decimal(factor_array[19])
-        self.factorIIon4 = Decimal(factor_array[20])
-        self.factorIIon5 = Decimal(factor_array[21])
-        self.factorIIon6 = Decimal(factor_array[22])
+        self.AOut(1, 0)
         return
