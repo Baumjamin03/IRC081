@@ -5,7 +5,6 @@ Created on Wed Feb 28 10:55:21 2024
 @author: benj002
 """
 
-from GlobalVariables import *
 from SubFrame import *
 # from IRC081 import IRC081
 
@@ -34,13 +33,9 @@ class MainWindow(ctk.CTk):
         self.grid_rowconfigure((0, 1), weight=1)
 
         self.frameDaq = DaqFrame(self)
-
         self.frameAnalogOut = AnalogFrame(self)
-
         self.frameEmission = EmissionFrame(self)
-
         self.framePressure = PressureFrame(self)
-
         self.frameVoltages = VoltagesFrame(self)
 
     def measurement_loop(self):
@@ -76,6 +71,12 @@ class MainWindow(ctk.CTk):
         self.frameDaq.emission.set("{:.5e}".format(self.irc081.get_emission_current()))
 
         self.framePressure.pressure.set("{:.5e}".format(self.irc081.get_pressure_mbar()))
+
+        self.analog_out_handler()
+
+    def analog_out_handler(self):
+        if self.frameAnalogOut.frameVoltageDisplay.check_var is "on":
+            pass
 
 
 if __name__ == "__main__":
