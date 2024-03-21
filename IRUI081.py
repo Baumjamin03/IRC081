@@ -5,9 +5,11 @@ Created on Wed Feb 28 10:55:21 2024
 @author: benj002
 """
 
+import atexit
 from SubFrame import *
-from IRC081 import IRC081
+# from IRC081 import IRC081
 from decimal import *
+from RS232 import *
 
 # Define the custom window dimensions
 WIDTH = 800
@@ -18,9 +20,11 @@ class MainWindow(ctk.CTk):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        atexit.register(self.shutdown)
+
         self.configure(fg_color="black")
 
-        self.irc081 = IRC081()
+        # self.irc081 = IRC081()
 
         self.windowWidth = WIDTH
         self.windowHeight = HEIGHT
@@ -41,6 +45,20 @@ class MainWindow(ctk.CTk):
 
         self.upperRange = None
         self.lowerRange = None
+
+        self.com = RS232Communication()
+        self.com.open_port()
+        self.RS232Listener = SerialListener(self.com, self.handle_serial_data)
+        self.RS232Writer = SerialWriter(self.com)
+        self.RS232Listener.start()
+
+    def handle_serial_data(self, data):
+        print(f"Received data: {data}")
+
+    def shutdown(self):
+        self.irc081.measurement_end()
+        self.RS232Listener.stop()
+        self.com.close_port()
 
     def measurement_loop(self):
         if self.frameDaq.switch_var.get() == "on":

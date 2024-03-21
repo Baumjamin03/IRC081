@@ -1,6 +1,5 @@
 # Backend File for IRC081 raspi extension
 
-import atexit
 from mccDAQ.usb_2400 import *  # https://github.com/wjasper/Linux_Drivers/tree/master/USB
 from GetCalibrationValues import *
 from decimal import *
@@ -33,8 +32,6 @@ class IRC081(usb_2408_2AO):
             print('CJC Gradient: Chan =', chan,
                   ' CJC Gradient =', format(self.CJCGradient[chan], '.5f'))
         print('\nMFG Calibration date: ', self.getMFGCAL())
-
-        atexit.register(self.measurement_end)
 
         getcontext().prec = 18
         self.measMode = self.SINGLE_ENDED
