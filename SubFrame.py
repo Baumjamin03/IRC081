@@ -74,7 +74,7 @@ class AnalogFrame(SubFrame):
         self.grid(padx=(PADX, PADX * 2), pady=(PADY * 2, PADY))
         self.entryUpperRange = RangeEntry(self, 1, 1, "Upper Range Limit")
         self.entryLowerRange = RangeEntry(self, 2, 1, "Lower Range Limit")
-        self.btnSetRange = ctk.CTkButton(self, text="Set Range")
+        self.btnSetRange = ctk.CTkButton(self, text="Set Range", command=master.set_range)
         self.btnSetRange.grid(row=2, column=0, padx=PADX, pady=PADY, sticky="nsew")
         self.grid_columnconfigure((0, 1), weight=1)
         self.grid_rowconfigure((1, 2), weight=1)

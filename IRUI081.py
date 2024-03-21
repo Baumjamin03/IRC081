@@ -39,6 +39,9 @@ class MainWindow(ctk.CTk):
         self.framePressure = PressureFrame(self)
         self.frameVoltages = VoltagesFrame(self)
 
+        self.upperRange = None
+        self.lowerRange = None
+
     def measurement_loop(self):
         if self.frameDaq.switch_var.get() == "on":
             self.update_values()
@@ -76,24 +79,31 @@ class MainWindow(ctk.CTk):
         self.analog_out_handler()
 
     def analog_out_handler(self):
-        if self.frameAnalogOut.frameVoltageDisplay.check_var.get():
+        if self.frameAnalogOut.frameVoltageDisplay.check_var.get() or not (self.lowerRange and self.upperRange):
             voltage = self.irc081.get_ion_voltage() * 2
             self.frameAnalogOut.frameVoltageDisplay.value.set("{:.3f}".format(voltage))
         else:
-            try:
-                upper_number = self.frameAnalogOut.entryUpperRange.entry.get()
-                upper_exponent = self.frameAnalogOut.entryUpperRange.expEntry.get()
-                upper_range = Decimal(f"{upper_number}e-{upper_exponent}")
+            pressure = self.irc081.get_pressure_mbar()
+            voltage = (pressure - self.lowerRange) / (self.upperRange - self.lowerRange) * 10
+            self.frameAnalogOut.frameVoltageDisplay.value.set("{:.3f}".format(voltage))
 
-                lower_number = self.frameAnalogOut.entryLowerRange.entry.get()
-                lower_exponent = self.frameAnalogOut.entryLowerRange.expEntry.get()
-                lower_range = Decimal(f"{lower_number}e-{lower_exponent}")
+    def set_range(self):
+        try:
+            upper_number = self.frameAnalogOut.entryUpperRange.entry.get()
+            upper_exponent = self.frameAnalogOut.entryUpperRange.expEntry.get()
+            upper_range = Decimal(f"{upper_number}e-{upper_exponent}")
 
-                print(f"Analog out range: {lower_range} - {upper_range}")
-            except Exception as e:
-                print("Error: " + str(e))
+            lower_number = self.frameAnalogOut.entryLowerRange.entry.get()
+            lower_exponent = self.frameAnalogOut.entryLowerRange.expEntry.get()
+            lower_range = Decimal(f"{lower_number}e-{lower_exponent}")
 
+            print(f"Analog out range: {lower_range} - {upper_range}")
+        except Exception as e:
+            print("Error: " + str(e))
+            return
 
+        self.upperRange = upper_range
+        self.lowerRange = lower_range
 
 
 if __name__ == "__main__":
