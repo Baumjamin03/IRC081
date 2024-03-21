@@ -7,6 +7,7 @@ Created on Wed Feb 28 10:55:21 2024
 
 from SubFrame import *
 from IRC081 import IRC081
+from decimal import *
 
 # Define the custom window dimensions
 WIDTH = 800
@@ -78,6 +79,16 @@ class MainWindow(ctk.CTk):
         if self.frameAnalogOut.frameVoltageDisplay.check_var.get():
             voltage = self.irc081.get_ion_voltage() * 2
             self.frameAnalogOut.frameVoltageDisplay.value.set("{:.3f}".format(voltage))
+        else:
+            upper_number = self.frameAnalogOut.entryUpperRange.entry.get()
+            upper_exponent = self.frameAnalogOut.entryUpperRange.expEntry.get()
+            upper_range = Decimal(f"{upper_number}e-{upper_exponent}")
+
+            lower_number = self.frameAnalogOut.entryLowerRange.entry.get()
+            lower_exponent = self.frameAnalogOut.entryLowerRange.expEntry.get()
+            lower_range = Decimal(f"{lower_number}e-{lower_exponent}")
+
+            print(f"Analog out range: {lower_range} - {upper_range}")
 
 
 if __name__ == "__main__":
