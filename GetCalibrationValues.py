@@ -4,6 +4,9 @@ import configparser
 
 # Get Array with all Values
 def get_calibration_values(serial_number):
+    """
+    Inserts the calibration values by serial number into an array and returns it
+    """
     # Set up Configparser
     calibration_file = configparser.ConfigParser()
     calibration_file.read('IRC081 Calibration.ini')

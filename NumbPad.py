@@ -5,6 +5,9 @@ from GlobalVariables import *
 
 class NumbPad(ctk.CTkToplevel):
     def __init__(self, entry, *args, **kwargs):
+        """
+        Initializes the pop-up numbpad for the touchscreen
+        """
         super().__init__(*args, **kwargs)
         self.geometry("300x400")
         self.title(entry.cget("placeholder_text"))
@@ -47,12 +50,18 @@ class NumbPad(ctk.CTkToplevel):
 
 class ButtonNumber(ctk.CTkButton):
     def __init__(self, master, row, col, text, entry, *args, **kwargs):
+        """
+        Initializes a button for the numbpad
+        """
         super().__init__(master=master, text=text, width=100, height=100, border_width=3, border_color="black",
                          fg_color=infBlue, command=lambda: self.button_clicked(entry), *args, **kwargs)
         self.grid(row=row, column=col)
         self.cget("font").configure(size=32, weight="bold")
 
     def button_clicked(self, entry):
+        """
+        Adds the pressed button value to the entry
+        """
         current_value = entry.get()
         if '.' in current_value and str(self.cget("text")) == '.':
             return

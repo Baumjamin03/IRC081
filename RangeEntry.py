@@ -5,6 +5,9 @@ from TouchEntry import TouchEntry
 
 class RangeEntry(BaseFrame):
     def __init__(self, master, row, col, title, pady=0, *args, **kwargs):
+        """
+        Initializes the range entries for the analog output
+        """
         super().__init__(master, row, col, title, pady=pady, *args, **kwargs)
         self.entry = TouchEntry(self, 1, 0, title=("Enter " + title))
         self.grid_rowconfigure(1, weight=1)

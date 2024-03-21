@@ -18,6 +18,9 @@ HEIGHT = 480
 
 class MainWindow(ctk.CTk):
     def __init__(self, *args, **kwargs):
+        """
+        Initializes the IRUI081 for the IRC081 controller
+        """
         super().__init__(*args, **kwargs)
 
         atexit.register(self.shutdown)
@@ -53,24 +56,39 @@ class MainWindow(ctk.CTk):
         self.RS232Listener.start()
 
     def handle_serial_data(self, data):
+        """
+        Handles Data read from RS232.
+        """
         print(f"Received data: {data}")
 
     def shutdown(self):
+        """
+        Executes on program termination. It resets the IRC081 Parameters and ends the RS232 communication.
+        """
         self.irc081.measurement_end()
         self.RS232Listener.stop()
         self.com.close_port()
 
     def measurement_loop(self):
+        """
+        Calls itself and periodically updates measurement values.
+        """
         if self.frameDaq.switch_var.get() == "on":
             self.update_values()
             self.after(1000, self.measurement_loop)
 
     def set_emission_curr(self):
+        """
+        Sets the Emission current for the IRG080.
+        """
         current = self.frameEmission.entryCurrent.get()
         print("i emission set: " + current)
         self.irc081.set_emission(current)
 
     def switch_event(self):
+        """
+        Turns the IRG080 Measurements on/off.
+        """
         if self.frameDaq.switch_var.get() == "on":
             self.set_emission_curr()
             self.irc081.measurement_start()
@@ -81,6 +99,9 @@ class MainWindow(ctk.CTk):
             self.irc081.measurement_end()
 
     def update_values(self):
+        """
+        Reads the Data from the IRC081 and Displays it.
+        """
         self.irc081.refresh_controller_data()
 
         self.frameVoltages.uDeflector.value.set("{:.3f}".format(self.irc081.get_voltage_deflector()))
@@ -97,6 +118,11 @@ class MainWindow(ctk.CTk):
         self.analog_out_handler()
 
     def analog_out_handler(self):
+        """
+        Calculates the output voltage in respect to the set range or auto range if enabled.
+        Auto range will output twice the voltage it reads from the IColl (AI15) Analog Input.
+        Defaults to auto range if no values are provided.
+        """
         if self.frameAnalogOut.frameVoltageDisplay.check_var.get() or not (self.lowerRange and self.upperRange):
             voltage = self.irc081.get_ion_voltage() * 2
             self.frameAnalogOut.frameVoltageDisplay.value.set("{:.3f}".format(voltage))
@@ -106,6 +132,9 @@ class MainWindow(ctk.CTk):
             self.frameAnalogOut.frameVoltageDisplay.value.set("{:.3f}".format(voltage))
 
     def set_range(self):
+        """
+        Sets the range provided by the range input entries.
+        """
         try:
             upper_number = self.frameAnalogOut.entryUpperRange.entry.get()
             upper_exponent = self.frameAnalogOut.entryUpperRange.expEntry.get()

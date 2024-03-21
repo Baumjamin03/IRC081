@@ -7,6 +7,9 @@ from GlobalVariables import *
 
 class SubFrame(BaseFrame):
     def __init__(self, master, row, col, title, title_size=20, **kwargs):
+        """
+        Initializes sub frames for the GUI
+        """
         super().__init__(master, row, col, title, **kwargs)
         self.lblTitle.cget("font").configure(size=title_size)
         self.lblTitle.grid(columnspan=9)
@@ -15,6 +18,9 @@ class SubFrame(BaseFrame):
 
 class VoltagesFrame(SubFrame):
     def __init__(self, master):
+        """
+        Initializes voltage frame for the GUI
+        """
         super().__init__(master, 2, 0, "IRG080 Voltages")
         self.grid(columnspan=2, padx=PADX * 2, pady=(PADY, PADY * 2))
         self.grid_columnconfigure((0, 1, 2), weight=1)
@@ -28,6 +34,9 @@ class VoltagesFrame(SubFrame):
 
 class PressureFrame(SubFrame):
     def __init__(self, master):
+        """
+        Initializes Pressure Frame for the GUI
+        """
         super().__init__(master, 0, 0, "Pressure")
         self.grid(padx=(PADX * 2, PADX), pady=(PADY * 2, PADY))
         self.grid_rowconfigure(1, weight=1)
@@ -40,6 +49,9 @@ class PressureFrame(SubFrame):
 
 class EmissionFrame(SubFrame):
     def __init__(self, master):
+        """
+        Initializes emission frame for the GUI
+        """
         super().__init__(master, 1, 1, "Emission Current")
         self.grid(padx=(PADX, PADX * 2))
         self.entryCurrent = TouchEntry(self, 1, 1, "Enter Emission Current")
@@ -54,6 +66,9 @@ class EmissionFrame(SubFrame):
 
 class DaqFrame(SubFrame):
     def __init__(self, master):
+        """
+        Initializes Daq frame for the GUI
+        """
         super().__init__(master, 1, 0, "DAQ")
         self.switch_var = ctk.StringVar(value="off")
         self.switch = ctk.CTkSwitch(self, text="Measure", command=master.switch_event, switch_width=100,
@@ -70,6 +85,9 @@ class DaqFrame(SubFrame):
 
 class AnalogFrame(SubFrame):
     def __init__(self, master):
+        """
+        Initializes the Analog frame for the GUI
+        """
         super().__init__(master, 0, 1, "Analog Out")
         self.grid(padx=(PADX, PADX * 2), pady=(PADY * 2, PADY))
         self.entryUpperRange = RangeEntry(self, 1, 1, "Upper Range Limit")

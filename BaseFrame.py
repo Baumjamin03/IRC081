@@ -5,6 +5,9 @@ from GlobalVariables import *
 
 class BaseFrame(ctk.CTkFrame):
     def __init__(self, master, row, col, title, pady=PADY, padx=PADX, *args, **kwargs):
+        """
+        Initializes the base class for frames in the GUI
+        """
         super().__init__(master, *args, **kwargs)
         self.configure(fg_color=infBlue)
         self.grid(row=row, column=col, padx=padx, pady=pady, sticky="nsew")

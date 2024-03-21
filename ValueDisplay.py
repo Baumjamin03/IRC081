@@ -5,6 +5,9 @@ from BaseFrame import BaseFrame
 
 class BaseValueFrame(BaseFrame):
     def __init__(self, master, row, col, title, *args, **kwargs):
+        """
+        Initializes the base class for value displays
+        """
         super().__init__(master, row, col, title, *args, **kwargs)
         self.value = ctk.DoubleVar()
         self.lblValue = ctk.CTkLabel(self, textvariable=self.value, anchor="center")
@@ -12,6 +15,9 @@ class BaseValueFrame(BaseFrame):
 
 class HorizontalValueDisplay(BaseValueFrame):
     def __init__(self, master, row, col, title, *args, **kwargs):
+        """
+        Initializes horizontal value displays
+        """
         super().__init__(master, row, col, title, pady=0, *args, **kwargs)
         self.lblValue.grid(row=0, column=1, sticky="nsew")
         self.lblValue.configure(anchor="w")
@@ -22,6 +28,9 @@ class HorizontalValueDisplay(BaseValueFrame):
 
 class VerticalValueDisplay(BaseValueFrame):
     def __init__(self, master, row, col, title, *args, **kwargs):
+        """
+        Initializes vertical value Displays
+        """
         super().__init__(master, row, col, title, pady=0, *args, **kwargs)
         self.lblValue.grid(row=1, column=0)
         self.lblTitle.cget("font").configure(size=17)
