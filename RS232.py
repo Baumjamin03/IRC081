@@ -95,10 +95,9 @@ class SerialWriter:
         Write the given data to the serial port without blocking the rest of the program.
         """
         if self.com.get_available_bytes() > 0:
-            pass
             # If the receive-buffer is full, wait until some data is read
-            # timeout = 5.0  # Timeout in seconds
-            # start_time = time.time()
-            # while self.com.get_available_bytes() == 0 and time.time() - start_time < timeout:
-            #     time.sleep(0.1)  # Sleep for 100ms before checking again
+            timeout = 5.0  # Timeout in seconds
+            start_time = time.time()
+            while self.com.get_available_bytes() == 0 and time.time() - start_time < timeout:
+                time.sleep(0.1)  # Sleep for 100ms before checking again
         self.com.send_data(data)
