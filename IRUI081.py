@@ -75,8 +75,9 @@ class MainWindow(ctk.CTk):
         self.analog_out_handler()
 
     def analog_out_handler(self):
-        if self.frameAnalogOut.frameVoltageDisplay.check_var is "on":
-            pass
+        if self.frameAnalogOut.frameVoltageDisplay.check_var.get():
+            voltage = self.irc081.get_ion_voltage() * 2
+            self.frameAnalogOut.frameVoltageDisplay.value.set("{:.3f}".format(voltage))
 
 
 if __name__ == "__main__":

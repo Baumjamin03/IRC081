@@ -28,6 +28,6 @@ class VerticalValueDisplay(BaseValueFrame):
         self.lblValue.cget("font").configure(size=15)
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure((0, 1), weight=1)
-        self.check_var = ctk.StringVar(value="on")
-        self.autoRange = ctk.CTkCheckBox(self, text="Autorange", variable=self.check_var, onvalue="on", offvalue="off")
+        self.check_var = ctk.BooleanVar(value=True)
+        self.autoRange = ctk.CTkCheckBox(self, text="Autorange", variable=self.check_var, onvalue=True, offvalue=False)
         self.autoRange.grid(row=0, column=1, sticky="nsew", rowspan=2)

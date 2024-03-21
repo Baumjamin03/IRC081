@@ -84,6 +84,7 @@ class IRC081(usb_2408_2AO):
         self.iEmission = 0
         self.pressure = 0
         self.uEmission = 0
+        self.uIon = 0
 
     def refresh_controller_data(self):
         self.uBias = Decimal(self.get_voltage(5)) * Decimal(10.1) * self.factorAI5
@@ -166,6 +167,9 @@ class IRC081(usb_2408_2AO):
     def get_ion_current(self):
         return self.iCollector
 
+    def get_ion_voltage(self):
+        return self.uIon
+
     def get_emission_current(self):
         return self.iEmission
 
@@ -185,6 +189,7 @@ class IRC081(usb_2408_2AO):
 
     def read_ion_current(self):
         voltage = self.get_voltage(15)
+        self.uIon = voltage
         print("u Ion: {:.5e}".format(voltage) + ", range: " + str(self.ionRange))
         current = 0
         if self.ionRange == 0:
