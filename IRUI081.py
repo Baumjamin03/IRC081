@@ -80,15 +80,20 @@ class MainWindow(ctk.CTk):
             voltage = self.irc081.get_ion_voltage() * 2
             self.frameAnalogOut.frameVoltageDisplay.value.set("{:.3f}".format(voltage))
         else:
-            upper_number = self.frameAnalogOut.entryUpperRange.entry.get()
-            upper_exponent = self.frameAnalogOut.entryUpperRange.expEntry.get()
-            upper_range = Decimal(f"{upper_number}e-{upper_exponent}")
+            try:
+                upper_number = self.frameAnalogOut.entryUpperRange.entry.get()
+                upper_exponent = self.frameAnalogOut.entryUpperRange.expEntry.get()
+                upper_range = Decimal(f"{upper_number}e-{upper_exponent}")
 
-            lower_number = self.frameAnalogOut.entryLowerRange.entry.get()
-            lower_exponent = self.frameAnalogOut.entryLowerRange.expEntry.get()
-            lower_range = Decimal(f"{lower_number}e-{lower_exponent}")
+                lower_number = self.frameAnalogOut.entryLowerRange.entry.get()
+                lower_exponent = self.frameAnalogOut.entryLowerRange.expEntry.get()
+                lower_range = Decimal(f"{lower_number}e-{lower_exponent}")
 
-            print(f"Analog out range: {lower_range} - {upper_range}")
+                print(f"Analog out range: {lower_range} - {upper_range}")
+            except Exception as e:
+                print("Error: " + str(e))
+
+
 
 
 if __name__ == "__main__":
