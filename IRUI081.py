@@ -23,7 +23,7 @@ class MainWindow(ctk.CTk):
         """
         super().__init__(*args, **kwargs)
 
-        atexit.register(self.shutdown)
+        # atexit.register(self.shutdown)
 
         self.configure(fg_color="black")
 
@@ -49,11 +49,11 @@ class MainWindow(ctk.CTk):
         self.upperRange = None
         self.lowerRange = None
 
-        self.com = RS232Communication()
-        self.com.open_port()
-        self.RS232Listener = SerialListener(self.com, self.handle_serial_data)
-        self.RS232Writer = SerialWriter(self.com)
-        self.RS232Listener.start()
+        # self.com = RS232Communication()
+        # self.com.open_port()
+        # self.RS232Listener = SerialListener(self.com, self.handle_serial_data)
+        # self.RS232Writer = SerialWriter(self.com)
+        # self.RS232Listener.start()
 
     def handle_serial_data(self, data):
         """

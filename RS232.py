@@ -18,7 +18,7 @@ class RS232Communication:
         """
         try:
             self.serial_port = serial.Serial(self.port, self.baudrate)
-        except serial.SerialException as e:
+        except Exception as e:
             print(f"Error opening port: {e}")
 
     def close_port(self):

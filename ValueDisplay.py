@@ -26,7 +26,7 @@ class HorizontalValueDisplay(BaseValueFrame):
         self.lblTitle.configure(pady=0, padx=0, width=82)
 
 
-class VerticalValueDisplay(BaseValueFrame):
+class AnalogOutDisplay(BaseValueFrame):
     def __init__(self, master, row, col, title, *args, **kwargs):
         """
         Initializes vertical value Displays
