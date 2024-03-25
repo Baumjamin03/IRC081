@@ -68,6 +68,7 @@ class SerialListener(threading.Thread):
         start_time = time.time()
         while self.running:
             if self.com.get_available_bytes() > 0:
+                start_time = time.time()
                 data = self.com.receive_data(self.com.get_available_bytes())
                 self.callback(data)
             elif time.time() - start_time > self.timeout:
