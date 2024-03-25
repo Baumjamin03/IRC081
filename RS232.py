@@ -72,7 +72,8 @@ class SerialListener(threading.Thread):
                 self.callback(data)
             elif time.time() - start_time > self.timeout:
                 # Exit the loop if the timeout has been reached
-                break
+                start_time = time.time()
+                print("RS232 Timeout")
             else:
                 time.sleep(0.1)  # Sleep for 100ms before checking again
 
@@ -81,23 +82,3 @@ class SerialListener(threading.Thread):
         Stop the listener thread.
         """
         self.running = False
-
-
-class SerialWriter:
-    def __init__(self, com):
-        """
-        Initialize the serial writer with the given RS232 communication object.
-        """
-        self.com = com
-
-    def write_data(self, data):
-        """
-        Write the given data to the serial port without blocking the rest of the program.
-        """
-        if self.com.get_available_bytes() > 0:
-            # If the receive-buffer is full, wait until some data is read
-            timeout = 5.0  # Timeout in seconds
-            start_time = time.time()
-            while self.com.get_available_bytes() == 0 and time.time() - start_time < timeout:
-                time.sleep(0.1)  # Sleep for 100ms before checking again
-        self.com.send_data(data)
