@@ -19,6 +19,5 @@ class TouchEntry(ctk.CTkEntry):
         Event handler, activates on click/touch of the entry and generates a numbpad
         """
         entry.delete(0, ctk.END)
-        if self.numPad is None or not self.numPad.winfo_exists():
-            self.numPad = NumbPad(entry)
-            self.numPad.raise_numbpad()
+        self.numPad.destroy()
+        self.numPad = NumbPad(entry)

@@ -11,10 +11,6 @@ from SubFrame import *
 from decimal import *
 from RS232 import *
 
-# Define the custom window dimensions
-WIDTH = 800
-HEIGHT = 480
-
 
 class MainWindow(ctk.CTk):
     def __init__(self, *args, **kwargs):
@@ -28,14 +24,6 @@ class MainWindow(ctk.CTk):
         self.configure(fg_color="black")
 
         # self.irc081 = IRC081()
-
-        self.windowWidth = WIDTH
-        self.windowHeight = HEIGHT
-
-        self.title("IRUI082")
-        self.geometry(f"{self.windowWidth}x{self.windowHeight}")
-
-        self.state('normal')
 
         self.grid_columnconfigure((0, 1), weight=1)
         self.grid_rowconfigure((0, 1), weight=1)
@@ -52,7 +40,6 @@ class MainWindow(ctk.CTk):
         # self.com = RS232Communication()
         # self.com.open_port()
         # self.RS232Listener = SerialListener(self.com, self.handle_serial_data)
-        # self.RS232Writer = SerialWriter(self.com)
         # self.RS232Listener.start()
 
     def handle_serial_data(self, data):
@@ -154,5 +141,6 @@ class MainWindow(ctk.CTk):
 
 
 if __name__ == "__main__":
-    app = MainWindow()
-    app.mainloop()
+    root = MainWindow()
+    root.after(500, lambda: root.wm_attributes('-fullscreen', 'true'))
+    root.mainloop()

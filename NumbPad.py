@@ -35,17 +35,12 @@ class NumbPad(ctk.CTkToplevel):
         try:
             self.wait_visibility()
             self.attributes('-topmost', 1)
-            self.grab_set()
+
         except Exception as e:
-            print("grab_set() goofed, " + str(e))
+            print(str(e))
 
     def fo_sho(self):
         self.destroy()
-
-    def raise_numbpad(self):
-        if self.winfo_exists() and self is not None:
-            self.focus()
-            self.after(100, self.raise_numbpad)
 
 
 class ButtonNumber(ctk.CTkButton):
