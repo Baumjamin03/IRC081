@@ -12,12 +12,14 @@ class TouchEntry(ctk.CTkEntry):
         super().__init__(master, placeholder_text_color="darkgrey", placeholder_text=title, *args, **kwargs)
         self.grid(row=row, column=col, padx=padx, pady=pady, sticky="nsew")
         self.numPad = None
-        self.bind("<Button-1>", lambda event, entry=self: self.entry_clicked(self, event))
+        self.bind("<Button-1>", lambda entry=self: self.entry_clicked(self))
 
-    def entry_clicked(self, entry, event):
+    def entry_clicked(self, entry):
         """
         Event handler, activates on click/touch of the entry and generates a numbpad
         """
         entry.delete(0, ctk.END)
-        self.numPad.destroy()
+        if self.numPad:
+            self.numPad.destroy()
         self.numPad = NumbPad(entry)
+        self.after(150, lambda: self.numPad.wm_attributes('-fullscreen', 'true'))

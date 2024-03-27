@@ -9,7 +9,6 @@ class NumbPad(ctk.CTkToplevel):
         Initializes the pop-up numbpad for the touchscreen
         """
         super().__init__(*args, **kwargs)
-        self.geometry("300x400")
         self.title(entry.cget("placeholder_text"))
         self.overrideredirect(False)
 
@@ -32,10 +31,15 @@ class NumbPad(ctk.CTkToplevel):
         self.buttonArray[12].grid(row=3, column=2)
         self.buttonArray[12].cget("font").configure(size=25)
 
+        self.value = ctk.StringVar()
+        self.lblInput = ctk.CTkLabel(self, textvariable=self.value)
+        self.lblInput.grid(row=0, column=3, rowspan=4, sticky="nsew")
+        self.grid_columnconfigure(3, weight=1)
+        self.lblInput.cget("font").configure(size=35)
+
         try:
             self.wait_visibility()
             self.attributes('-topmost', 1)
-
         except Exception as e:
             print(str(e))
 
@@ -68,3 +72,4 @@ class ButtonNumber(ctk.CTkButton):
 
         entry.delete(0, ctk.END)
         entry.insert(0, new_value)
+        entry.numPad.value.set(new_value)
