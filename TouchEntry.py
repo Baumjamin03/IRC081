@@ -19,7 +19,9 @@ class TouchEntry(ctk.CTkEntry):
         Event handler, activates on click/touch of the entry and generates a numbpad
         """
         entry.delete(0, ctk.END)
-        if self.numPad:
+        try:
             self.numPad.destroy()
+        except Exception as e:
+            print(str(e))
         self.numPad = NumbPad(entry)
         self.after(150, lambda: self.numPad.wm_attributes('-fullscreen', 'true'))
