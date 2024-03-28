@@ -42,12 +42,6 @@ class MainWindow(ctk.CTk):
         # self.RS232Listener = SerialListener(self.com, self.handle_serial_data)
         # self.RS232Listener.start()
 
-    def handle_serial_data(self, data):
-        """
-        Handles Data read from RS232.
-        """
-        print(f"Received data: {data}")
-
     def shutdown(self):
         """
         Executes on program termination. It resets the IRC081 Parameters and ends the RS232 communication.
@@ -138,6 +132,36 @@ class MainWindow(ctk.CTk):
 
         self.upperRange = upper_range
         self.lowerRange = lower_range
+
+    def handle_serial_data(self, data):
+        """
+        serial data handling for more information visit:
+        https://colla.inficon.com/display/VCRD/RS232+Protocoll
+        """
+        if data == b'':
+            pass
+        elif data == b'':
+            pass
+        elif data == b'':
+            pass
+        elif data == b'':
+            pass
+        elif data == b'':
+            pass
+        elif data == b'':
+            pass
+        elif data == b'':
+            pass
+        elif data == b'':
+            pass
+        elif data == b'':
+            pass
+        elif data == b'':
+            pass
+        elif data == b'':
+            pass
+
+        return
 
 
 if __name__ == "__main__":
