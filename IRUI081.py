@@ -138,28 +138,61 @@ class MainWindow(ctk.CTk):
         serial data handling for more information visit:
         https://colla.inficon.com/display/VCRD/RS232+Protocoll
         """
-        if data == b'':
+
+        if len(data) > 2:
+            print("invalid command, too short")
+            return
+
+        command_code = data[:2]
+        print("command: " + str(command_code))
+
+        writing = False
+        if len(data) > 2:
+            writing = data[2] == ';'
+            print("writing: " + str(writing))
+
+        if command_code == 'AL':  # Analogue range lower
+            if writing:
+                pass
+            else:
+                pass
+
+        elif command_code == 'AU':  # Analogue range upper
+            if writing:
+                pass
+            else:
+                pass
+        elif command_code == 'AA':  # Analogue Autorange
+            if writing:
+                self.frameAnalogOut.frameVoltageDisplay.check_var.set(data[3:])
+            else:
+                self.frameAnalogOut.frameVoltageDisplay.check_var.get()
+        elif command_code == 'AV':  # Analogue Voltage
             pass
-        elif data == b'':
-            pass
-        elif data == b'':
-            pass
-        elif data == b'':
-            pass
-        elif data == b'':
-            pass
-        elif data == b'':
-            pass
-        elif data == b'':
-            pass
-        elif data == b'':
-            pass
-        elif data == b'':
-            pass
-        elif data == b'':
-            pass
-        elif data == b'':
-            pass
+        elif command_code == 'EC':  # Emission current
+            if writing:
+                pass
+            else:
+                pass
+        elif command_code == 'ME':  # Measurement on/off
+            if writing:
+                pass
+            else:
+                pass
+        elif command_code == 'VW':  # Get Voltage Wehnelt
+            response = self.frameVoltages.uWehnelt.value.get()
+        elif command_code == 'VC':  # Get Voltage Cage
+            response = self.frameVoltages.uCage.value.get()
+        elif command_code == 'VF':  # Get Voltage Faraday
+            response = self.frameVoltages.uFaraday.value.get()
+        elif command_code == 'VB':  # Get Voltage Bias
+            response = self.frameVoltages.uBias.value.get()
+        elif command_code == 'VD':  # Get Voltage Deflector
+            response = self.frameVoltages.uDeflector.value.get()
+        elif command_code == 'IF':  # Get Filament Current
+            response = self.frameVoltages.iFil.value.get()
+        elif command_code == 'PR':  # Get Pressure
+            response = self.framePressure.pressure.get()
 
         return
 
