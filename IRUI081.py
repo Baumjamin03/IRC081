@@ -138,63 +138,73 @@ class MainWindow(ctk.CTk):
         serial data handling for more information visit:
         https://colla.inficon.com/display/VCRD/RS232+Protocoll
         """
+        if data.endswith(b'\r') or data.endswith(b'\n'):
+            data = data[:len(data) - 1]
+        response = data + b'\r\n'
 
-        if len(data) > 2:
-            print("invalid command, too short")
-            return
+        if len(data) < 2:
+            return response + b'Error, cmd too short\r\n'
 
         command_code = data[:2]
         print("command: " + str(command_code))
 
         writing = False
+        value = None
         if len(data) > 2:
-            writing = data[2] == ';'
-            print("writing: " + str(writing))
+            writing = data[2] == b';'
+            if not writing:
+                return response + b'cmd too long or invalid writing operator\r\n'
+            try:
+                value = Decimal(data[3:].decode())
+            except DecimalException:
+                return response + b'invalid value\r\n'
 
-        if command_code == 'AL':  # Analogue range lower
+        if command_code == b'AL':  # Analogue range lower
             if writing:
                 pass
             else:
                 pass
 
-        elif command_code == 'AU':  # Analogue range upper
+        elif command_code == b'AU':  # Analogue range upper
             if writing:
                 pass
             else:
                 pass
-        elif command_code == 'AA':  # Analogue Autorange
+        elif command_code == b'AA':  # Analogue Autorange
             if writing:
                 self.frameAnalogOut.frameVoltageDisplay.check_var.set(data[3:])
             else:
-                self.frameAnalogOut.frameVoltageDisplay.check_var.get()
-        elif command_code == 'AV':  # Analogue Voltage
+                response += str(self.frameAnalogOut.frameVoltageDisplay.check_var.get()).encode()
+        elif command_code == b'AV':  # Analogue Voltage
             pass
-        elif command_code == 'EC':  # Emission current
+        elif command_code == b'EC':  # Emission current
             if writing:
                 pass
             else:
                 pass
-        elif command_code == 'ME':  # Measurement on/off
+        elif command_code == b'ME':  # Measurement on/off
             if writing:
                 pass
             else:
-                pass
-        elif command_code == 'VW':  # Get Voltage Wehnelt
-            response = self.frameVoltages.uWehnelt.value.get()
-        elif command_code == 'VC':  # Get Voltage Cage
-            response = self.frameVoltages.uCage.value.get()
-        elif command_code == 'VF':  # Get Voltage Faraday
-            response = self.frameVoltages.uFaraday.value.get()
-        elif command_code == 'VB':  # Get Voltage Bias
-            response = self.frameVoltages.uBias.value.get()
-        elif command_code == 'VD':  # Get Voltage Deflector
-            response = self.frameVoltages.uDeflector.value.get()
-        elif command_code == 'IF':  # Get Filament Current
-            response = self.frameVoltages.iFil.value.get()
-        elif command_code == 'PR':  # Get Pressure
-            response = self.framePressure.pressure.get()
+                response += str(self.frameDaq.switch_var.get()).encode()
+        elif command_code == b'VW':  # Get Voltage Wehnelt
+            response += str(self.frameVoltages.uWehnelt.value.get()).encode()
+        elif command_code == b'VC':  # Get Voltage Cage
+            response += str(self.frameVoltages.uCage.value.get()).encode()
+        elif command_code == b'VF':  # Get Voltage Faraday
+            response += str(self.frameVoltages.uFaraday.value.get()).encode()
+        elif command_code == b'VB':  # Get Voltage Bias
+            response += str(self.frameVoltages.uBias.value.get()).encode()
+        elif command_code == b'VD':  # Get Voltage Deflector
+            response += str(self.frameVoltages.uDeflector.value.get()).encode()
+        elif command_code == b'IF':  # Get Filament Current
+            response += str(self.frameVoltages.iFil.value.get()).encode()
+        elif command_code == b'PR':  # Get Pressure
+            response += str(self.framePressure.pressure.get()).encode()
+        else:
+            response += b'unknown command'
 
-        return
+        return response + b'\r\n'
 
 
 if __name__ == "__main__":

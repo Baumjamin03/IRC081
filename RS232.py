@@ -27,13 +27,6 @@ class RS232Communication(serial.Serial):
         if self is not None:
             self.close()
 
-    def send_data(self, data):
-        """
-        Send the given data over the serial port.
-        """
-        if self is not None:
-            self.write(data.encode())
-
     def receive_data(self, num_bytes):
         """
         Receive the given number of bytes over the serial port.
@@ -71,7 +64,7 @@ class SerialListener(threading.Thread):
             if self.com.get_available_bytes() > 0:
                 start_time = time.time()
                 received_data = self.read_command()
-                self.callback(received_data)
+                self.com.write(self.callback(received_data))
             elif time.time() - start_time > self.timeout:
                 # Exit the loop if the timeout has been reached
                 start_time = time.time()
@@ -97,6 +90,6 @@ class SerialListener(threading.Thread):
             else:
                 time.sleep(0.05)
 
-            if time.time() - start_time > 3:
+            if time.time() - start_time > 5:
                 print("timeout, no termination character received")
                 return None
