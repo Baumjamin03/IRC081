@@ -64,7 +64,12 @@ class MainWindow(ctk.CTk):
         """
         current = self.frameEmission.entryCurrent.get()
         print("i emission set: " + current)
-        self.irc081.set_emission(current)
+        try:
+            self.irc081.set_emission(Decimal(current))
+        except DecimalException as e:
+            print(str(e))
+            return "invalid value"
+        return None
 
     def switch_event(self):
         """
@@ -151,42 +156,70 @@ class MainWindow(ctk.CTk):
         writing = False
         value = None
         if len(data) > 2:
-            writing = data[2] == b';'
+            writing = data[2:3] == b';'
             if not writing:
                 return response + b'cmd too long or invalid writing operator\r\n'
-            try:
-                value = Decimal(data[3:].decode())
-            except DecimalException:
-                return response + b'invalid value\r\n'
+            value = data[3:].decode()
 
         if command_code == b'AL':  # Analogue range lower
             if writing:
-                pass
+                if 'E-' in value:
+                    try:
+                        factor, exp = value.split('E-')
+                        self.frameAnalogOut.entryLowerRange.entry.delete(0, ctk.END)
+                        self.frameAnalogOut.entryLowerRange.entry.insert(0, factor)
+                        self.frameAnalogOut.entryLowerRange.expEntry.delete(0, ctk.END)
+                        self.frameAnalogOut.entryLowerRange.expEntry.insert(0, exp)
+                        self.set_range()
+                    except ValueError:
+                        response += "value Error"
+                else:
+                    response += "missing 'E-'"
             else:
-                pass
-
+                response += str(self.lowerRange).encode()
         elif command_code == b'AU':  # Analogue range upper
             if writing:
-                pass
+                if 'E-' in value:
+                    try:
+                        factor, exp = value.split('E-')
+                        self.frameAnalogOut.entryUpperRange.entry.delete(0, ctk.END)
+                        self.frameAnalogOut.entryUpperRange.entry.insert(0, factor)
+                        self.frameAnalogOut.entryUpperRange.expEntry.delete(0, ctk.END)
+                        self.frameAnalogOut.entryUpperRange.expEntry.insert(0, exp)
+                        self.set_range()
+                    except ValueError:
+                        response += "value Error"
+                else:
+                    response += "missing 'E-'"
             else:
-                pass
+                response += str(self.upperRange).encode()
         elif command_code == b'AA':  # Analogue Autorange
             if writing:
-                self.frameAnalogOut.frameVoltageDisplay.check_var.set(data[3:])
+                if value == 1:
+                    self.frameDaq.switch_var.set(True)
+                else:
+                    self.frameDaq.switch_var.set(False)
             else:
                 response += str(self.frameAnalogOut.frameVoltageDisplay.check_var.get()).encode()
         elif command_code == b'AV':  # Analogue Voltage
-            pass
+            response += str(self.frameAnalogOut.frameVoltageDisplay.value.get()).encode()
         elif command_code == b'EC':  # Emission current
             if writing:
-                pass
+                self.frameEmission.entryCurrent.delete(0, ctk.END)
+                self.frameEmission.entryCurrent.insert(0, value)
+                answ = self.set_emission_curr()
+                if answ is not None:
+                    response += answ
             else:
-                pass
+                response += str(self.frameDaq.emissionDisplay.value.get()).encode()
         elif command_code == b'ME':  # Measurement on/off
             if writing:
-                pass
+                if value == 1:
+                    self.frameDaq.switch_var.set("on")
+                else:
+                    self.frameDaq.switch_var.set("off")
             else:
-                response += str(self.frameDaq.switch_var.get()).encode()
+                response += self.frameDaq.switch_var.get().encode()
         elif command_code == b'VW':  # Get Voltage Wehnelt
             response += str(self.frameVoltages.uWehnelt.value.get()).encode()
         elif command_code == b'VC':  # Get Voltage Cage
@@ -204,7 +237,10 @@ class MainWindow(ctk.CTk):
         else:
             response += b'unknown command'
 
-        return response + b'\r\n'
+        if response.endswith(b'\r\n'):
+            return response
+        else:
+            return response + b'\r\n'
 
 
 if __name__ == "__main__":

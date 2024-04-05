@@ -99,7 +99,7 @@ class IRC081(usb_2408_2AO):
         self.iCollector = self.read_ion_current()
         self.iEmission = self.read_emission_curr()
         self.pressure = self.calculate_pressure_mbar()
-        self.uEmission = self.set_emission_curr()
+        self.uEmission = self.set_emission_prop()
         print("ion: " + "{:.5e}".format(self.iCollector) + ", bias: " + "{:.5f}".format(self.uBias))
         print("iEm: " + "{:.5e}".format(self.iEmission) + ", uEm: " + "{:.5f}".format(self.uEmission))
         print(self.pressure)
@@ -138,20 +138,20 @@ class IRC081(usb_2408_2AO):
         pressure = Decimal(ion_curr / (self.sensitivity * emission_curr))
         return pressure
 
-    def set_emission(self, curr):
+    def set_emission(self, curr: Decimal):
         """
         Sets the emission current property
         """
         self.setEmission = curr
 
-    def set_emission_curr(self):
+    def set_emission_prop(self):
         """
         Calculates and sets the voltage level corresponding to the set emission current.
         Returns voltage level
         """
         current = self.setEmission
         if (current == 0) or (current is None) or (current is ""):
-            current = 30
+            current = Decimal(30)
         emission_current = Decimal(current)
         voltage = 0
         if emission_current < 100:
