@@ -7,7 +7,7 @@ Created on Wed Feb 28 10:55:21 2024
 
 import atexit
 from SubFrame import *
-# from IRC081 import IRC081
+from IRC081 import IRC081
 from decimal import *
 from RS232 import *
 
@@ -19,11 +19,17 @@ class MainWindow(ctk.CTk):
         """
         super().__init__(*args, **kwargs)
 
-        # atexit.register(self.shutdown)
-
         self.configure(fg_color="black")
 
-        # self.irc081 = IRC081()
+        self.irc081 = None
+        while self.irc081 is None:
+            try:
+                self.irc081 = IRC081()
+            except Exception as e:
+                print("no IRC081 found, Error: " + str(e))
+                time.sleep(2)
+
+        atexit.register(self.shutdown)
 
         self.grid_columnconfigure((0, 1), weight=1)
         self.grid_rowconfigure((0, 1), weight=1)
@@ -37,10 +43,16 @@ class MainWindow(ctk.CTk):
         self.upperRange = None
         self.lowerRange = None
 
-        # self.com = RS232Communication()
-        # self.com.open_port()
-        # self.RS232Listener = SerialListener(self.com, self.handle_serial_data)
-        # self.RS232Listener.start()
+        self.com = None
+        while self.com is None:
+            try:
+                self.com = RS232Communication()
+                self.com.open_port()
+            except Exception as e:
+                print(e)
+                time.sleep(1)
+        self.RS232Listener = SerialListener(self.com, self.handle_serial_data)
+        self.RS232Listener.start()
 
     def shutdown(self):
         """
@@ -172,9 +184,9 @@ class MainWindow(ctk.CTk):
                         self.frameAnalogOut.entryLowerRange.expEntry.insert(0, exp)
                         self.set_range()
                     except ValueError:
-                        response += "value Error"
+                        response += b'value Error'
                 else:
-                    response += "missing 'E-'"
+                    response += b'missing [E-]'
             else:
                 response += str(self.lowerRange).encode()
         elif command_code == b'AU':  # Analogue range upper
@@ -188,9 +200,9 @@ class MainWindow(ctk.CTk):
                         self.frameAnalogOut.entryUpperRange.expEntry.insert(0, exp)
                         self.set_range()
                     except ValueError:
-                        response += "value Error"
+                        response += b'value Error'
                 else:
-                    response += "missing 'E-'"
+                    response += b'missing [E-]'
             else:
                 response += str(self.upperRange).encode()
         elif command_code == b'AA':  # Analogue Autorange
