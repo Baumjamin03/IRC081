@@ -53,6 +53,8 @@ class MainWindow(ctk.CTk):
         while self.com is None:
             try:
                 self.com = RS232Communication()
+                if self.com.is_open:
+                    self.com.close_port()
                 self.com.open_port()
             except Exception as e:
                 print(e)
@@ -213,7 +215,7 @@ class MainWindow(ctk.CTk):
                 response += str(self.upperRange).encode()
         elif command_code == b'AA':  # Analogue Autorange
             if writing:
-                if value == 1:
+                if value == "1":
                     self.frameDaq.switch_var.set(True)
                 else:
                     self.frameDaq.switch_var.set(False)
@@ -232,10 +234,13 @@ class MainWindow(ctk.CTk):
                 response += str(self.frameDaq.emissionDisplay.value.get()).encode()
         elif command_code == b'ME':  # Measurement on/off
             if writing:
-                if value == 1:
+                if value == "1":
                     self.frameDaq.switch_var.set("on")
+                    self.frameDaq.switch.select()
                 else:
                     self.frameDaq.switch_var.set("off")
+                    self.frameDaq.switch.deselect()
+                self.switch_event()
             else:
                 response += self.frameDaq.switch_var.get().encode()
         elif command_code == b'VW':  # Get Voltage Wehnelt
@@ -261,9 +266,12 @@ class MainWindow(ctk.CTk):
             return response + b'\r\n'
 
     def update_digipot(self):
-        voltage = self.frameAnalogOut.frameVoltageDisplay.value.get()
-        d_value = voltage*256//10
-        self.dPot.set_potentiometer(d_value)
+        try:
+            voltage = Decimal(self.frameAnalogOut.frameVoltageDisplay.value.get())
+            d_value = voltage*256//10
+            self.dPot.set_potentiometer(int(d_value))
+        except Exception as e:
+            print(e)
 
 
 if __name__ == "__main__":

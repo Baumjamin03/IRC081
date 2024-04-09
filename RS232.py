@@ -68,7 +68,7 @@ class SerialListener(threading.Thread):
             elif time.time() - start_time > self.timeout:
                 # Exit the loop if the timeout has been reached
                 start_time = time.time()
-                print("no data")
+                # print("no data")
             else:
                 time.sleep(0.1)  # Sleep for 100ms before checking again
 

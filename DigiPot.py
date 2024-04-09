@@ -12,6 +12,10 @@ class AD5280:
         self.address = address
 
     def set_potentiometer(self, value):
+        if value > 255:
+            value = 255
+        if value < 0:
+            value = 0
         # Write to the digital potentiometer
         self.bus.write_i2c_block_data(self.address, 0x00, [value])
 
