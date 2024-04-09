@@ -33,7 +33,7 @@ class MainWindow(ctk.CTk):
         atexit.register(self.shutdown)
         self.dPot = None
         try:
-            self.dPot = AD5280(1, 0b0101100)
+            self.dPot = AD5280()
         except Exception as e:
             print(e)
 
