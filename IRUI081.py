@@ -10,6 +10,7 @@ from SubFrame import *
 from IRC081 import IRC081
 from decimal import *
 from RS232 import *
+from DigiPot import AD5280
 
 
 class MainWindow(ctk.CTk):
@@ -30,6 +31,11 @@ class MainWindow(ctk.CTk):
                 time.sleep(2)
 
         atexit.register(self.shutdown)
+        self.dPot = None
+        try:
+            self.dPot = AD5280(1, 0b0101100)
+        except Exception as e:
+            print(e)
 
         self.grid_columnconfigure((0, 1), weight=1)
         self.grid_rowconfigure((0, 1), weight=1)
@@ -68,6 +74,7 @@ class MainWindow(ctk.CTk):
         """
         if self.frameDaq.switch_var.get() == "on":
             self.update_values()
+            self.update_digipot()
             self.after(1000, self.measurement_loop)
 
     def set_emission_curr(self):
@@ -91,7 +98,6 @@ class MainWindow(ctk.CTk):
             self.set_emission_curr()
             self.irc081.measurement_start()
             self.measurement_loop()
-
         else:
             print("measurement end")
             self.irc081.measurement_end()
@@ -253,6 +259,11 @@ class MainWindow(ctk.CTk):
             return response
         else:
             return response + b'\r\n'
+
+    def update_digipot(self):
+        voltage = self.frameAnalogOut.frameVoltageDisplay.value.get()
+        d_value = voltage*256//10
+        self.dPot.set_potentiometer(d_value)
 
 
 if __name__ == "__main__":
