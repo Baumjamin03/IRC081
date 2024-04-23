@@ -10,7 +10,7 @@ from SubFrame import *
 from IRC081 import IRC081
 from decimal import *
 from RS232 import *
-from DigiPot import AD5280
+from AnalogueOut import MCP4725
 
 
 class MainWindow(ctk.CTk):
@@ -26,14 +26,14 @@ class MainWindow(ctk.CTk):
         while self.irc081 is None:
             try:
                 self.irc081 = IRC081()
-            except Exception as e:
+            except OSError as e:
                 print("no IRC081 found, Error: " + str(e))
                 time.sleep(2)
 
         atexit.register(self.shutdown)
         self.dPot = None
         try:
-            self.dPot = AD5280()
+            self.dPot = MCP4725()
         except Exception as e:
             print(e)
 
@@ -76,7 +76,7 @@ class MainWindow(ctk.CTk):
         """
         if self.frameDaq.switch_var.get() == "on":
             self.update_values()
-            self.update_digipot()
+            self.update_aout()
             self.after(1000, self.measurement_loop)
 
     def set_emission_curr(self):
@@ -265,11 +265,11 @@ class MainWindow(ctk.CTk):
         else:
             return response + b'\r\n'
 
-    def update_digipot(self):
+    def update_aout(self):
         try:
             voltage = Decimal(self.frameAnalogOut.frameVoltageDisplay.value.get())
-            d_value = voltage*256//10
-            self.dPot.set_potentiometer(int(d_value))
+            d_value = voltage*4095//10
+            self.dPot.set_analogue_out(int(d_value))
         except Exception as e:
             print(e)
 

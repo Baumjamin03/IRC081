@@ -13,11 +13,7 @@ class IRC081(usb_2408_2AO):
         """
         Initializes the IRC081 controller.
         """
-        try:
-            super().__init__(*args, **kwargs)
-        except Exception as e:
-            print("where he at? ERROR: " + str(e))
-            return
+        super().__init__(*args, **kwargs)
         print('wMaxPacketSize =', self.wMaxPacketSize)
         for gain in range(1, 10):
             print('Calibration Table: Range =', gain,
