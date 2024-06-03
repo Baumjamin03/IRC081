@@ -1,6 +1,6 @@
 # Backend File for IRC081 raspi extension
 
-from mccDAQ.usb_2400 import *  # https://github.com/wjasper/Linux_Drivers/tree/master/USB
+from usb_2400 import *  # https://github.com/wjasper/Linux_Drivers/tree/master/USB
 from GetCalibrationValues import *
 from decimal import *
 
