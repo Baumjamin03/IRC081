@@ -18,24 +18,25 @@ class MainWindow(ctk.CTk):
         """
         Initializes the IRUI081 for the IRC081 controller
         """
-        super().__init__(*args, **kwargs)
-
-        self.configure(fg_color="black")
-
         self.irc081 = None
-
         while self.irc081 is None:
             try:
                 self.irc081 = IRC081()
             except OSError as e:
                 print("no IRC081 found, Error: " + str(e))
                 start_screen = ctk.CTk()
-                lbl_start = ctk.CTkLabel(start_screen, text="please connect IRC081")
-                lbl_start.after(2500, start_screen.destroy())
-                lbl_start.mainloop()
-                time.sleep(3)
+                start_screen.geometry("400x200")
+                lbl_start = ctk.CTkLabel(start_screen, text="Please connect IRC081")
+                lbl_start.pack(pady=50)
+                start_screen.after(5000, start_screen.destroy)
+                start_screen.mainloop()
+                time.sleep(0.1)
                 continue
             break
+
+        super().__init__(*args, **kwargs)
+
+        self.configure(fg_color="black")
 
         atexit.register(self.shutdown)
         self.dPot = None
