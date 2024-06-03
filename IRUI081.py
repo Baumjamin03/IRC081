@@ -23,12 +23,19 @@ class MainWindow(ctk.CTk):
         self.configure(fg_color="black")
 
         self.irc081 = None
+
         while self.irc081 is None:
             try:
                 self.irc081 = IRC081()
             except OSError as e:
                 print("no IRC081 found, Error: " + str(e))
-                time.sleep(2)
+                start_screen = ctk.CTk()
+                lbl_start = ctk.CTkLabel(start_screen, text="please connect IRC081")
+                lbl_start.after(2500, start_screen.destroy())
+                lbl_start.mainloop()
+                time.sleep(3)
+                continue
+            break
 
         atexit.register(self.shutdown)
         self.dPot = None
