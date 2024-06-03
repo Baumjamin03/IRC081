@@ -158,38 +158,6 @@ class IRC081(usb_2408_2AO):
             print("current too big")
         return voltage
 
-    def get_pressure_mbar(self):
-        return self.pressure
-
-    def get_voltage_wehnelt(self):
-        return self.uWehnelt
-
-    def get_voltage_deflector(self):
-        return self.uDeflector
-
-    def get_voltage_cage(self):
-        return self.uCage
-
-    def get_voltage_faraday(self):
-        return self.uFaraday
-
-    def get_voltage_bias(self):
-        return self.uBias
-
-    def get_current_filament(self):
-        return self.iFil
-
-    def get_ion_current(self):
-        return self.iCollector
-
-    def get_ion_voltage(self):
-        return self.uIon
-
-    def get_emission_current(self):
-        return self.iEmission
-
-    def get_emission_voltage(self):
-        return self.uEmission
 
     def read_emission_curr(self):
         """
@@ -309,3 +277,36 @@ class IRC081(usb_2408_2AO):
         self.update_digital_output()
         self.AOut(1, 0)
         return
+
+    def get_pressure_mbar(self):
+        return self.pressure
+
+    def get_voltage_wehnelt(self):
+        return self.uWehnelt
+
+    def get_voltage_deflector(self):
+        return self.uDeflector
+
+    def get_voltage_cage(self):
+        return self.uCage
+
+    def get_voltage_faraday(self):
+        return self.uFaraday
+
+    def get_voltage_bias(self):
+        return self.uBias
+
+    def get_current_filament(self):
+        return self.iFil
+
+    def get_ion_current(self):
+        return self.iCollector
+
+    def get_ion_voltage(self):
+        return self.uIon
+
+    def get_emission_current(self):
+        return self.iEmission
+
+    def get_emission_voltage(self):
+        return self.uEmission
