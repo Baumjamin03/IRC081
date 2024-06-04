@@ -43,11 +43,11 @@ class PressureFrame(SubFrame):
         self.grid_columnconfigure(0, weight=1)
         self.pressure = ctk.DoubleVar()
         self.barDisplay = ctk.CTkLabel(self, text_color="white", textvariable=self.pressure, anchor="e")
-        self.barDisplay.grid(row=1, column=0, sticky="nsew")
+        self.barDisplay.grid(row=1, column=0, sticky="nsew", padx=PADX, pady=PADY)
         self.barDisplay.cget("font").configure(size=40)
         self.lblUnit = ctk.CTkLabel(self, text=" mbar", anchor="w")
         self.lblUnit.cget("font").configure(size=40)
-        self.lblUnit.grid(row=1, column=1, sticky="nsew")
+        self.lblUnit.grid(row=1, column=1, sticky="nsew", padx=PADX, pady=PADY)
 
 
 class EmissionFrame(SubFrame):
@@ -62,7 +62,7 @@ class EmissionFrame(SubFrame):
         self.btnSet.grid(row=1, column=0, padx=PADX, pady=PADY, sticky="nsew")
         self.grid_columnconfigure((0, 1), weight=1)
         self.grid_rowconfigure(1, weight=1)
-        self.lblUnit = ctk.CTkLabel(self, text="uA")
+        self.lblUnit = ctk.CTkLabel(self, text="uA", text_color="white")
         self.lblUnit.grid(column=2, row=1, padx=(PADX, PADX * 2))
         self.lblUnit.cget("font").configure(weight="bold", size=20)
 
@@ -76,10 +76,10 @@ class DaqFrame(SubFrame):
         self.switch_var = ctk.StringVar(value="off")
         self.switch = ctk.CTkSwitch(self, text="Measure", command=master.switch_event, switch_width=100,
                                     switch_height=50, variable=self.switch_var, onvalue="on", offvalue="off")
-        self.switch.grid(row=1, column=0, sticky="nsew", columnspan=3)
+        self.switch.grid(row=1, column=0, sticky="nsew", columnspan=3, padx=PADX, pady=PADY)
         self.switch.cget("font").configure(size=20)
         self.emissionDisplay = HorizontalValueDisplay(self, 2, 0, "Emission: ")
-        self.emissionDisplay.grid(sticky="nsew")
+        self.emissionDisplay.grid(sticky="nsew", padx=PADX, pady=PADY)
 
         self.grid(padx=(PADX * 2, PADX))
         self.grid_columnconfigure(0, weight=1)
@@ -95,6 +95,7 @@ class AnalogFrame(SubFrame):
         self.grid(padx=(PADX, PADX * 2))
         self.entryUpperRange = RangeEntry(self, 1, 1, "Upper Range Limit")
         self.entryLowerRange = RangeEntry(self, 2, 1, "Lower Range Limit")
+        self.entryLowerRange.grid(padx=PADX, pady=PADY)
         self.btnSetRange = ctk.CTkButton(self, text="Set Range", command=master.set_range)
         self.btnSetRange.grid(row=2, column=0, padx=PADX, pady=PADY, sticky="nsew")
         self.grid_columnconfigure((0, 1), weight=1)
