@@ -31,7 +31,7 @@ class MainWindow(ctk.CTk):
                 start_screen.after(5000, start_screen.destroy)
                 start_screen.mainloop()
                 time.sleep(0.1)
-                continue
+                # continue
             break
 
         super().__init__(*args, **kwargs)

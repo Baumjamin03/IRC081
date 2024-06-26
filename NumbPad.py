@@ -12,7 +12,7 @@ class NumbPad(ctk.CTkToplevel):
         self.title(entry.cget("placeholder_text"))
         self.overrideredirect(False)
 
-        self.buttonArray = [12]
+        self.buttonArray = [13]
         row = 0
         col = 0
         for i in range(1, 10):
@@ -26,15 +26,21 @@ class NumbPad(ctk.CTkToplevel):
 
         self.buttonArray.append(ButtonNumber(self, 3, 0, ".", entry))
 
-        self.buttonArray.append(ctk.CTkButton(self, text="ENTER", width=100, height=100, border_width=3,
-                                              border_color="black", fg_color=infBlue, command=self.fo_sho))
+        self.buttonArray.append(ctk.CTkButton(self, text="DEL", width=100, height=100, border_width=3,
+                                              border_color="black", fg_color=infBlue,
+                                              command=lambda: self.backspace(entry)))
         self.buttonArray[12].grid(row=3, column=2)
         self.buttonArray[12].cget("font").configure(size=25)
 
+        self.buttonArray.append(ctk.CTkButton(self, text="ENTER", width=100, height=400, border_width=3,
+                                              border_color="black", fg_color=infBlue, command=self.exit))
+        self.buttonArray[13].grid(row=0, column=3, rowspan=4)
+        self.buttonArray[13].cget("font").configure(size=25)
+
         self.value = ctk.StringVar()
-        self.lblInput = ctk.CTkLabel(self, textvariable=self.value)
-        self.lblInput.grid(row=0, column=3, rowspan=4, sticky="nsew")
-        self.grid_columnconfigure(3, weight=1)
+        self.lblInput = ctk.CTkLabel(self, textvariable=self.value, fg_color="lightgrey", width=150, corner_radius=5)
+        self.lblInput.grid(row=0, column=4, rowspan=4)
+        self.grid_columnconfigure(4, weight=1)
         self.lblInput.cget("font").configure(size=35)
 
         try:
@@ -43,8 +49,16 @@ class NumbPad(ctk.CTkToplevel):
         except Exception as e:
             print(str(e))
 
-    def fo_sho(self):
+    def exit(self):
         self.destroy()
+
+    def backspace(self, entry):
+        current_value = entry.get()
+
+        new_value = current_value[:-1]
+        entry.delete(0, ctk.END)
+        entry.insert(0, new_value)
+        entry.numPad.value.set(new_value)
 
 
 class ButtonNumber(ctk.CTkButton):
