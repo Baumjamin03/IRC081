@@ -64,11 +64,11 @@ class MainWindow(ctk.CTk):
         while self.com is None:
             try:
                 if port_toggle:
-                    self.com = RS232Communication()
                     port_toggle = False
+                    self.com = RS232Communication()
                 else:
-                    self.com = RS232Communication(port='/dev/ttyS0')
                     port_toggle = True
+                    self.com = RS232Communication(port='/dev/ttyS0')
                 if self.com.is_open:
                     self.com.close_port()
                 self.com.open_port()

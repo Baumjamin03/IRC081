@@ -25,3 +25,12 @@ class TouchEntry(ctk.CTkEntry):
             print(str(e))
         self.numPad = NumbPad(entry)
         self.after(150, lambda: self.numPad.wm_attributes('-fullscreen', 'true'))
+
+
+if __name__ == "__main__":
+    app = ctk.CTk()
+    app.geometry("1000x500")
+    tehe = TouchEntry(app, 0, 0, "hehe")
+    app.mainloop()
+
+
