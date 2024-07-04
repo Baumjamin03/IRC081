@@ -11,6 +11,8 @@ from IRC081 import IRC081
 from decimal import *
 from RS232 import *
 from AnalogueOut import MCP4725
+import asyncio
+from threading import *
 
 
 class MainWindow(ctk.CTk):
@@ -76,6 +78,8 @@ class MainWindow(ctk.CTk):
         self.RS232Listener = SerialListener(self.com, self.handle_serial_data)
         self.RS232Listener.start()
 
+        self.start_loop_in_thread(self.irc081.refresh_controller_data)
+
     def shutdown(self):
         """
         Executes on program termination. It resets the IRC081 Parameters and ends the RS232 communication.
@@ -122,7 +126,6 @@ class MainWindow(ctk.CTk):
         """
         Reads the Data from the IRC081 and Displays it.
         """
-        self.irc081.refresh_controller_data()
 
         self.frameVoltages.uDeflector.value.set("{:.3f}".format(self.irc081.get_voltage_deflector()))
         self.frameVoltages.uWehnelt.value.set("{:.3f}".format(self.irc081.get_voltage_wehnelt()))
@@ -286,6 +289,24 @@ class MainWindow(ctk.CTk):
             self.dPot.set_analogue_out(int(d_value))
         except Exception as e:
             print(e)
+
+    def async_start_loop(self, loop: asyncio.AbstractEventLoop):
+        """
+        Target function for Thread
+        :param loop: asyncio eventloop
+        """
+        asyncio.set_event_loop(loop)
+        loop.run_forever()
+
+    def start_loop_in_thread(self, func):
+        """
+        Takes a function, creates an async Loop and runs it in a Thread
+        :param func: any function to be run in a separate Thread
+        """
+        loop = asyncio.new_event_loop()
+        loop_thread = Thread(target=self.async_start_loop, args=(loop,), daemon=True)
+        loop_thread.start()
+        asyncio.run_coroutine_threadsafe(func(), loop)
 
 
 if __name__ == "__main__":

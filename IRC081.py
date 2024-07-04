@@ -3,6 +3,7 @@
 from usb_2400 import *  # https://github.com/wjasper/Linux_Drivers/tree/master/USB
 from GetCalibrationValues import *
 from decimal import *
+import asyncio
 
 RESISTOR1G11 = Decimal("1.11E9")  # ohm
 SENSITIVITY = 29  # 1/mbar
@@ -82,23 +83,25 @@ class IRC081(usb_2408_2AO):
         self.uEmission = 0
         self.uIon = 0
 
-    def refresh_controller_data(self):
+    async def refresh_controller_data(self):
         """
         Reads and Calculates measurement Data.
         """
-        self.uBias = Decimal(self.get_voltage(5)) * Decimal(10.1) * self.factorAI5
-        self.uWehnelt = Decimal(self.get_voltage(1)) * Decimal(10.1) * self.factorAI1
-        self.uDeflector = Decimal(self.get_voltage(0)) * Decimal(10.1) * self.factorAI0
-        self.uFaraday = Decimal(self.get_voltage(3)) * Decimal(51) * self.factorAI3
-        self.uCage = Decimal(self.get_voltage(2)) * Decimal(51) * self.factorAI2
-        self.iFil = Decimal(self.get_voltage(6)) * self.factorAI6
-        self.iCollector = self.read_ion_current()
-        self.iEmission = self.read_emission_curr()
-        self.pressure = self.calculate_pressure_mbar()
-        self.uEmission = self.set_emission_prop()
-        print("ion: " + "{:.5e}".format(self.iCollector) + ", bias: " + "{:.5f}".format(self.uBias))
-        print("iEm: " + "{:.5e}".format(self.iEmission) + ", uEm: " + "{:.5f}".format(self.uEmission))
-        print(self.pressure)
+        while not False:
+            self.uBias = Decimal(self.get_voltage(5)) * Decimal(10.1) * self.factorAI5
+            self.uWehnelt = Decimal(self.get_voltage(1)) * Decimal(10.1) * self.factorAI1
+            self.uDeflector = Decimal(self.get_voltage(0)) * Decimal(10.1) * self.factorAI0
+            self.uFaraday = Decimal(self.get_voltage(3)) * Decimal(51) * self.factorAI3
+            self.uCage = Decimal(self.get_voltage(2)) * Decimal(51) * self.factorAI2
+            self.iFil = Decimal(self.get_voltage(6)) * self.factorAI6
+            self.iCollector = self.read_ion_current()
+            self.iEmission = self.read_emission_curr()
+            self.pressure = self.calculate_pressure_mbar()
+            self.uEmission = self.set_emission_prop()
+            print("ion: " + "{:.5e}".format(self.iCollector) + ", bias: " + "{:.5f}".format(self.uBias))
+            print("iEm: " + "{:.5e}".format(self.iEmission) + ", uEm: " + "{:.5f}".format(self.uEmission))
+            print(self.pressure)
+            await asyncio.sleep(0.2)
 
     def update_digital_output(self):
         """
@@ -157,7 +160,6 @@ class IRC081(usb_2408_2AO):
         else:
             print("current too big")
         return voltage
-
 
     def read_emission_curr(self):
         """
