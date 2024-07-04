@@ -24,7 +24,7 @@ class TouchEntry(ctk.CTkEntry):
         except Exception as e:
             print(str(e))
         self.numPad = NumbPad(entry)
-        self.after(150, lambda: self.numPad.wm_attributes('-fullscreen', 'true'))
+        self.after(50, lambda: self.numPad.wm_attributes('-fullscreen', 'true'))
 
 
 if __name__ == "__main__":

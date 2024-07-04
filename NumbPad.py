@@ -26,15 +26,15 @@ class NumbPad(ctk.CTkToplevel):
 
         self.buttonArray.append(ButtonNumber(self, 3, 0, ".", entry))
 
-        self.buttonArray.append(ctk.CTkButton(self, text="DEL", border_width=3,
+        self.buttonArray.append(ctk.CTkButton(self, text="DEL", border_width=3, width=120,
                                               border_color="black", fg_color=infBlue,
                                               command=lambda: self.backspace(entry)))
-        self.buttonArray[12].grid(row=3, column=2, sticky="nsew")
+        self.buttonArray[12].grid(row=3, column=2)
         self.buttonArray[12].cget("font").configure(size=25)
 
-        self.buttonArray.append(ctk.CTkButton(self, text="ENTER", border_width=3,
+        self.buttonArray.append(ctk.CTkButton(self, text="ENTER", border_width=3, width=120,
                                               border_color="black", fg_color=infBlue, command=self.exit))
-        self.buttonArray[13].grid(row=0, column=3, rowspan=4, sticky="nsew")
+        self.buttonArray[13].grid(row=0, column=3, rowspan=4)
         self.buttonArray[13].cget("font").configure(size=25)
 
         self.value = ctk.StringVar()
@@ -68,9 +68,9 @@ class ButtonNumber(ctk.CTkButton):
         """
         Initializes a button for the numbpad
         """
-        super().__init__(master=master, text=text, border_width=3, border_color="black",
+        super().__init__(master=master, text=text, border_width=3, border_color="black", width=120,
                          fg_color=infBlue, command=lambda: self.button_clicked(entry), *args, **kwargs)
-        self.grid(row=row, column=col, sticky="nsew")
+        self.grid(row=row, column=col)
         self.cget("font").configure(size=32, weight="bold")
 
     def button_clicked(self, entry):
