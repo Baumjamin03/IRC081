@@ -6,6 +6,7 @@ from decimal import *
 import asyncio
 
 RESISTOR1G11 = Decimal("1.11E9")  # ohm
+RESISTOR1G02 = Decimal("1.02E9")
 SENSITIVITY = 29  # 1/mbar
 
 
@@ -48,6 +49,10 @@ class IRC081(usb_2408_2AO):
         self.factorAI6 = Decimal(factor_array[7])
         self.factorAI8 = Decimal(factor_array[8])
         self.factorAI9 = Decimal(factor_array[9])
+        self.factorIF0 = Decimal(factor_array[10])
+        self.factorIF1 = Decimal(factor_array[11])
+        self.factorIC0 = Decimal(factor_array[12])
+        self.factorIC1 = Decimal(factor_array[13])
         self.factorIEmission0 = Decimal(factor_array[14])
         self.factorIEmission1 = Decimal(factor_array[15])
         self.factorIIon0 = Decimal(factor_array[16])
@@ -74,6 +79,8 @@ class IRC081(usb_2408_2AO):
         self.uWehnelt = 0
         self.uDeflector = 0
         self.uFaraday = 0
+        self.iFaraday = 0
+        self.iCage = 0
         self.uCage = 0
         self.iFil = 0
         self.setEmission = 0
@@ -82,6 +89,7 @@ class IRC081(usb_2408_2AO):
         self.pressure = 0
         self.uEmission = 0
         self.uIon = 0
+        self.transmission = 0
 
     async def refresh_controller_data(self):
         """
@@ -98,10 +106,13 @@ class IRC081(usb_2408_2AO):
             self.iEmission = self.read_emission_curr()
             self.pressure = self.calculate_pressure_mbar()
             self.uEmission = self.set_emission_prop()
+            self.iFaraday = self.read_faraday_current()
+            self.iCage = self.read_cage_current()
+            self.transmission = self.get_faraday_current() / self.get_emission_current()
             print("ion: " + "{:.5e}".format(self.iCollector) + ", bias: " + "{:.5f}".format(self.uBias))
             print("iEm: " + "{:.5e}".format(self.iEmission) + ", uEm: " + "{:.5f}".format(self.uEmission))
             print(self.pressure)
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(0.25)
 
     def update_digital_output(self):
         """
@@ -171,8 +182,30 @@ class IRC081(usb_2408_2AO):
             value = (emission_voltage * Decimal("2e-5") * 10 + (bias_voltage / RESISTOR1G11)) * self.factorIEmission1
         else:
             value = (emission_voltage * Decimal("2e-5") + (bias_voltage / RESISTOR1G11)) * self.factorIEmission0
-        # print("emission volt: " + str(emission_voltage))
-        # print("emission ist: " + str(value))
+        return value
+
+    def read_faraday_current(self):
+        """
+        Reads and calculates faraday current.
+        """
+        voltage = Decimal(self.get_voltage(11))
+        faraday_voltage = self.get_voltage_faraday()
+        if self.bitE == 0:
+            value = (voltage * Decimal("1.98e-5") * 10 - (faraday_voltage / RESISTOR1G02)) * self.factorIF1
+        else:
+            value = (voltage * Decimal("1.98e-5") - (faraday_voltage / RESISTOR1G02)) * self.factorIF0
+        return value
+
+    def read_cage_current(self):
+        """
+        Reads and calculates cage current.
+        """
+        voltage = Decimal(self.get_voltage(10))
+        cage_voltage = self.get_voltage_cage()
+        if self.bitE == 0:
+            value = (voltage * Decimal("1.98e-5") * 10 - (cage_voltage / RESISTOR1G02)) * self.factorIC1
+        else:
+            value = (voltage * Decimal("1.98e-5") - (cage_voltage / RESISTOR1G02)) * self.factorIC0
         return value
 
     def read_ion_current(self):
@@ -312,3 +345,12 @@ class IRC081(usb_2408_2AO):
 
     def get_emission_voltage(self):
         return self.uEmission
+
+    def get_transmission(self):
+        return self.transmission
+
+    def get_faraday_current(self):
+        return self.iFaraday
+
+    def get_cage_current(self):
+        return self.iCage
