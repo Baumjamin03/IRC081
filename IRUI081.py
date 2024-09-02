@@ -82,7 +82,7 @@ class MainWindow(ctk.CTk):
 
     def shutdown(self):
         """
-        Executes on program termination. It resets the IRC081 Parameters and ends the RS232 communication.
+        Executes on program termination. It resets the IRC081 Parameters and ends the RS232 communication
         """
         self.irc081.measurement_end()
         self.RS232Listener.stop()
