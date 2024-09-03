@@ -135,7 +135,7 @@ class MainWindow(ctk.CTk):
         self.frameVoltages.iFil.value.set("{:.3f}".format(self.irc081.get_current_filament()))
 
         self.frameDaq.emissionDisplay.value.set("{:.5e}".format(self.irc081.get_emission_current()))
-        self.frameDaq.transmissionDisplay.value.set("{:.2e}".format(self.irc081.get_transmission()))
+        self.frameDaq.transmissionDisplay.value.set("{:.2}".format(self.irc081.get_transmission()))
 
         self.framePressure.pressure.set("{:.5e}".format(self.irc081.get_pressure_mbar()))
 

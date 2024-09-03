@@ -82,6 +82,7 @@ class DaqFrame(SubFrame):
         self.emissionDisplay.grid(sticky="nsew", padx=PADX, pady=PADY)
 
         self.transmissionDisplay = HorizontalValueDisplay(self, 2, 1, "Transmission:")
+        self.transmissionDisplay.grid(sticky="nsew", padx=PADX, pady=PADY)
 
         self.grid(padx=(PADX * 2, PADX))
         self.grid_columnconfigure(0, weight=1)

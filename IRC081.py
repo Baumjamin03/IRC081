@@ -108,7 +108,7 @@ class IRC081(usb_2408_2AO):
             self.uEmission = self.set_emission_prop()
             self.iFaraday = self.read_faraday_current()
             self.iCage = self.read_cage_current()
-            self.transmission = self.get_faraday_current() / self.get_emission_current()
+            self.transmission = (self.get_faraday_current() / self.get_emission_current()) * 100
             print("ion: " + "{:.5e}".format(self.iCollector) + ", bias: " + "{:.5f}".format(self.uBias))
             print("iEm: " + "{:.5e}".format(self.iEmission) + ", uEm: " + "{:.5f}".format(self.uEmission))
             print(self.pressure)
