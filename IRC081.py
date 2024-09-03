@@ -93,7 +93,7 @@ class IRC081(usb_2408_2AO):
 
     async def refresh_controller_data(self):
         """
-        Reads and Calculates measurement Data.
+        Reads and Calculates measurement Data
         """
         while not False:
             self.uBias = Decimal(self.get_voltage(5)) * Decimal(10.1) * self.factorAI5
