@@ -145,7 +145,7 @@ class MainWindow(ctk.CTk):
         """
         Calculates the output voltage in respect to the set range or auto range if enabled.
         Auto range will output twice the voltage it reads from the IColl (AI15) Analog Input.
-        Defaults to auto range if no values are provided.
+        Defaults to auto range if no values are provided
         """
         if self.frameAnalogOut.frameVoltageDisplay.check_var.get() or not (self.lowerRange and self.upperRange):
             voltage = self.irc081.get_ion_voltage() * 2
