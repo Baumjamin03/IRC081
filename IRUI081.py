@@ -124,7 +124,7 @@ class MainWindow(ctk.CTk):
 
     def update_values(self):
         """
-        Reads the Data from the IRC081 and Displays it
+        Reads the Data from the IRC081 and Displays it.
         """
 
         self.frameVoltages.uDeflector.value.set("{:.3f}".format(self.irc081.get_voltage_deflector()))
