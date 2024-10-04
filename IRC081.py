@@ -96,35 +96,38 @@ class IRC081(usb_2408_2AO):
         Reads and Calculates measurement Data
         """
         while not False:
-            self.uDeflector = Decimal(await self.get_voltage(0)) * Decimal(10.1) * self.factorAI0
-            self.uWehnelt = Decimal(await self.get_voltage(1)) * Decimal(10.1) * self.factorAI1
-            self.uFaraday = Decimal(await self.get_voltage(3)) * Decimal(51) * self.factorAI3
-            self.uBias = Decimal(await self.get_voltage(5)) * Decimal(10.1) * self.factorAI5
-            self.uCage = Decimal(await self.get_voltage(2)) * Decimal(51) * self.factorAI2
-            self.iFil = Decimal(await self.get_voltage(6)) * self.factorAI6
-            self.iCollector = await self.read_ion_current()
-            self.iEmission = await self.read_emission_curr()
-            self.uEmission = await self.set_emission_prop()
-            self.pressure = await self.calculate_pressure_mbar()
-            self.iFaraday = await self.read_faraday_current()
-            self.iCage = await self.read_cage_current()
+            self.uDeflector = Decimal(self.get_voltage(0)) * Decimal(10.1) * self.factorAI0
+            self.uWehnelt = Decimal(self.get_voltage(1)) * Decimal(10.1) * self.factorAI1
+            await asyncio.sleep(0.1)
+            self.uFaraday = Decimal(self.get_voltage(3)) * Decimal(51) * self.factorAI3
+            self.uBias = Decimal(self.get_voltage(5)) * Decimal(10.1) * self.factorAI5
+            self.uCage = Decimal(self.get_voltage(2)) * Decimal(51) * self.factorAI2
+            self.iFil = Decimal(self.get_voltage(6)) * self.factorAI6
+            await asyncio.sleep(0.1)
+            self.iCollector = self.read_ion_current()
+            self.iEmission = self.read_emission_curr()
+            self.uEmission = self.set_emission_prop()
+            self.pressure = self.calculate_pressure_mbar()
+            await asyncio.sleep(0.1)
+            self.iFaraday = self.read_faraday_current()
+            self.iCage = self.read_cage_current()
             self.transmission = (self.get_faraday_current() / self.get_emission_current()) * 100
             print("ion: " + "{:.5e}".format(self.iCollector) + ", bias: " + "{:.5f}".format(self.uBias))
             print("iEm: " + "{:.5e}".format(self.iEmission) + ", uEm: " + "{:.5f}".format(self.uEmission))
             print(self.pressure)
-            await asyncio.sleep(0.4)
+            await asyncio.sleep(0.1)
 
-    async def update_digital_output(self):
+    def update_digital_output(self):
         """
         Processes the Bits to a HEX-value for the Digital outputs.
         """
         output_value = ((self.bitA << 7) | (self.bitB << 6) | (self.bitC << 5) | (self.bitD << 4) | (self.bitE << 3) |
                         (self.bitF << 2) | (self.bitOn << 1))
         print("digital output: " + str(output_value))
-        await self.DOut(output_value)
+        self.DOut(output_value)
         return
 
-    async def ion_range_handler(self):
+    def ion_range_handler(self):
         """
         Processes the Range to set the respective bits.
         """
@@ -134,12 +137,12 @@ class IRC081(usb_2408_2AO):
         self.bitB = 1 - coll_range // 2
         coll_range = coll_range % 2
         self.bitA = 1 - coll_range
-        await self.update_digital_output()
+        self.update_digital_output()
         print("new range: " + str(self.ionRange))
         print("A: " + str(self.bitA) + " B: " + str(self.bitB) + " C: " + str(self.bitC))
         return
 
-    async def calculate_pressure_mbar(self):
+    def calculate_pressure_mbar(self):
         """
         Calculates the pressure from the ion current, emission current and sensitivity factor.
         """
@@ -172,11 +175,11 @@ class IRC081(usb_2408_2AO):
             print("current too big")
         return voltage
 
-    async def read_emission_curr(self):
+    def read_emission_curr(self):
         """
         Reads and calculates actual emission current.
         """
-        emission_voltage = Decimal(await self.get_voltage(13))
+        emission_voltage = Decimal(self.get_voltage(13))
         bias_voltage = self.get_voltage_bias()
         if self.bitE == 0:
             value = (emission_voltage * Decimal("2e-5") * 10 + (bias_voltage / RESISTOR1G11)) * self.factorIEmission1
@@ -184,11 +187,11 @@ class IRC081(usb_2408_2AO):
             value = (emission_voltage * Decimal("2e-5") + (bias_voltage / RESISTOR1G11)) * self.factorIEmission0
         return value
 
-    async def read_faraday_current(self):
+    def read_faraday_current(self):
         """
         Reads and calculates faraday current.
         """
-        voltage = Decimal(await self.get_voltage(11))
+        voltage = Decimal(self.get_voltage(11))
         faraday_voltage = self.get_voltage_faraday()
         if self.bitE == 0:
             value = (voltage * Decimal("1.98e-5") * 10 - (faraday_voltage / RESISTOR1G02)) * self.factorIF1
@@ -196,11 +199,11 @@ class IRC081(usb_2408_2AO):
             value = (voltage * Decimal("1.98e-5") - (faraday_voltage / RESISTOR1G02)) * self.factorIF0
         return value
 
-    async def read_cage_current(self):
+    def read_cage_current(self):
         """
         Reads and calculates cage current.
         """
-        voltage = Decimal(await self.get_voltage(10))
+        voltage = Decimal(self.get_voltage(10))
         cage_voltage = self.get_voltage_cage()
         if self.bitE == 0:
             value = (voltage * Decimal("1.98e-5") * 10 - (cage_voltage / RESISTOR1G02)) * self.factorIC1
@@ -208,11 +211,11 @@ class IRC081(usb_2408_2AO):
             value = (voltage * Decimal("1.98e-5") - (cage_voltage / RESISTOR1G02)) * self.factorIC0
         return value
 
-    async def read_ion_current(self):
+    def read_ion_current(self):
         """
         Reads and calculates ion current respective to the range.
         """
-        voltage = await self.get_voltage(15)
+        voltage = self.get_voltage(15)
         self.uIon = voltage
         print("u Ion: {:.5e}".format(voltage) + ", range: " + str(self.ionRange))
         current = 0
@@ -233,10 +236,10 @@ class IRC081(usb_2408_2AO):
 
         if (voltage > 4.5) and (self.ionRange > 0):
             self.ionRange = self.ionRange - 1
-            await self.ion_range_handler()
+            self.ion_range_handler()
         elif (voltage < 0.4) and (self.ionRange < 6):
             self.ionRange = self.ionRange + 1
-            await self.ion_range_handler()
+            self.ion_range_handler()
         # print("ion range: " + str(self.ionRange))
         # print("ion volts: " + str(voltage))
         # print("ion: " + str(current))
@@ -253,7 +256,7 @@ class IRC081(usb_2408_2AO):
         self.AOut(0, float(value))
         return
 
-    async def set_emission_current_should_100u(self, i_e_should):
+    def set_emission_current_should_100u(self, i_e_should):
         """
         Sets emission current in the 100uA range.
         """
@@ -262,11 +265,11 @@ class IRC081(usb_2408_2AO):
         value = ((i_e_should - (bias_voltage / RESISTOR1G11)) * (10 ** 5)) / self.factorIEmission0
         print("emission_current_should 100uA: " + str(value))
         self.bitE = 1
-        await self.update_digital_output()
-        await self.AOut(1, float(value))
+        self.update_digital_output()
+        self.AOut(1, float(value))
         return value
 
-    async def set_emission_current_should_1m(self, i_e_should):
+    def set_emission_current_should_1m(self, i_e_should):
         """
         Sets emission current in the 1mA range.
         """
@@ -275,27 +278,26 @@ class IRC081(usb_2408_2AO):
         value = ((i_e_should - (bias_voltage / RESISTOR1G11)) * (10 ** 4)) / self.factorIEmission1
         print("emission_current_should 1mA: " + str(value))
         self.bitE = 0
-        await self.update_digital_output()
-        await self.AOut(1, float(value))
+        self.update_digital_output()
+        self.AOut(1, float(value))
         return value
 
-    async def get_voltage(self, channel):
+    def get_voltage(self, channel):
         """
         Reads and return voltage of selected analog input channel (0-15).
         """
-        data, flags = await self.AIn(channel, self.measMode, self.measGain, self.measRate)
-        data = int(data * await self.Cal[self.measGain].slope + await self.Cal[self.measGain].intercept)
-        # await asyncio.sleep(0.02)
-        return await self.volts(self.measGain, data)
+        data, flags = self.AIn(channel, self.measMode, self.measGain, self.measRate)
+        data = int(data * self.Cal[self.measGain].slope + self.Cal[self.measGain].intercept)
+        return self.volts(self.measGain, data)
 
-    async def measurement_start(self):
+    def measurement_start(self):
         """
         Sets the Voltages for the IRG080 configured by the potentiometers on the IRC081.
         """
         print("start")
-        print("interlock < 2.5V = good: " + str(await self.get_voltage(4)))
+        print("interlock < 2.5V = good: " + str(self.get_voltage(4)))
         self.bitOn = 1
-        await self.update_digital_output()
+        self.update_digital_output()
         return
 
     def measurement_end(self):
