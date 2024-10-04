@@ -116,13 +116,6 @@ class TouchEntry(ctk.CTkEntry):
         self.after(50, lambda: self.numPad.wm_attributes('-fullscreen', 'true'))
 
 
-if __name__ == "__main__":
-    app = ctk.CTk()
-    app.geometry("1000x500")
-    tehe = TouchEntry(app, 0, 0, "hehe")
-    app.mainloop()
-
-
 class RangeEntry(BaseFrame):
     def __init__(self, master, row, col, title, pady=0, *args, **kwargs):
         """

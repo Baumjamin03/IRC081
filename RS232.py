@@ -1,10 +1,9 @@
-import serial
+from serial import Serial
 import threading
 import time
-from array import *
 
 
-class RS232Communication(serial.Serial):
+class RS232Communication(Serial):
     def __init__(self, port='/dev/ttyAMA10', baudrate=9600):
         """
         Initialize the RS232 communication object with the given port and baudrate.
