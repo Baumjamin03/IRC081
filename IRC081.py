@@ -1,9 +1,9 @@
 # Backend File for IRC081 raspi extension
 
 from usb_2400 import *  # https://github.com/wjasper/Linux_Drivers/tree/master/USB
-from GetCalibrationValues import *
 from decimal import *
 import asyncio
+import configparser
 
 RESISTOR1G11 = Decimal("1.11E9")  # ohm
 RESISTOR1G02 = Decimal("1.02E9")
@@ -355,3 +355,18 @@ class IRC081(usb_2408_2AO):
 
     def get_cage_current(self):
         return self.iCage
+
+
+def get_calibration_values(serial_number):
+    """
+    Inserts the calibration values by serial number into an array and returns it
+    """
+    # Set up Configparser
+    calibration_file = configparser.ConfigParser()
+    calibration_file.read('IRC081 Calibration.ini')
+    # Create output array , write values and return
+    output_array = []
+    for key in calibration_file[serial_number]:
+        key_value = calibration_file[serial_number][key]
+        output_array.append(key_value)
+    return output_array
