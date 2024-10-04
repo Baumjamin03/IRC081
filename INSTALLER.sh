@@ -12,10 +12,6 @@ echo "Updating package list and installing dependencies..."
 sudo apt update
 sudo apt install -y $DEPENDENCIES
 
-# Enable I2C
-echo "Enabling I2C..."
-sudo raspi-config nonint do_i2c 0
-
 # Clone the Git repository
 echo "Cloning the repository..."
 git clone $REPO_URL $CLONE_DIR

@@ -285,7 +285,7 @@ class IRC081(usb_2408_2AO):
         """
         data, flags = await self.AIn(channel, self.measMode, self.measGain, self.measRate)
         data = int(data * await self.Cal[self.measGain].slope + await self.Cal[self.measGain].intercept)
-        await asyncio.sleep(0.02)
+        # await asyncio.sleep(0.02)
         return await self.volts(self.measGain, data)
 
     async def measurement_start(self):
