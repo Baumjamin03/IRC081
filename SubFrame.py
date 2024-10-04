@@ -1,7 +1,6 @@
 # SubFrame class file
 from ValueDisplay import *
-from TouchEntry import TouchEntry
-from RangeEntry import RangeEntry
+from TouchEntry import TouchEntry, RangeEntry
 from GlobalVariables import *
 
 
