@@ -112,7 +112,7 @@ class IRC081(usb_2408_2AO):
             print("ion: " + "{:.5e}".format(self.iCollector) + ", bias: " + "{:.5f}".format(self.uBias))
             print("iEm: " + "{:.5e}".format(self.iEmission) + ", uEm: " + "{:.5f}".format(self.uEmission))
             print(self.pressure)
-            await asyncio.sleep(0.25)
+            await asyncio.sleep(0.2)
 
     async def update_digital_output(self):
         """
@@ -285,6 +285,7 @@ class IRC081(usb_2408_2AO):
         """
         data, flags = await self.AIn(channel, self.measMode, self.measGain, self.measRate)
         data = int(data * await self.Cal[self.measGain].slope + await self.Cal[self.measGain].intercept)
+        await asyncio.sleep(0.02)
         return await self.volts(self.measGain, data)
 
     def measurement_start(self):
