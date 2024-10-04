@@ -2,7 +2,7 @@
 
 # Define variables
 REPO_URL="https://github.com/Baumjamin03/IRC081.git"
-CLONE_DIR="/home/irc081-pi1/IRC081"
+CLONE_DIR="./IRC081"
 UDEV_RULE_FILE="61-mcc.rules"  # Name of the udev rules file in the repository
 DEST_UDEV_RULE_FILE="/etc/udev/rules.d"
 DEPENDENCIES="git python3 python3-pip python3-venv"  # Adding python3-venv to install venv

@@ -288,14 +288,14 @@ class IRC081(usb_2408_2AO):
         await asyncio.sleep(0.02)
         return await self.volts(self.measGain, data)
 
-    def measurement_start(self):
+    async def measurement_start(self):
         """
         Sets the Voltages for the IRG080 configured by the potentiometers on the IRC081.
         """
         print("start")
-        print("interlock < 2.5V = good: " + str(self.get_voltage(4)))
+        print("interlock < 2.5V = good: " + str(await self.get_voltage(4)))
         self.bitOn = 1
-        self.update_digital_output()
+        await self.update_digital_output()
         return
 
     def measurement_end(self):
