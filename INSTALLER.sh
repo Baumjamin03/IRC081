@@ -6,6 +6,7 @@ CLONE_DIR="./IRC081"
 UDEV_RULE_FILE="61-mcc.rules"
 DEST_UDEV_RULE_FILE="/etc/udev/rules.d"
 DEPENDENCIES="git python3 python3-pip python3-venv python3-tk python3-pil python3-pil.imagetk i2c-tools"
+MAIN_SCRIPT="IRUI081.py"  # Updated main script name
 
 # Create launcher script
 create_launcher() {
@@ -18,7 +19,7 @@ export PYTHONPATH="${PYTHONPATH}:/usr/lib/python3/dist-packages"
 
 cd /home/pi/IRC081
 source venv/bin/activate
-python3 your_main_script.py  # Replace with your actual script name
+python3 IRUI081.py
 EOL
     chmod +x launcher.sh
 }
@@ -112,6 +113,11 @@ sudo udevadm control --reload
 echo "Installation complete! The application will start automatically on next boot."
 echo "To start it now without rebooting, run: sudo systemctl start irc081.service"
 echo "To check status: sudo systemctl status irc081.service"
+
+# Verify main script exists
+if [ ! -f "$MAIN_SCRIPT" ]; then
+    echo "WARNING: $MAIN_SCRIPT not found in repository. Please verify the main script name."
+fi
 
 # Offer to reboot
 read -p "Would you like to reboot now? (y/n) " -n 1 -r
