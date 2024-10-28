@@ -59,7 +59,8 @@ class App(ctk.CTk):
             text_color="#5D74A1",
             command=command,
             fg_color="white",
-            hover_color=infBlue
+            hover_color=infBlue,
+            font=("Arial", 24, "bold")
         )
         button.grid(row=row, column=col, sticky="nsew")
         return button
@@ -79,6 +80,8 @@ class PageManager(BasePage):
         # Configure grid
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
+
+        self.add_page("Numpad", NumpadPage(self))
 
     def add_page(self, page_name, page):
         """Add a page to the manager"""
@@ -104,11 +107,15 @@ class PageManager(BasePage):
 
             self.lbl_page.configure(text=page_name)
 
+    def show_numpad(self, entry, caller_page):
+        self.pages["Numpad"].show(entry, caller_page)
+
 
 class NumericKeypad(ctk.CTkFrame):
     def __init__(self, master, entry_widget=None, **kwargs):
         super().__init__(master, **kwargs)
         self.entry_widget = entry_widget
+        self.master = master
 
         # Configure grid weights
         for i in range(4):
@@ -145,32 +152,33 @@ class NumericKeypad(ctk.CTkFrame):
                         command=lambda t=text: self.button_click(t)
                     )
                     btn.grid(row=i, column=j, padx=2, pady=2, sticky="nsew")
+                    if text == '↓':
+                        btn.grid(rowspan=2)
 
     def is_valid_number(self, value):
-        """Check if the resulting string would be a valid number"""
+        """Check if the resulting string would be a valid positive number (including zero)"""
         try:
-            if value.count('-') > 1:
-                return False
-            if value.count('.') > 1:
-                return False
-            if value.count('E') > 1:
-                return False
+
+            # Don't allow negative signs at all
+            if '-' in value:
+                for s in value.split('E'):
+                    if s.count('E') > 1:
+                        return False
+
+            # Check for valid scientific notation
             if 'E' in value:
-                base, exp = value.split('E')
-                if exp and exp[0] == '-':
-                    exp = exp[1:]
-                if base and base[0] == '-':
-                    base = base[1:]
-                base = base.replace('.', '')
-                if not all(c.isdigit() for c in base):
+                if value.count('E') > 1:
                     return False
-                if exp and not all(c.isdigit() for c in exp):
-                    return False
+
                 return True
 
-            if value == '' or value == '-' or value == '.' or value == '-.':
-                return True
-            float(value)
+            # For regular numbers
+            if value.count('.') > 1:
+                return False
+
+            # Convert to float and check if positive
+            # num = float(value)
+            # return num >= 0
             return True
         except ValueError:
             return False
@@ -184,6 +192,7 @@ class NumericKeypad(ctk.CTkFrame):
         if value == '⌫':
             new_value = current[:-1]
         elif value == '↓':
+            self.master.confirm()
             return
         else:
             if value == '-' and current:
@@ -202,11 +211,12 @@ class NumericKeypad(ctk.CTkFrame):
 
 
 class NumpadPage(BasePage):
-    def __init__(self, master, page_manager, **kwargs):
+    def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
-        self.page_manager = page_manager
+        self.page_manager = master
         self.target_entry = None
         self.original_value = None
+        self.og_page = None
 
         # Configure grid weights for main layout
         self.grid_columnconfigure(0, weight=1)
@@ -245,13 +255,14 @@ class NumpadPage(BasePage):
         )
         self.confirm_btn.grid(row=0, column=1, padx=5, pady=5, sticky="ew", rowspan=2)
 
-    def show(self, entry_widget):
+    def show(self, entry_widget, og_page_name):
         """Prepare and show the numpad page"""
         self.target_entry = entry_widget
+        self.og_page = og_page_name
         self.original_value = entry_widget.get()
         self.display.delete(0, 'end')
         self.display.insert(0, self.original_value)
-        self.page_manager.show_page("numpad")
+        self.page_manager.show_page("Numpad")
         self.display.focus()
 
     def confirm(self):
@@ -260,7 +271,6 @@ class NumpadPage(BasePage):
             self.target_entry.delete(0, 'end')
             self.target_entry.insert(0, self.display.get())
         self.cleanup()
-        self.page_manager.show_page("main")
 
     def cancel(self):
         """Cancel the entry and return to previous page"""
@@ -268,13 +278,14 @@ class NumpadPage(BasePage):
             self.target_entry.delete(0, 'end')
             self.target_entry.insert(0, self.original_value)
         self.cleanup()
-        self.page_manager.show_page("main")
 
     def cleanup(self):
         """Reset the numpad state"""
         self.target_entry = None
         self.original_value = None
         self.display.delete(0, 'end')
+        self.page_manager.show_page(self.og_page)
+        self.og_page = None
 
     def on_page_leave(self):
         """Called when switching away from numpad page"""
@@ -308,7 +319,10 @@ class HomePage(BasePage):
 
         self.emOn = StartButton(self.emFrame, text="", corner_radius=30, height=60, width=60, border_width=5,
                                 border_color="white", fg_color="green")
-        self.emOn.grid(row=0, column=0, sticky="nsew")
+        self.emOn.grid(row=0, column=0)
+
+        self.entryEmission = TouchEntry(self.emFrame, 1, 0)
+        self.entryEmission.bind("<Button-1>", lambda e: master.show_numpad(self.entryEmission, "Home"))
 
         self.pressFrame = ctk.CTkFrame(self, fg_color="white", corner_radius=10)
         self.pressFrame.grid(row=0, column=1, sticky="nsew", pady=30, padx=30)
@@ -338,6 +352,12 @@ class HomePage(BasePage):
 class StartButton(ctk.CTkButton):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
+
+
+class TouchEntry(ctk.CTkEntry):
+    def __init__(self, master, row, col, **kwargs):
+        super().__init__(master, height=40, **kwargs)
+        self.grid(row=row, column=col)
 
 
 class ValueDisplay(ctk.CTkFrame):
