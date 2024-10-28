@@ -9,7 +9,6 @@ txtColor = "white"
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
-        self.pages = {}
         self.configure(fg_color="white")
 
         self.geometry("800x480")
@@ -31,36 +30,25 @@ class App(ctk.CTk):
                                       fg_color=infBlue)
         self.lblStatus.grid(row=0, column=1, padx=70, sticky="nsew")
 
-        self.content_frame = ctk.CTkFrame(self, fg_color=infBlue, corner_radius=10)
+        self.content_frame = PageManager(self, self.lblPage)
         self.content_frame.grid(row=1, column=0, sticky="nsew", columnspan=3, padx=5)
 
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(1, weight=1)
 
-        self.pages["Home"] = HomePage(self.content_frame)
-        self.pages["Settings"] = SettingsPage(self.content_frame)
-        self.pages["Plot"] = PlotPage(self.content_frame)
-        self.pages["Info"] = InfoPage(self.content_frame)
-
-        # Place all pages in the same location in the content frame
-        for page in self.pages.values():
-            page.place(relwidth=1, relheight=1)
+        self.content_frame.add_page("Home", HomePage(self.content_frame))
+        self.content_frame.add_page("Settings", SettingsPage(self.content_frame))
+        self.content_frame.add_page("Plot", PlotPage(self.content_frame))
+        self.content_frame.add_page("Info", InfoPage(self.content_frame))
 
         self.corner_buttons = {
-            "top_left": self.create_corner_button("⚙️", 0, 0, lambda: self.show_page("Settings")),
-            "top_right": self.create_corner_button("👁️", 0, 2, lambda: self.show_page("Plot")),
-            "bottom_left": self.create_corner_button("👤", 2, 0, lambda: self.show_page("Home")),
-            "bottom_right": self.create_corner_button("🔍", 2, 2, lambda: self.show_page("Info"))
+            "top_left": self.create_corner_button("⚙️", 0, 0, lambda: self.content_frame.show_page("Settings")),
+            "top_right": self.create_corner_button("👁️", 0, 2, lambda: self.content_frame.show_page("Plot")),
+            "bottom_left": self.create_corner_button("👤", 2, 0, lambda: self.content_frame.show_page("Home")),
+            "bottom_right": self.create_corner_button("🔍", 2, 2, lambda: self.content_frame.show_page("Info"))
         }
         # Show the default page (Home)
-        self.show_page("Home")
-
-    def show_page(self, page_name: str):
-        """Show the selected page by lifting it to the front"""
-        page = self.pages.get(page_name)
-        if page:
-            self.lblPage.configure(text=page_name)
-            page.lift()
+        self.content_frame.show_page("Home")
 
     def create_corner_button(self, text: str, row: int, col: int, command) -> ctk.CTkButton:
         button = ctk.CTkButton(
@@ -78,8 +66,220 @@ class App(ctk.CTk):
 
 
 class BasePage(ctk.CTkFrame):
-    def __init__(self, master):
-        super().__init__(master, fg_color=infBlue, bg_color="white", corner_radius=10)
+    def __init__(self, master, **kwargs):
+        super().__init__(master, fg_color=infBlue, bg_color="white", corner_radius=10, **kwargs)
+
+
+class PageManager(BasePage):
+    def __init__(self, master, lbl_page, **kwargs):
+        super().__init__(master, **kwargs)
+        self.current_page = None
+        self.pages = {}
+        self.lbl_page = lbl_page
+        # Configure grid
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+    def add_page(self, page_name, page):
+        """Add a page to the manager"""
+        self.pages[page_name] = page
+        page.grid(row=0, column=0, sticky="nsew")
+        if not self.current_page:
+            self.current_page = page_name
+
+    def show_page(self, page_name):
+        """Switch to a specific page"""
+        if page_name in self.pages:
+            # Notify current page it's being hidden
+            if self.current_page and hasattr(self.pages[self.current_page], "on_page_leave"):
+                self.pages[self.current_page].on_page_leave()
+
+            # Show new page
+            self.pages[page_name].lift()
+            self.current_page = page_name
+
+            # Notify new page it's being shown
+            if hasattr(self.pages[page_name], "on_page_enter"):
+                self.pages[page_name].on_page_enter()
+
+            self.lbl_page.configure(text=page_name)
+
+
+class NumericKeypad(ctk.CTkFrame):
+    def __init__(self, master, entry_widget=None, **kwargs):
+        super().__init__(master, **kwargs)
+        self.entry_widget = entry_widget
+
+        # Configure grid weights
+        for i in range(4):
+            self.grid_rowconfigure(i, weight=1)
+            self.grid_columnconfigure(i, weight=1)
+
+        # Button styling
+        btn_font = ("Arial", 18)
+        btn_color = "#3B3B3B"
+        btn_hover_color = "#4D4D4D"
+        btn_width = 60
+        btn_height = 60
+
+        # Button layout
+        buttons = [
+            ['1', '2', '3', 'E'],
+            ['4', '5', '6', '⌫'],
+            ['7', '8', '9', '↓'],
+            ['-', '0', '.', None]
+        ]
+
+        # Create buttons
+        for i, row in enumerate(buttons):
+            for j, text in enumerate(row):
+                if text is not None:
+                    btn = ctk.CTkButton(
+                        self,
+                        text=text,
+                        font=btn_font,
+                        width=btn_width,
+                        height=btn_height,
+                        fg_color=btn_color,
+                        hover_color=btn_hover_color,
+                        command=lambda t=text: self.button_click(t)
+                    )
+                    btn.grid(row=i, column=j, padx=2, pady=2, sticky="nsew")
+
+    def is_valid_number(self, value):
+        """Check if the resulting string would be a valid number"""
+        try:
+            if value.count('-') > 1:
+                return False
+            if value.count('.') > 1:
+                return False
+            if value.count('E') > 1:
+                return False
+            if 'E' in value:
+                base, exp = value.split('E')
+                if exp and exp[0] == '-':
+                    exp = exp[1:]
+                if base and base[0] == '-':
+                    base = base[1:]
+                base = base.replace('.', '')
+                if not all(c.isdigit() for c in base):
+                    return False
+                if exp and not all(c.isdigit() for c in exp):
+                    return False
+                return True
+
+            if value == '' or value == '-' or value == '.' or value == '-.':
+                return True
+            float(value)
+            return True
+        except ValueError:
+            return False
+
+    def button_click(self, value):
+        if not self.entry_widget:
+            return
+
+        current = self.entry_widget.get()
+
+        if value == '⌫':
+            new_value = current[:-1]
+        elif value == '↓':
+            return
+        else:
+            if value == '-' and current:
+                return
+            if value == 'E':
+                if 'E' in current or not current:
+                    return
+            if value == '.' and '.' in current.split('E')[0]:
+                return
+
+            new_value = current + value
+
+        if self.is_valid_number(new_value) or new_value == "":
+            self.entry_widget.delete(0, 'end')
+            self.entry_widget.insert(0, new_value)
+
+
+class NumpadPage(BasePage):
+    def __init__(self, master, page_manager, **kwargs):
+        super().__init__(master, **kwargs)
+        self.page_manager = page_manager
+        self.target_entry = None
+        self.original_value = None
+
+        # Configure grid weights for main layout
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=0)  # Entry row
+        self.grid_rowconfigure(1, weight=1)  # Numpad row
+
+        # Entry display
+        self.display = ctk.CTkEntry(self, height=40, font=("Arial", 20))
+        self.display.grid(row=0, column=0, padx=10, pady=(10, 5), sticky="ew")
+
+        # Numpad frame
+        self.numpad = NumericKeypad(self, entry_widget=self.display)
+        self.numpad.grid(row=1, column=0, padx=10, pady=5)
+
+        # Buttons frame
+        self.button_frame = ctk.CTkFrame(self)
+        self.button_frame.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
+        self.button_frame.grid_columnconfigure((0, 1), weight=1)
+
+        # Cancel and Confirm buttons
+        self.cancel_btn = ctk.CTkButton(
+            self.button_frame,
+            text="Cancel",
+            command=self.cancel,
+            fg_color="#dc3545",
+            hover_color="#c82333"
+        )
+        self.cancel_btn.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
+
+        self.confirm_btn = ctk.CTkButton(
+            self.button_frame,
+            text="Confirm",
+            command=self.confirm,
+            fg_color="#28a745",
+            hover_color="#218838"
+        )
+        self.confirm_btn.grid(row=0, column=1, padx=5, pady=5, sticky="ew", rowspan=2)
+
+    def show(self, entry_widget):
+        """Prepare and show the numpad page"""
+        self.target_entry = entry_widget
+        self.original_value = entry_widget.get()
+        self.display.delete(0, 'end')
+        self.display.insert(0, self.original_value)
+        self.page_manager.show_page("numpad")
+        self.display.focus()
+
+    def confirm(self):
+        """Confirm the entered value and return to previous page"""
+        if self.target_entry:
+            self.target_entry.delete(0, 'end')
+            self.target_entry.insert(0, self.display.get())
+        self.cleanup()
+        self.page_manager.show_page("main")
+
+    def cancel(self):
+        """Cancel the entry and return to previous page"""
+        if self.target_entry and self.original_value is not None:
+            self.target_entry.delete(0, 'end')
+            self.target_entry.insert(0, self.original_value)
+        self.cleanup()
+        self.page_manager.show_page("main")
+
+    def cleanup(self):
+        """Reset the numpad state"""
+        self.target_entry = None
+        self.original_value = None
+        self.display.delete(0, 'end')
+
+    def on_page_leave(self):
+        """Called when switching away from numpad page"""
+        if self.target_entry:
+            self.cancel()
 
 
 class HomePage(BasePage):
@@ -106,6 +306,10 @@ class HomePage(BasePage):
         self.emFrame = ctk.CTkFrame(self, fg_color=infBlue)
         self.emFrame.grid(row=0, column=0)
 
+        self.emOn = StartButton(self.emFrame, text="", corner_radius=30, height=60, width=60, border_width=5,
+                                border_color="white", fg_color="green")
+        self.emOn.grid(row=0, column=0, sticky="nsew")
+
         self.pressFrame = ctk.CTkFrame(self, fg_color="white", corner_radius=10)
         self.pressFrame.grid(row=0, column=1, sticky="nsew", pady=30, padx=30)
         self.pressFrame.grid_columnconfigure(0, weight=1)
@@ -129,6 +333,11 @@ class HomePage(BasePage):
 
         ctk.CTkLabel(self.transmissionFrame, font=("Arial", 36, "bold"), text_color="black",
                      text="%", anchor="w", fg_color="white").grid(row=0, column=2, sticky="nsew")
+
+
+class StartButton(ctk.CTkButton):
+    def __init__(self, master, **kwargs):
+        super().__init__(master, **kwargs)
 
 
 class ValueDisplay(ctk.CTkFrame):
