@@ -27,7 +27,7 @@ class App(ctk.CTk):
         self.irc081 = None
         while self.irc081 is None:
 
-            break # important break for simulating GUI on a desktop
+            # break # important break for simulating GUI on a desktop
 
             try:
                 self.irc081 = IRC081()
