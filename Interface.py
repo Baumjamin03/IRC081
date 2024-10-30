@@ -1,6 +1,17 @@
 import customtkinter as ctk
 import tkinter as tk
-from PIL import Image, ImageTk
+from PIL import Image
+import asyncio
+from decimal import *
+from threading import Thread
+import time
+import atexit
+
+try:
+    from IRC081 import IRC081
+except OSError as e:
+    print(e)
+    print("Can only import IRC081 on a linux system")
 
 infBlue = "#24517F"
 txtColor = "white"
@@ -12,7 +23,29 @@ class App(ctk.CTk):
         self.configure(fg_color="white")
 
         self.geometry("800x480")
-        self.title("Control Interface")
+
+        self.irc081 = None
+        while self.irc081 is None:
+
+            break # important break for simulating GUI on a desktop
+
+            try:
+                self.irc081 = IRC081()
+                self.start_loop_in_thread(self.irc081.refresh_controller_data)
+                atexit.register(self.shutdown)
+            except OSError as e:
+                print("no IRC081 found, Error: " + str(e))
+                start_screen = ctk.CTk()
+                start_screen.geometry("400x200")
+                lbl_start = ctk.CTkLabel(start_screen, text="Please connect IRC081")
+                lbl_start.pack(pady=50)
+                start_screen.after(5000, start_screen.destroy)
+                start_screen.mainloop()
+                time.sleep(5)
+                # continue
+            break
+
+        self.running = False
 
         self.TitleBar = TrapezoidFrame(master=self, logo_path="./IFCN.SW_BIG.D.png")
         self.TitleBar.grid(row=0, column=1, sticky="nsew", pady=(0, 5))
@@ -36,7 +69,7 @@ class App(ctk.CTk):
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(1, weight=1)
 
-        self.content_frame.add_page("Home", HomePage(self.content_frame))
+        self.content_frame.add_page("Home", HomePage(self.content_frame, sw_event=self.switch_event))
         self.content_frame.add_page("Settings", SettingsPage(self.content_frame))
         self.content_frame.add_page("Plot", PlotPage(self.content_frame))
         self.content_frame.add_page("Info", InfoPage(self.content_frame))
@@ -49,6 +82,15 @@ class App(ctk.CTk):
         }
         # Show the default page (Home)
         self.content_frame.show_page("Home")
+
+    def shutdown(self):
+        """
+        Executes on program termination. It resets the IRC081 Parameters and ends the RS232 communication
+        """
+        if self.irc081 is not None:
+            self.irc081.measurement_end()
+        # self.RS232Listener.stop()
+        # self.com.close_port()
 
     def create_corner_button(self, text: str, row: int, col: int, command) -> ctk.CTkButton:
         button = ctk.CTkButton(
@@ -64,6 +106,195 @@ class App(ctk.CTk):
         )
         button.grid(row=row, column=col, sticky="nsew")
         return button
+
+    def switch_event(self):
+        """
+        Turns the IRG080 Measurements on/off.
+        """
+        if not self.running:
+            self.running = True
+            self.content_frame.pages["Home"].emOn.configure(fg_color="#3F7432")
+            self.set_emission_curr()
+            self.measurement_loop()
+            if self.irc081 is not None:
+                self.irc081.measurement_start()
+        else:
+            self.running = False
+            self.content_frame.pages["Home"].emOn.configure(fg_color="#BBD396")
+            print("measurement end")
+            if self.irc081 is not None:
+                self.irc081.measurement_end()
+
+    def set_emission_curr(self):
+        """
+        Sets the Emission current for the IRG080.
+        """
+        current = self.content_frame.pages["Home"].entryEmission.get()
+        print("i emission set: " + current)
+        if self.irc081 is not None:
+            try:
+                self.irc081.set_emission(Decimal(current))
+            except DecimalException as e:
+                print(str(e))
+                return "invalid value"
+            return None
+
+    def measurement_loop(self):
+        """
+        Calls itself and periodically updates measurement values.
+        """
+        if self.running:
+            if self.irc081 is not None:
+                self.update_values()
+                self.update_aout()
+            self.after(1000, self.measurement_loop)
+
+    def update_values(self):
+        """
+        Reads the Data from the IRC081 and Displays it.
+        """
+        self.content_frame.pages["Home"].Voltages["Wehnelt"].value.set(
+            "{:.3f}".format(self.irc081.get_voltage_wehnelt()))
+        self.content_frame.pages["Home"].Voltages["Cage"].value.set(
+            "{:.3f}".format(self.irc081.get_voltage_cage()))
+        self.content_frame.pages["Home"].Voltages["Faraday"].value.set(
+            "{:.3f}".format(self.irc081.get_voltage_faraday()))
+        self.content_frame.pages["Home"].Voltages["Bias"].value.set(
+            "{:.3f}".format(self.irc081.get_voltage_bias()))
+        self.content_frame.pages["Home"].Voltages["Deflector"].value.set(
+            "{:.3f}".format(self.irc081.get_voltage_deflector()))
+        self.content_frame.pages["Home"].Voltages["Filament"].value.set(
+            "{:.3f}".format(self.irc081.get_current_filament()))
+
+        self.content_frame.pages["Home"].pressure.set("{:.5e}".format(self.irc081.get_pressure_mbar()))
+        self.content_frame.pages["Home"].transmission.set("{:.2f}".format(self.irc081.get_transmission()))
+
+    def update_aout(self):
+        pass
+
+    def async_start_loop(self, loop: asyncio.AbstractEventLoop):
+        """
+        Target function for Thread
+        :param loop: asyncio eventloop
+        """
+        asyncio.set_event_loop(loop)
+        loop.run_forever()
+
+    def start_loop_in_thread(self, func):
+        """
+        Takes a function, creates an async Loop and runs it in a Thread
+        :param func: any function to be run in a separate Thread
+        """
+        loop = asyncio.new_event_loop()
+        loop_thread = Thread(target=self.async_start_loop, args=(loop,), daemon=True)
+        loop_thread.start()
+        asyncio.run_coroutine_threadsafe(func(), loop)
+
+    def handle_serial_data(self, data):
+        """
+        serial data handling for more information visit:
+        https://colla.inficon.com/display/VCRD/RS232+Protocoll
+        """
+        if data.endswith(b'\r') or data.endswith(b'\n'):
+            data = data[:len(data) - 1]
+        response = data + b'\r\n'
+
+        if len(data) < 2:
+            return response + b'Error, cmd too short\r\n'
+
+        command_code = data[:2]
+        print("command: " + str(command_code))
+
+        writing = False
+        value = None
+        if len(data) > 2:
+            writing = data[2:3] == b';'
+            if not writing:
+                return response + b'cmd too long or invalid writing operator\r\n'
+            value = data[3:].decode()
+
+        if command_code == b'AL':  # Analogue range lower
+            if writing:
+                if 'E-' in value:
+                    try:
+                        factor, exp = value.split('E-')
+                        self.frameAnalogOut.entryLowerRange.entry.delete(0, ctk.END)
+                        self.frameAnalogOut.entryLowerRange.entry.insert(0, factor)
+                        self.frameAnalogOut.entryLowerRange.expEntry.delete(0, ctk.END)
+                        self.frameAnalogOut.entryLowerRange.expEntry.insert(0, exp)
+                        self.set_range()
+                    except ValueError:
+                        response += b'value Error'
+                else:
+                    response += b'missing [E-]'
+            else:
+                response += str(self.lowerRange).encode()
+        elif command_code == b'AU':  # Analogue range upper
+            if writing:
+                if 'E-' in value:
+                    try:
+                        factor, exp = value.split('E-')
+                        self.frameAnalogOut.entryUpperRange.entry.delete(0, ctk.END)
+                        self.frameAnalogOut.entryUpperRange.entry.insert(0, factor)
+                        self.frameAnalogOut.entryUpperRange.expEntry.delete(0, ctk.END)
+                        self.frameAnalogOut.entryUpperRange.expEntry.insert(0, exp)
+                        self.set_range()
+                    except ValueError:
+                        response += b'value Error'
+                else:
+                    response += b'missing [E-]'
+            else:
+                response += str(self.upperRange).encode()
+        elif command_code == b'AA':  # Analogue Autorange
+            if writing:
+                if value == "1":
+                    self.frameDaq.switch_var.set(True)
+                else:
+                    self.frameDaq.switch_var.set(False)
+            else:
+                response += str(self.frameAnalogOut.frameVoltageDisplay.check_var.get()).encode()
+        elif command_code == b'AV':  # Analogue Voltage
+            response += str(self.frameAnalogOut.frameVoltageDisplay.value.get()).encode()
+        elif command_code == b'EC':  # Emission current
+            if writing:
+                self.content_frame.pages["Home"].entryEmission.delete(0, ctk.END)
+                self.content_frame.pages["Home"].entryEmission.insert(0, value)
+                answ = self.set_emission_curr()
+                if answ is not None:
+                    response += answ
+            else:
+                response += str(self.content_frame.pages["Home"].entryEmission.get()).encode()
+        elif command_code == b'ME':  # Measurement on/off
+            if writing:
+                if value == "1":
+                    if not self.running:
+                        self.switch_event()
+                else:
+                    if self.running:
+                        self.switch_event()
+            else:
+                response += self.running
+        elif command_code == b'VW':  # Get Voltage Wehnelt
+            response += str(self.content_frame.pages["Home"].Voltages["Wehnelt"].value.get()).encode()
+        elif command_code == b'VC':  # Get Voltage Cage
+            response += str(self.content_frame.pages["Home"].Voltages["Cage"].value.get()).encode()
+        elif command_code == b'VF':  # Get Voltage Faraday
+            response += str(self.content_frame.pages["Home"].Voltages["Faraday"].value.get()).encode()
+        elif command_code == b'VB':  # Get Voltage Bias
+            response += str(self.content_frame.pages["Home"].Voltages["Bias"].value.get()).encode()
+        elif command_code == b'VD':  # Get Voltage Deflector
+            response += str(self.content_frame.pages["Home"].Voltages["Deflector"].value.get()).encode()
+        elif command_code == b'IF':  # Get Filament Current
+            response += str(self.content_frame.pages["Home"].Voltages["Current"].value.get()).encode()
+        elif command_code == b'PR':  # Get Pressure
+            response += str(self.content_frame.pages["Home"].pressure.get()).encode()
+        else:
+            response += b'unknown command'
+
+        if response.endswith(b'\r\n'):
+            return response
+        else:
+            return response + b'\r\n'
 
 
 class BasePage(ctk.CTkFrame):
@@ -155,32 +386,31 @@ class NumericKeypad(ctk.CTkFrame):
                     if text == '↓':
                         btn.grid(rowspan=2)
 
-    def is_valid_number(self, value):
+    def is_valid_number(self, value: str):
         """Check if the resulting string would be a valid positive number (including zero)"""
         try:
 
             # Don't allow negative signs at all
             if '-' in value:
-                for s in value.split('E'):
-                    if s.count('E') > 1:
-                        return False
+                if 'E' in value:
+                    for s in value.split('E'):
+                        if s.count('-') > 1:
+                            return False
+                elif value.count('-') > 1:
+                    return False
 
             # Check for valid scientific notation
             if 'E' in value:
                 if value.count('E') > 1:
                     return False
 
-                return True
+            for s in value.split('E'):
+                if s.count('.') > 1:
+                    return False
 
-            # For regular numbers
-            if value.count('.') > 1:
-                return False
-
-            # Convert to float and check if positive
-            # num = float(value)
-            # return num >= 0
             return True
-        except ValueError:
+        except ValueError as er:
+            print(er)
             return False
 
     def button_click(self, value):
@@ -195,14 +425,6 @@ class NumericKeypad(ctk.CTkFrame):
             self.master.confirm()
             return
         else:
-            if value == '-' and current:
-                return
-            if value == 'E':
-                if 'E' in current or not current:
-                    return
-            if value == '.' and '.' in current.split('E')[0]:
-                return
-
             new_value = current + value
 
         if self.is_valid_number(new_value) or new_value == "":
@@ -267,6 +489,13 @@ class NumpadPage(BasePage):
 
     def confirm(self):
         """Confirm the entered value and return to previous page"""
+        new_value = self.display.get()
+        try:
+            Decimal(new_value)
+        except DecimalException as ex:
+            print(ex)
+            return
+
         if self.target_entry:
             self.target_entry.delete(0, 'end')
             self.target_entry.insert(0, self.display.get())
@@ -294,7 +523,7 @@ class NumpadPage(BasePage):
 
 
 class HomePage(BasePage):
-    def __init__(self, master):
+    def __init__(self, master, sw_event):
         super().__init__(master)
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure((0, 1), weight=1)
@@ -318,11 +547,16 @@ class HomePage(BasePage):
         self.emFrame.grid(row=0, column=0)
 
         self.emOn = StartButton(self.emFrame, text="", corner_radius=30, height=60, width=60, border_width=5,
-                                border_color="white", fg_color="green")
+                                border_color="white", fg_color="#BBD396", command=sw_event, hover=False)
         self.emOn.grid(row=0, column=0)
 
-        self.entryEmission = TouchEntry(self.emFrame, 1, 0)
-        self.entryEmission.bind("<Button-1>", lambda e: master.show_numpad(self.entryEmission, "Home"))
+        self.lblEmission = ctk.CTkLabel(self.emFrame, text="Emission in uA:", font=("Arial", 18, "bold"))
+        self.lblEmission.grid(row=1, column=0, pady=(10, 0))
+
+        self.entryEmission = TouchEntry(self.emFrame, 2, 0, font=("Arial", 18, "normal"))
+        self.entryEmission.insert(0, "30")
+        self.entryEmission.bind("<Button-1>", lambda event: master.show_numpad(self.entryEmission, "Home"))
+        self.entryEmission.grid(sticky="ew")
 
         self.pressFrame = ctk.CTkFrame(self, fg_color="white", corner_radius=10)
         self.pressFrame.grid(row=0, column=1, sticky="nsew", pady=30, padx=30)
@@ -355,9 +589,9 @@ class StartButton(ctk.CTkButton):
 
 
 class TouchEntry(ctk.CTkEntry):
-    def __init__(self, master, row, col, **kwargs):
-        super().__init__(master, height=40, **kwargs)
-        self.grid(row=row, column=col)
+    def __init__(self, master, row, col, pady=5, **kwargs):
+        super().__init__(master, height=50, justify="center", **kwargs)
+        self.grid(row=row, column=col, pady=pady)
 
 
 class ValueDisplay(ctk.CTkFrame):

@@ -163,7 +163,7 @@ class IRC081(usb_2408_2AO):
         Returns voltage level
         """
         current = self.setEmission
-        if (current == 0) or (current is None) or (current is ""):
+        if (current == 0) or (current is None) or (current == ""):
             current = Decimal(30)
         emission_current = Decimal(current)
         voltage = 0

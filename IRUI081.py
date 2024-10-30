@@ -32,7 +32,7 @@ class MainWindow(ctk.CTk):
                 lbl_start.pack(pady=50)
                 start_screen.after(5000, start_screen.destroy)
                 start_screen.mainloop()
-                time.sleep(0.1)
+                time.sleep(5)
                 # continue
             break
 
