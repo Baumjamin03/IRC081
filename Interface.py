@@ -27,7 +27,7 @@ class App(ctk.CTk):
         self.irc081 = None
         while self.irc081 is None:
 
-            break  # important break for simulating GUI on a desktop
+            #break  # important break for simulating GUI on a desktop
 
             try:
                 self.irc081 = IRC081()
@@ -716,5 +716,5 @@ class TrapezoidFrame(ctk.CTkFrame):
 
 if __name__ == "__main__":
     root = App()
-    # root.after(500, lambda: root.wm_attributes('-fullscreen', 'true'))
+    root.after(500, lambda: root.wm_attributes('-fullscreen', 'true'))
     root.mainloop()
