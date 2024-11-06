@@ -82,6 +82,9 @@ echo "Configuring I2C and Serial interfaces..."
 configure_interfaces
 
 echo "Cloning the repository..."
+if [ -d "$CLONE_DIR" ]; then
+    rm -rf "$CLONE_DIR"
+fi
 git clone -b Interface2.0 $REPO_URL $CLONE_DIR
 cd $CLONE_DIR || exit
 

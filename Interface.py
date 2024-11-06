@@ -35,8 +35,8 @@ class App(ctk.CTk):
                 self.irc081 = IRC081()
                 self.start_loop_in_thread(self.irc081.refresh_controller_data)
                 atexit.register(self.shutdown)
-            except OSError as e:
-                print("no IRC081 found, Error: " + str(e))
+            except OSError as er:
+                print("no IRC081 found, Error: " + str(er))
                 start_screen = ctk.CTk()
                 start_screen.geometry("400x200")
                 lbl_start = ctk.CTkLabel(start_screen, text="Please connect IRC081")
@@ -69,8 +69,8 @@ class App(ctk.CTk):
 
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, minsize=50)  # Ensure TitleBar row height
-        self.grid_rowconfigure(2, minsize=50)  # Ensure NavBar row height
         self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(2, minsize=50)  # Ensure NavBar row height
 
         self.content_frame.add_page("Home", HomePage(self.content_frame, sw_event=self.switch_event))
         self.content_frame.add_page("Settings", SettingsPage(self.content_frame))
@@ -138,8 +138,8 @@ class App(ctk.CTk):
         if self.irc081 is not None:
             try:
                 self.irc081.set_emission(Decimal(current))
-            except DecimalException as e:
-                print(str(e))
+            except DecimalException as er:
+                print(str(er))
                 return "invalid value"
             return None
 
@@ -148,10 +148,10 @@ class App(ctk.CTk):
         Calls itself and periodically updates measurement values.
         """
         if self.running:
+            self.after(1000, self.measurement_loop)
             if self.irc081 is not None:
                 self.update_values()
                 self.update_aout()
-            self.after(1000, self.measurement_loop)
 
     def update_values(self):
         """
