@@ -68,8 +68,8 @@ class App(ctk.CTk):
         self.content_frame.grid(row=1, column=0, sticky="nsew", columnspan=3, padx=5)
 
         self.grid_columnconfigure(1, weight=1)
-        self.grid_rowconfigure(0, minsize=60)  # Ensure TitleBar row height
-        self.grid_rowconfigure(2, minsize=60)  # Ensure NavBar row height
+        self.grid_rowconfigure(0, minsize=50)  # Ensure TitleBar row height
+        self.grid_rowconfigure(2, minsize=50)  # Ensure NavBar row height
         self.grid_rowconfigure(1, weight=1)
 
         self.content_frame.add_page("Home", HomePage(self.content_frame, sw_event=self.switch_event))
