@@ -6,6 +6,7 @@ from decimal import *
 from threading import Thread
 import time
 import atexit
+import platform
 
 try:
     from IRC081 import IRC081
@@ -27,7 +28,8 @@ class App(ctk.CTk):
         self.irc081 = None
         while self.irc081 is None:
 
-            #break  # important break for simulating GUI on a desktop
+            if platform.system() == "Windows":
+                break  # important break for simulating GUI on a desktop
 
             try:
                 self.irc081 = IRC081()
@@ -53,11 +55,10 @@ class App(ctk.CTk):
         self.NavBar = TrapezoidFrame(master=self, height=50, invert=True)
         self.NavBar.grid(row=2, column=1, sticky="nsew", pady=(5, 0))
         self.NavBar.grid_rowconfigure(0, weight=1)
-        self.NavBar.grid_columnconfigure(0, weight=1)
 
         self.lblPage = ctk.CTkLabel(self.NavBar, text_color="white", text="", fg_color=infBlue,
                                     font=("Arial", 18, "bold"), bg_color=infBlue, justify="center")
-        self.lblPage.grid(row=0, column=0, padx=150, sticky="nsew")
+        self.lblPage.pack(anchor="center", expand=True)
 
         # self.lblStatus = ctk.CTkLabel(self.NavBar, text="OFF", anchor="e", text_color="white", bg_color=infBlue,
         #                               font=("Arial", 18, "bold"), width=100, fg_color=infBlue)
@@ -67,8 +68,8 @@ class App(ctk.CTk):
         self.content_frame.grid(row=1, column=0, sticky="nsew", columnspan=3, padx=5)
 
         self.grid_columnconfigure(1, weight=1)
-        self.grid_rowconfigure(0, minsize=70)  # Ensure TitleBar row height
-        self.grid_rowconfigure(2, minsize=70)  # Ensure NavBar row height
+        self.grid_rowconfigure(0, minsize=60)  # Ensure TitleBar row height
+        self.grid_rowconfigure(2, minsize=60)  # Ensure NavBar row height
         self.grid_rowconfigure(1, weight=1)
 
         self.content_frame.add_page("Home", HomePage(self.content_frame, sw_event=self.switch_event))
@@ -716,5 +717,6 @@ class TrapezoidFrame(ctk.CTkFrame):
 
 if __name__ == "__main__":
     root = App()
-    root.after(500, lambda: root.wm_attributes('-fullscreen', 'true'))
+    if platform.system() != "Windows":
+        root.after(500, lambda: root.wm_attributes('-fullscreen', 'true'))
     root.mainloop()
