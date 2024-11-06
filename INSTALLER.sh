@@ -5,8 +5,8 @@ REPO_URL="https://github.com/Baumjamin03/IRC081.git"
 CLONE_DIR="./IRC081"
 UDEV_RULE_FILE="61-mcc.rules"
 DEST_UDEV_RULE_FILE="/etc/udev/rules.d"
-DEPENDENCIES="git python3 python3-pip python3-venv python3-tk python3-pil python3-pil.imagetk i2c-tools"
-MAIN_SCRIPT="IRUI081.py"  # Updated main script name
+DEPENDENCIES="git python3 python3-pip python3-venv python3-tk python3-pil python3-pil.imagetk i2c-tools libjpeg-dev zlib1g-dev libpng-dev libfreetype6-dev"
+MAIN_SCRIPT="Interface.py"  # Updated main script name
 
 # Create launcher script
 create_launcher() {
@@ -28,7 +28,7 @@ EOL
 create_service() {
     sudo bash -c 'cat > /etc/systemd/system/irc081.service << EOL
 [Unit]
-Description=IRC081 Python Application
+Description=IRC081 Application
 After=network.target graphical.target
 
 [Service]
@@ -42,6 +42,9 @@ RestartSec=10
 Type=simple
 KillMode=process
 TimeoutStopSec=20
+
+StandardOutput=append:./irc081.log
+StandardError=append:./irc081.log
 
 [Install]
 WantedBy=graphical.target
@@ -83,6 +86,8 @@ python3 -m venv venv
 
 echo "Activating the virtual environment..."
 source venv/bin/activate
+
+pip install --upgrade pip setuptools wheel
 
 if [ -f "requirements.txt" ]; then
     echo "Installing Python dependencies in the virtual environment..."
