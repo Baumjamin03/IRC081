@@ -47,10 +47,10 @@ class App(ctk.CTk):
 
         self.running = False
 
-        self.TitleBar = TrapezoidFrame(master=self, logo_path="./IFCN.SW_BIG.D.png")
+        self.TitleBar = TrapezoidFrame(master=self, logo_path="./IFCN.SW_BIG.D.png", height=60)
         self.TitleBar.grid(row=0, column=1, sticky="nsew", pady=(0, 5))
 
-        self.NavBar = TrapezoidFrame(master=self, height=30, invert=True)
+        self.NavBar = TrapezoidFrame(master=self, height=60, invert=True)
         self.NavBar.grid(row=2, column=1, sticky="nsew", pady=(5, 0))
         self.NavBar.grid_rowconfigure(0, weight=1)
         self.NavBar.grid_columnconfigure((0, 1), weight=1)
@@ -67,6 +67,8 @@ class App(ctk.CTk):
         self.content_frame.grid(row=1, column=0, sticky="nsew", columnspan=3, padx=5)
 
         self.grid_columnconfigure(1, weight=1)
+        self.grid_rowconfigure(0, minsize=90)  # Ensure TitleBar row height
+        self.grid_rowconfigure(2, minsize=90)  # Ensure NavBar row height
         self.grid_rowconfigure(1, weight=1)
 
         self.content_frame.add_page("Home", HomePage(self.content_frame, sw_event=self.switch_event))
