@@ -54,7 +54,8 @@ configure_interfaces() {
     sudo raspi-config nonint do_i2c 0
 
     # Enable Serial
-    sudo raspi-config nonint do_serial 0
+    sudo raspi-config nonint do_serial_hw 0
+    sudo raspi-config nonint do_serial_cons 1
 
     # Add modules to /etc/modules
     if ! grep -q "i2c-dev" /etc/modules; then
