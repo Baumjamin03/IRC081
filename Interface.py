@@ -33,7 +33,6 @@ class App(ctk.CTk):
 
             try:
                 self.irc081 = IRC081()
-                self.start_loop_in_thread(self.irc081.refresh_controller_data)
                 atexit.register(self.shutdown)
             except OSError as er:
                 print("no IRC081 found, Error: " + str(er))
@@ -85,6 +84,9 @@ class App(ctk.CTk):
         }
         # Show the default page (Home)
         self.content_frame.show_page("Home")
+
+        if self.irc081 is not None:
+            self.start_loop_in_thread(self.irc081.refresh_controller_data)
 
     def shutdown(self):
         """
