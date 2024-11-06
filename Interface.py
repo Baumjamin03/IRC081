@@ -52,7 +52,7 @@ class App(ctk.CTk):
         self.TitleBar.grid(row=0, column=1, sticky="nsew", pady=(0, 5))
 
         self.NavBar = TrapezoidFrame(master=self, height=50, invert=True)
-        self.NavBar.grid(row=2, column=1, sticky="nsew", pady=(5, 0))
+        self.NavBar.grid(row=2, column=1, sticky="nsew", pady=(5, 0), padx=1)
         self.NavBar.grid_rowconfigure(0, weight=1)
 
         self.lblPage = ctk.CTkLabel(self.NavBar, text_color="white", text="", fg_color=infBlue,
@@ -67,9 +67,9 @@ class App(ctk.CTk):
         self.content_frame.grid(row=1, column=0, sticky="nsew", columnspan=3, padx=5)
 
         self.grid_columnconfigure(1, weight=1)
-        self.grid_rowconfigure(0, minsize=50)  # Ensure TitleBar row height
+        self.grid_rowconfigure(0, minsize=55)  # Ensure TitleBar row height
         self.grid_rowconfigure(1, weight=1)
-        self.grid_rowconfigure(2, minsize=50)  # Ensure NavBar row height
+        self.grid_rowconfigure(2, minsize=55)  # Ensure NavBar row height
 
         self.content_frame.add_page("Home", HomePage(self.content_frame, sw_event=self.switch_event))
         self.content_frame.add_page("Settings", SettingsPage(self.content_frame))
@@ -108,10 +108,8 @@ class App(ctk.CTk):
             command=command,
             fg_color="white",
             hover_color=infBlue,
-
         )
         button.grid(row=row, column=col, sticky="nsew")
-        button.lift()
         return button
 
     def switch_event(self):
@@ -722,5 +720,5 @@ class TrapezoidFrame(ctk.CTkFrame):
 if __name__ == "__main__":
     root = App()
     if platform.system() != "Windows":
-        root.after(500, lambda: root.wm_attributes('-fullscreen', 'true'))
+        root.after(2500, lambda: root.wm_attributes('-fullscreen', 'true'))
     root.mainloop()
