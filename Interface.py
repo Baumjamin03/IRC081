@@ -23,7 +23,7 @@ class App(ctk.CTk):
         super().__init__()
         self.configure(fg_color="white")
 
-        self.geometry("800x480")
+        self.geometry("600x280")
 
         self.irc081 = None
         while self.irc081 is None:
@@ -720,5 +720,5 @@ class TrapezoidFrame(ctk.CTkFrame):
 if __name__ == "__main__":
     root = App()
     if platform.system() != "Windows":
-        root.after(2500, lambda: root.wm_attributes('-fullscreen', 'true'))
+        root.after(500, lambda: root.wm_attributes('-fullscreen', 'true'))
     root.mainloop()
