@@ -157,7 +157,7 @@ class IRC081(usb_2408_2AO):
         """
         self.setEmission = curr
 
-    async def set_emission_prop(self):
+    def set_emission_prop(self):
         """
         Calculates and sets the voltage level corresponding to the set emission current.
         Returns voltage level
@@ -168,9 +168,9 @@ class IRC081(usb_2408_2AO):
         emission_current = Decimal(current)
         voltage = 0
         if emission_current < 100:
-            voltage = await self.set_emission_current_should_100u(emission_current)
+            voltage = self.set_emission_current_should_100u(emission_current)
         elif emission_current < 1000:
-            voltage = await self.set_emission_current_should_1m(emission_current)
+            voltage = self.set_emission_current_should_1m(emission_current)
         else:
             print("current too big")
         return voltage
