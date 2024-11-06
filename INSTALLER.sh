@@ -8,47 +8,51 @@ DEST_UDEV_RULE_FILE="/etc/udev/rules.d"
 DEPENDENCIES="git python3 python3-pip python3-venv python3-tk python3-pil python3-pil.imagetk i2c-tools libjpeg-dev zlib1g-dev libpng-dev libfreetype6-dev"
 MAIN_SCRIPT="Interface.py"  # Updated main script name
 
-# Create launcher script
+# Get the current username
+USER_NAME=$(whoami)
+
+# Function to create launcher script
 create_launcher() {
-    cat > launcher.sh << 'EOL'
+    cat > launcher.sh << EOL
 #!/bin/bash
 sleep 10
 export DISPLAY=:0
-export XAUTHORITY=/home/pi/.Xauthority
-export PYTHONPATH="${PYTHONPATH}:/usr/lib/python3/dist-packages"
+export XAUTHORITY=/home/$USER_NAME/.Xauthority
+export PYTHONPATH="\${PYTHONPATH}:/usr/lib/python3/dist-packages"
 
-cd /home/pi/IRC081
+cd /home/$USER_NAME/IRC081
 source venv/bin/activate
 python3 IRUI081.py
 EOL
     chmod +x launcher.sh
 }
 
-# Create systemd service
+# Function to create systemd service with dynamic username and logging
 create_service() {
-    sudo bash -c 'cat > /etc/systemd/system/irc081.service << EOL
+    sudo bash -c "cat > /etc/systemd/system/irc081.service << EOL
 [Unit]
-Description=IRC081 Application
+Description=IRC081 Python Application
 After=network.target graphical.target
 
 [Service]
 Environment=DISPLAY=:0
-Environment=XAUTHORITY=/home/pi/.Xauthority
-User=pi
-Group=pi
-ExecStart=/home/pi/IRC081/launcher.sh
+Environment=XAUTHORITY=/home/$USER_NAME/.Xauthority
+User=$USER_NAME
+Group=$USER_NAME
+ExecStart=/home/$USER_NAME/IRC081/launcher.sh
 Restart=always
 RestartSec=10
 Type=simple
 KillMode=process
 TimeoutStopSec=20
 
-StandardOutput=append:./irc081.log
-StandardError=append:./irc081.log
+# Logging setup
+StandardOutput=append:/home/$USER_NAME/IRC081/irc081.log
+StandardError=append:/home/$USER_NAME/IRC081/irc081.log
 
 [Install]
 WantedBy=graphical.target
-EOL'
+EOL"
 }
 
 # Enable I2C and Serial
@@ -110,8 +114,8 @@ sudo systemctl daemon-reload
 sudo systemctl enable irc081.service
 
 echo "Setting up X server permissions..."
-echo "xhost +local:pi" >> ~/.bashrc
-xhost +local:pi
+echo "xhost +local:$USER_NAME" >> ~/.bashrc
+xhost +local:$USER_NAME
 
 echo "Reloading udev rules..."
 sudo udevadm control --reload
