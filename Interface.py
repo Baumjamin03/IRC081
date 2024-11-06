@@ -148,6 +148,7 @@ class App(ctk.CTk):
         Calls itself and periodically updates measurement values.
         """
         if self.running:
+            print("going strong!")
             self.after(1000, self.measurement_loop)
             if self.irc081 is not None:
                 self.update_values()
