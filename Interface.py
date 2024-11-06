@@ -714,5 +714,5 @@ class TrapezoidFrame(ctk.CTkFrame):
 
 if __name__ == "__main__":
     root = App()
-    # root.after(500, lambda: root.wm_attributes('-fullscreen', 'true'))
+    root.after(500, lambda: root.wm_attributes('-fullscreen', 'true'))
     root.mainloop()
