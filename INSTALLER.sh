@@ -74,7 +74,7 @@ echo "Configuring I2C and Serial interfaces..."
 configure_interfaces
 
 echo "Cloning the repository..."
-git clone $REPO_URL $CLONE_DIR
+git clone -b Interface2.0 $REPO_URL $CLONE_DIR
 cd $CLONE_DIR || exit
 
 echo "Creating a virtual environment..."
