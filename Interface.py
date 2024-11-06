@@ -86,6 +86,7 @@ class App(ctk.CTk):
         self.content_frame.show_page("Home")
 
         if self.irc081 is not None:
+            print("starting meas. thread")
             self.start_loop_in_thread(self.irc081.refresh_controller_data)
 
     def shutdown(self):
@@ -150,7 +151,6 @@ class App(ctk.CTk):
         Calls itself and periodically updates measurement values.
         """
         if self.running:
-            print("going strong!")
             self.after(1000, self.measurement_loop)
             if self.irc081 is not None:
                 self.update_values()

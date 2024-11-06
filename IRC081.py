@@ -304,7 +304,6 @@ class IRC081(usb_2408_2AO):
         """
         Resets IRC081 digital outputs and emission current.
         """
-        print("measurement end")
         self.bitA = 1
         self.bitB = 1
         self.bitC = 1
