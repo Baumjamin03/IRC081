@@ -27,7 +27,7 @@ class App(ctk.CTk):
         self.irc081 = None
         while self.irc081 is None:
 
-            # break # important break for simulating GUI on a desktop
+            break # important break for simulating GUI on a desktop
 
             try:
                 self.irc081 = IRC081()
@@ -76,9 +76,9 @@ class App(ctk.CTk):
 
         self.corner_buttons = {
             "top_left": self.create_corner_button("⚙️", 0, 0, lambda: self.content_frame.show_page("Settings")),
-            "top_right": self.create_corner_button("👁️", 0, 2, lambda: self.content_frame.show_page("Plot")),
-            "bottom_left": self.create_corner_button("👤", 2, 0, lambda: self.content_frame.show_page("Home")),
-            "bottom_right": self.create_corner_button("🔍", 2, 2, lambda: self.content_frame.show_page("Info"))
+            "top_right": self.create_corner_button("A️", 0, 2, lambda: self.content_frame.show_page("Plot")),
+            "bottom_left": self.create_corner_button("B", 2, 0, lambda: self.content_frame.show_page("Home")),
+            "bottom_right": self.create_corner_button("C", 2, 2, lambda: self.content_frame.show_page("Info"))
         }
         # Show the default page (Home)
         self.content_frame.show_page("Home")
@@ -96,13 +96,13 @@ class App(ctk.CTk):
         button = ctk.CTkButton(
             self,
             text=text,
-            width=60,
-            height=60,
+            # width=60,
+            # height=60,
             text_color="#5D74A1",
             command=command,
             fg_color="white",
             hover_color=infBlue,
-            font=("Arial", 24, "bold")
+
         )
         button.grid(row=row, column=col, sticky="nsew")
         return button
@@ -714,5 +714,5 @@ class TrapezoidFrame(ctk.CTkFrame):
 
 if __name__ == "__main__":
     root = App()
-    root.after(500, lambda: root.wm_attributes('-fullscreen', 'true'))
+    # root.after(500, lambda: root.wm_attributes('-fullscreen', 'true'))
     root.mainloop()
