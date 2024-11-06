@@ -108,6 +108,7 @@ class App(ctk.CTk):
 
         )
         button.grid(row=row, column=col, sticky="nsew")
+        button.lift()
         return button
 
     def switch_event(self):
