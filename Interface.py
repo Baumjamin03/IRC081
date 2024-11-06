@@ -53,22 +53,22 @@ class App(ctk.CTk):
         self.NavBar = TrapezoidFrame(master=self, height=50, invert=True)
         self.NavBar.grid(row=2, column=1, sticky="nsew", pady=(5, 0))
         self.NavBar.grid_rowconfigure(0, weight=1)
-        self.NavBar.grid_columnconfigure((0, 1), weight=1)
+        self.NavBar.grid_columnconfigure(0, weight=1)
 
-        self.lblPage = ctk.CTkLabel(self.NavBar, text_color="white", text="", fg_color=infBlue, width=100, anchor="w",
-                                    font=("Arial", 18, "bold"), bg_color=infBlue)
-        self.lblPage.grid(row=0, column=0, padx=70, sticky="nsew")
+        self.lblPage = ctk.CTkLabel(self.NavBar, text_color="white", text="", fg_color=infBlue,
+                                    font=("Arial", 18, "bold"), bg_color=infBlue, justify="center")
+        self.lblPage.grid(row=0, column=0, padx=150, sticky="nsew")
 
-        self.lblStatus = ctk.CTkLabel(self.NavBar, text="OFF", anchor="e", text_color="white", bg_color=infBlue,
-                                      font=("Arial", 18, "bold"), width=100, fg_color=infBlue)
-        self.lblStatus.grid(row=0, column=1, padx=70, sticky="nsew")
+        # self.lblStatus = ctk.CTkLabel(self.NavBar, text="OFF", anchor="e", text_color="white", bg_color=infBlue,
+        #                               font=("Arial", 18, "bold"), width=100, fg_color=infBlue)
+        # self.lblStatus.grid(row=0, column=1, padx=70, sticky="nsew")
 
         self.content_frame = PageManager(self, self.lblPage)
         self.content_frame.grid(row=1, column=0, sticky="nsew", columnspan=3, padx=5)
 
         self.grid_columnconfigure(1, weight=1)
-        self.grid_rowconfigure(0, minsize=75)  # Ensure TitleBar row height
-        self.grid_rowconfigure(2, minsize=75)  # Ensure NavBar row height
+        self.grid_rowconfigure(0, minsize=70)  # Ensure TitleBar row height
+        self.grid_rowconfigure(2, minsize=70)  # Ensure NavBar row height
         self.grid_rowconfigure(1, weight=1)
 
         self.content_frame.add_page("Home", HomePage(self.content_frame, sw_event=self.switch_event))
