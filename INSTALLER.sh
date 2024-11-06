@@ -22,7 +22,7 @@ export PYTHONPATH="\${PYTHONPATH}:/usr/lib/python3/dist-packages"
 
 cd /home/$USER_NAME/IRC081
 source venv/bin/activate
-python3 IRUI081.py
+python3 Interface.py
 EOL
     chmod +x launcher.sh
 }
