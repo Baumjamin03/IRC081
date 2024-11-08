@@ -302,7 +302,6 @@ class IRC081(usb_2408_2AO):
         print("interlock < 2.5V = good: " + str(self.get_voltage(4)))
         self.bitOn = 1
         self.update_digital_output()
-        return
 
     def measurement_end(self):
         """
