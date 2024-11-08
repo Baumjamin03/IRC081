@@ -6,14 +6,10 @@ import time
 import atexit
 import platform
 from Pages import *
-
-from AnalogueOut import MCP4725
 from RS232 import RS232Communication, SerialListener
-try:
+if platform.system() != "Windows":
     from IRC081 import IRC081
-except OSError as e:
-    print(e)
-    print("Can only import IRC081 on a linux system")
+    from AnalogueOut import MCP4725
 
 infBlue = "#24517F"
 txtColor = "white"
@@ -28,7 +24,7 @@ class App(ctk.CTk):
 
         self.com = None
         port_toggle = False
-        while self.com is None:
+        while self.com is None and platform.system() != "Windows":
             try:
                 if port_toggle:
                     port_toggle = False
@@ -43,15 +39,19 @@ class App(ctk.CTk):
                 print(er)
                 self.com = None
                 time.sleep(1)
-        self.RS232Listener = SerialListener(self.com, self.handle_serial_data)
-        self.RS232Listener.start()
+
+        if self.com is not None:
+            self.RS232Listener = SerialListener(self.com, self.handle_serial_data)
+            self.RS232Listener.start()
 
         self.uOut = 0
         self.dPot = None
-        try:
-            self.dPot = MCP4725()
-        except Exception as er:
-            print(er)
+
+        if platform.system() != "Windows":
+            try:
+                self.dPot = MCP4725()
+            except Exception as er:
+                print(er)
 
         self.irc081 = None
         while self.irc081 is None:
