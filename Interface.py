@@ -100,7 +100,8 @@ class App(ctk.CTk):
         self.grid_rowconfigure(1, weight=1)
         self.grid_rowconfigure(2, minsize=55)  # Ensure NavBar row height
 
-        self.content_frame.add_page("Home", HomePage(self.content_frame, sw_event=self.switch_event))
+        self.content_frame.add_page("Home", HomePage(self.content_frame, sw_event=self.switch_event,
+                                                     emission_setter=self.set_emission_curr))
         self.content_frame.add_page("Settings", SettingsPage(self.content_frame))
         self.content_frame.add_page("Plot", PlotPage(self.content_frame))
         self.content_frame.add_page("Info", InfoPage(self.content_frame))

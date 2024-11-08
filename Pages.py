@@ -246,7 +246,8 @@ class NumericKeypad(ctk.CTkFrame):
 class HomePage(BasePage):
     def __init__(self,
                  master: any,
-                 sw_event: callable):
+                 sw_event: callable,
+                 emission_setter: callable):
         super().__init__(master)
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure((0, 1), weight=1)
@@ -280,6 +281,10 @@ class HomePage(BasePage):
         self.entryEmission.insert(0, "30")
         self.entryEmission.bind("<Button-1>", lambda event: master.show_numpad(self.entryEmission, "Home"))
         self.entryEmission.grid(sticky="ew")
+
+        self.btnEmission = ctk.CTkButton(self.emFrame, bg_color=infBlue, text_color="white", text="Set Emission",
+                                         height=40, command=emission_setter)
+        self.btnEmission.grid(row=3, column=0, pady=5)
 
         self.pressFrame = ctk.CTkFrame(self, fg_color="white", corner_radius=10)
         self.pressFrame.grid(row=0, column=1, sticky="nsew", pady=30, padx=30)
@@ -373,5 +378,4 @@ class SettingsPage(BasePage):
             "iCage": ValueDisplay(self.frameValues, "Cage (A):", 0, 1),
             "iEmission": ValueDisplay(self.frameValues, "Emission (A):", 0, 2),
             "iCollector": ValueDisplay(self.frameValues, "Collector (A):", 0, 3)
-
         }
