@@ -7,6 +7,7 @@ import atexit
 import platform
 from Pages import *
 from RS232 import RS232Communication, SerialListener
+
 if platform.system() != "Windows":
     from IRC081 import IRC081
     from AnalogueOut import MCP4725
@@ -231,7 +232,15 @@ class App(ctk.CTk):
 
             self.content_frame.pages["Home"].pressure.set("{:.5e}".format(self.irc081.get_pressure_mbar()))
             self.content_frame.pages["Home"].transmission.set("{:.2f}".format(self.irc081.get_transmission()))
-
+        elif self.content_frame.current_page == "Settings":
+            self.content_frame.pages["Settings"].values["iEmission"].value.set(
+                "{:.3f}".format(self.irc081.get_emission_current()))
+            self.content_frame.pages["Settings"].values["iCage"].value.set(
+                "{:.3f}".format(self.irc081.get_cage_current()))
+            self.content_frame.pages["Settings"].values["iFaraday"].value.set(
+                "{:.3f}".format(self.irc081.get_faraday_current()))
+            self.content_frame.pages["Settings"].values["iCollector"].value.set(
+                "{:.3f}".format(self.irc081.get_ion_current()))
 
     def update_aout(self) -> None:
         """
