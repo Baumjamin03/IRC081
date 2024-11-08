@@ -81,10 +81,10 @@ class App(ctk.CTk):
 
         self.running = False
 
-        self.TitleBar = TrapezoidFrame(master=self, logo_path="Pictures/IFCN.SW_BIG.D.png", height=50)
+        self.TitleBar = TrapezoidFrame(master=self, logo_path="Pictures/IFCN.SW_BIG.D.png")
         self.TitleBar.grid(row=0, column=1, sticky="nsew", pady=(0, 5))
 
-        self.NavBar = TrapezoidFrame(master=self, height=50, invert=True)
+        self.NavBar = TrapezoidFrame(master=self, invert=True)
         self.NavBar.grid(row=2, column=1, sticky="nsew", pady=(5, 0), padx=1)
         self.NavBar.grid_rowconfigure(0, weight=1)
 
@@ -150,8 +150,7 @@ class App(ctk.CTk):
             # Calculate aspect ratio from original image
             aspect_ratio = orig_width / orig_height
 
-            # Calculate new dimensions maintaining aspect ratio with height=50
-            target_height = 40
+            target_height = 30
             target_width = int(target_height * aspect_ratio)
 
             button_image = ctk.CTkImage(
