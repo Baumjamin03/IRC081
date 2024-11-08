@@ -151,7 +151,7 @@ class App(ctk.CTk):
             aspect_ratio = orig_width / orig_height
 
             # Calculate new dimensions maintaining aspect ratio with height=50
-            target_height = 50
+            target_height = 40
             target_width = int(target_height * aspect_ratio)
 
             button_image = ctk.CTkImage(
