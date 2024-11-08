@@ -91,6 +91,8 @@ class IRC081(usb_2408_2AO):
         self.uIon = 0
         self.transmission = 0
 
+        self.dOut = 0
+
     async def refresh_controller_data(self):
         """
         Reads and Calculates measurement Data
@@ -115,7 +117,7 @@ class IRC081(usb_2408_2AO):
             # print("ion: " + "{:.5e}".format(self.iCollector) + ", bias: " + "{:.5f}".format(self.uBias))
             # print("iEm: " + "{:.5e}".format(self.iEmission) + ", uEm: " + "{:.5f}".format(self.uEmission))
             # print(self.pressure)
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(0.2)
 
     def update_digital_output(self):
         """
@@ -124,7 +126,9 @@ class IRC081(usb_2408_2AO):
         output_value = ((self.bitA << 7) | (self.bitB << 6) | (self.bitC << 5) | (self.bitD << 4) | (self.bitE << 3) |
                         (self.bitF << 2) | (self.bitOn << 1))
         print("digital output: " + str(output_value))
-        self.DOut(output_value)
+        if self.dOut != output_value:
+            self.DOut(output_value)
+            self.dOut = output_value
         return
 
     def ion_range_handler(self):
