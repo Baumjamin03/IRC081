@@ -263,7 +263,7 @@ class App(ctk.CTk):
             print(er)
 
     def analogue_out_handler(self):
-        if False or not (self.lowerRange and self.upperRange):
+        if not (self.lowerRange and self.upperRange):
             self.uOut = self.irc081.get_ion_voltage() * 2
             self.content_frame.pages["Settings"].lblOut.value.set("{:.3f}".format(self.uOut))
         else:
@@ -329,11 +329,7 @@ class App(ctk.CTk):
             if writing:
                 if 'E-' in value:
                     try:
-                        factor, exp = value.split('E-')
-                        self.frameAnalogOut.entryLowerRange.entry.delete(0, ctk.END)
-                        self.frameAnalogOut.entryLowerRange.entry.insert(0, factor)
-                        self.frameAnalogOut.entryLowerRange.expEntry.delete(0, ctk.END)
-                        self.frameAnalogOut.entryLowerRange.expEntry.insert(0, exp)
+                        self.content_frame.pages["Setting"].entryLower.set(value)
                         self.set_range()
                     except ValueError:
                         response += b'value Error'
@@ -345,11 +341,7 @@ class App(ctk.CTk):
             if writing:
                 if 'E-' in value:
                     try:
-                        factor, exp = value.split('E-')
-                        self.frameAnalogOut.entryUpperRange.entry.delete(0, ctk.END)
-                        self.frameAnalogOut.entryUpperRange.entry.insert(0, factor)
-                        self.frameAnalogOut.entryUpperRange.expEntry.delete(0, ctk.END)
-                        self.frameAnalogOut.entryUpperRange.expEntry.insert(0, exp)
+                        self.content_frame.pages["Setting"].entryUpper.set(value)
                         self.set_range()
                     except ValueError:
                         response += b'value Error'
