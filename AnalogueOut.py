@@ -17,3 +17,5 @@ class MCP4725:
             value = 0
         # Write to the digital potentiometer
         self.bus.write_i2c_block_data(self.address, 0x00, [value])
+
+

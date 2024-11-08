@@ -247,6 +247,8 @@ class App(ctk.CTk):
                 "{:.3f}".format(self.irc081.get_faraday_current()))
             self.content_frame.pages["Settings"].values["iCollector"].value.set(
                 "{:.3f}".format(self.irc081.get_ion_current()))
+            self.content_frame.pages["Settings"].lblOut.value.set(
+                "{:.3f}".format(self.uOut))
 
     def update_aout(self) -> None:
         """
