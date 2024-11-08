@@ -22,6 +22,8 @@ class App(ctk.CTk):
         self.configure(fg_color="white")
 
         self.geometry("600x280")
+        if platform.system() == "Windows":
+            self.geometry("800x480")
 
         self.com = None
         port_toggle = False
@@ -129,8 +131,8 @@ class App(ctk.CTk):
         """
         if self.irc081 is not None:
             self.irc081.measurement_end()
-        # self.RS232Listener.stop()
-        # self.com.close_port()
+            self.RS232Listener.stop()
+            self.com.close_port()
 
     def create_corner_button(self,
                              row: int,
@@ -175,6 +177,7 @@ class App(ctk.CTk):
         """
         Turns the IRG080 Measurements on/off.
         """
+        print("----------------SWTICH---------------")
         if not self.running:
             self.running = True
             self.content_frame.pages["Home"].emOn.configure(fg_color="#3F7432")

@@ -1,9 +1,6 @@
 # AD5280 DigiPot class file
 
-try:
-    import smbus
-except:
-    import smbus2 as smbus
+import smbus2 as smbus
 
 
 class MCP4725:

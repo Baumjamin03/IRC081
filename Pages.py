@@ -282,7 +282,7 @@ class HomePage(BasePage):
         self.entryEmission.bind("<Button-1>", lambda event: master.show_numpad(self.entryEmission, "Home"))
         self.entryEmission.grid(sticky="ew")
 
-        self.btnEmission = ctk.CTkButton(self.emFrame, bg_color=infBlue, text_color="white", text="Set Emission",
+        self.btnEmission = ctk.CTkButton(self.emFrame, border_color="white", border_width=3, text_color="white", text="Set Emission",
                                          height=40, command=emission_setter)
         self.btnEmission.grid(row=3, column=0, pady=5)
 
