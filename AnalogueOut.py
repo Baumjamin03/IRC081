@@ -7,11 +7,13 @@ except:
 
 
 class MCP4725:
-    def __init__(self, bus_number=1, address=0x60):
+    def __init__(self,
+                 bus_number: int = 1,
+                 address: int = 0x60):
         self.bus = smbus.SMBus(bus_number)
         self.address = address
 
-    def set_analogue_out(self, value):
+    def set_analogue_out(self, value: int):
         if value > 4095:
             value = 4095
         if value < 0:

@@ -1,13 +1,14 @@
-import customtkinter as ctk
 import tkinter as tk
 from PIL import Image
 import asyncio
-from decimal import *
 from threading import Thread
 import time
 import atexit
 import platform
+from Pages import *
 
+from AnalogueOut import MCP4725
+from RS232 import RS232Communication, SerialListener
 try:
     from IRC081 import IRC081
 except OSError as e:
@@ -24,6 +25,33 @@ class App(ctk.CTk):
         self.configure(fg_color="white")
 
         self.geometry("600x280")
+
+        self.com = None
+        port_toggle = False
+        while self.com is None:
+            try:
+                if port_toggle:
+                    port_toggle = False
+                    self.com = RS232Communication()
+                else:
+                    port_toggle = True
+                    self.com = RS232Communication(port='/dev/ttyS0')
+                if self.com.is_open:
+                    self.com.close_port()
+                self.com.open_port()
+            except Exception as er:
+                print(er)
+                self.com = None
+                time.sleep(1)
+        self.RS232Listener = SerialListener(self.com, self.handle_serial_data)
+        self.RS232Listener.start()
+
+        self.uOut = 0
+        self.dPot = None
+        try:
+            self.dPot = MCP4725()
+        except Exception as er:
+            print(er)
 
         self.irc081 = None
         while self.irc081 is None:
@@ -93,7 +121,7 @@ class App(ctk.CTk):
             print("starting meas. thread")
             self.start_loop_in_thread(self.irc081.refresh_controller_data)
 
-    def shutdown(self):
+    def shutdown(self) -> None:
         """
         Executes on program termination. It resets the IRC081 Parameters and ends the RS232 communication
         """
@@ -102,7 +130,11 @@ class App(ctk.CTk):
         # self.RS232Listener.stop()
         # self.com.close_port()
 
-    def create_corner_button(self, row: int, col: int, command, logo_path: str = None) -> ctk.CTkButton:
+    def create_corner_button(self,
+                             row: int,
+                             col: int,
+                             command: callable = None,
+                             logo_path: str = None) -> ctk.CTkButton:
         # Create image if logo path is provided
         if logo_path:
             # Open the image and get its original dimensions
@@ -137,7 +169,7 @@ class App(ctk.CTk):
         button.grid(row=row, column=col, sticky="nsew")
         return button
 
-    def switch_event(self):
+    def switch_event(self) -> None:
         """
         Turns the IRG080 Measurements on/off.
         """
@@ -155,7 +187,7 @@ class App(ctk.CTk):
             if self.irc081 is not None:
                 self.irc081.measurement_end()
 
-    def set_emission_curr(self):
+    def set_emission_curr(self) -> None | str:
         """
         Sets the Emission current for the IRG080.
         """
@@ -169,7 +201,7 @@ class App(ctk.CTk):
                 return "invalid value"
             return None
 
-    def measurement_loop(self):
+    def measurement_loop(self) -> None:
         """
         Calls itself and periodically updates measurement values.
         """
@@ -199,10 +231,29 @@ class App(ctk.CTk):
         self.content_frame.pages["Home"].pressure.set("{:.5e}".format(self.irc081.get_pressure_mbar()))
         self.content_frame.pages["Home"].transmission.set("{:.2f}".format(self.irc081.get_transmission()))
 
-    def update_aout(self):
-        pass
+    def update_aout(self) -> None:
+        """
+        Calculates the output voltage in respect to the set range or auto range if enabled.
+        Auto range will output twice the voltage it reads from the IColl (AI15) Analog Input.
+        Defaults to auto range if no values are provided
+        """
+        try:
+            voltage = Decimal(self.uOut)
+            d_value = voltage * 4095 // 10
+            self.dPot.set_analogue_out(int(d_value))
+        except Exception as er:
+            print(er)
 
-    def async_start_loop(self, loop: asyncio.AbstractEventLoop):
+    def analogue_out_handler(self):
+        if self.frameAnalogOut.frameVoltageDisplay.check_var.get() or not (self.lowerRange and self.upperRange):
+            voltage = self.irc081.get_ion_voltage() * 2
+            self.frameAnalogOut.frameVoltageDisplay.value.set("{:.3f}".format(voltage))
+        else:
+            pressure = self.irc081.get_pressure_mbar()
+            voltage = (pressure - self.lowerRange) / (self.upperRange - self.lowerRange) * 10
+            self.frameAnalogOut.frameVoltageDisplay.value.set("{:.3f}".format(voltage))
+
+    def async_start_loop(self, loop: asyncio.AbstractEventLoop) -> None:
         """
         Target function for Thread
         :param loop: asyncio eventloop
@@ -210,7 +261,7 @@ class App(ctk.CTk):
         asyncio.set_event_loop(loop)
         loop.run_forever()
 
-    def start_loop_in_thread(self, func):
+    def start_loop_in_thread(self, func) -> None:
         """
         Takes a function, creates an async Loop and runs it in a Thread
         :param func: any function to be run in a separate Thread
@@ -220,12 +271,13 @@ class App(ctk.CTk):
         loop_thread.start()
         asyncio.run_coroutine_threadsafe(func(), loop)
 
-    def handle_serial_data(self, data):
+    def handle_serial_data(self,
+                           data) -> None | str:
         """
         serial data handling for more information visit:
         https://colla.inficon.com/display/VCRD/RS232+Protocoll
         """
-        if data.endswith(b'\r') or data.endswith(b'\n'):
+        while data.endswith(b'\r') or data.endswith(b'\n'):
             data = data[:len(data) - 1]
         response = data + b'\r\n'
 
@@ -327,335 +379,6 @@ class App(ctk.CTk):
             return response + b'\r\n'
 
 
-class BasePage(ctk.CTkFrame):
-    def __init__(self, master, **kwargs):
-        super().__init__(master, fg_color=infBlue, bg_color="white", corner_radius=10, **kwargs)
-
-
-class PageManager(BasePage):
-    def __init__(self, master, lbl_page, **kwargs):
-        super().__init__(master, **kwargs)
-        self.current_page = None
-        self.pages = {}
-        self.lbl_page = lbl_page
-        # Configure grid
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_columnconfigure(0, weight=1)
-
-        self.add_page("Numpad", NumpadPage(self))
-
-    def add_page(self, page_name, page):
-        """Add a page to the manager"""
-        self.pages[page_name] = page
-        page.grid(row=0, column=0, sticky="nsew")
-        if not self.current_page:
-            self.current_page = page_name
-
-    def show_page(self, page_name):
-        """Switch to a specific page"""
-        if page_name in self.pages:
-            # Notify current page it's being hidden
-            if self.current_page and hasattr(self.pages[self.current_page], "on_page_leave"):
-                self.pages[self.current_page].on_page_leave()
-
-            # Show new page
-            self.pages[page_name].lift()
-            self.current_page = page_name
-
-            # Notify new page it's being shown
-            if hasattr(self.pages[page_name], "on_page_enter"):
-                self.pages[page_name].on_page_enter()
-
-            self.lbl_page.configure(text=page_name)
-
-    def show_numpad(self, entry, caller_page):
-        self.pages["Numpad"].show(entry, caller_page)
-
-
-class NumericKeypad(ctk.CTkFrame):
-    def __init__(self, master, entry_widget=None, **kwargs):
-        super().__init__(master, **kwargs)
-        self.entry_widget = entry_widget
-        self.master = master
-
-        # Configure grid weights
-        for i in range(4):
-            self.grid_rowconfigure(i, weight=1)
-            self.grid_columnconfigure(i, weight=1)
-
-        # Button styling
-        btn_font = ("Arial", 18)
-        btn_color = "#3B3B3B"
-        btn_hover_color = "#4D4D4D"
-        btn_width = 60
-        btn_height = 60
-
-        # Button layout
-        buttons = [
-            ['1', '2', '3', 'E'],
-            ['4', '5', '6', '⌫'],
-            ['7', '8', '9', '↓'],
-            ['-', '0', '.', None]
-        ]
-
-        # Create buttons
-        for i, row in enumerate(buttons):
-            for j, text in enumerate(row):
-                if text is not None:
-                    btn = ctk.CTkButton(
-                        self,
-                        text=text,
-                        font=btn_font,
-                        width=btn_width,
-                        height=btn_height,
-                        fg_color=btn_color,
-                        hover_color=btn_hover_color,
-                        command=lambda t=text: self.button_click(t)
-                    )
-                    btn.grid(row=i, column=j, padx=2, pady=2, sticky="nsew")
-                    if text == '↓':
-                        btn.grid(rowspan=2)
-
-    def is_valid_number(self, value: str):
-        """Check if the resulting string would be a valid positive number (including zero)"""
-        try:
-
-            # Don't allow negative signs at all
-            if '-' in value:
-                if 'E' in value:
-                    for s in value.split('E'):
-                        if s.count('-') > 1:
-                            return False
-                elif value.count('-') > 1:
-                    return False
-
-            # Check for valid scientific notation
-            if 'E' in value:
-                if value.count('E') > 1:
-                    return False
-
-            for s in value.split('E'):
-                if s.count('.') > 1:
-                    return False
-
-            return True
-        except ValueError as er:
-            print(er)
-            return False
-
-    def button_click(self, value):
-        if not self.entry_widget:
-            return
-
-        current = self.entry_widget.get()
-
-        if value == '⌫':
-            new_value = current[:-1]
-        elif value == '↓':
-            self.master.confirm()
-            return
-        else:
-            new_value = current + value
-
-        if self.is_valid_number(new_value) or new_value == "":
-            self.entry_widget.delete(0, 'end')
-            self.entry_widget.insert(0, new_value)
-
-
-class NumpadPage(BasePage):
-    def __init__(self, master, **kwargs):
-        super().__init__(master, **kwargs)
-        self.page_manager = master
-        self.target_entry = None
-        self.original_value = None
-        self.og_page = None
-
-        # Configure grid weights for main layout
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(0, weight=0)  # Entry row
-        self.grid_rowconfigure(1, weight=1)  # Numpad row
-
-        # Entry display
-        self.display = ctk.CTkEntry(self, height=40, font=("Arial", 20))
-        self.display.grid(row=0, column=0, padx=10, pady=(10, 5), sticky="ew")
-
-        # Numpad frame
-        self.numpad = NumericKeypad(self, entry_widget=self.display)
-        self.numpad.grid(row=1, column=0, padx=10, pady=5)
-
-        # Buttons frame
-        self.button_frame = ctk.CTkFrame(self)
-        self.button_frame.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
-        self.button_frame.grid_columnconfigure((0, 1), weight=1)
-
-        # Cancel and Confirm buttons
-        self.cancel_btn = ctk.CTkButton(
-            self.button_frame,
-            text="Cancel",
-            command=self.cancel,
-            fg_color="#dc3545",
-            hover_color="#c82333"
-        )
-        self.cancel_btn.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
-
-        self.confirm_btn = ctk.CTkButton(
-            self.button_frame,
-            text="Confirm",
-            command=self.confirm,
-            fg_color="#28a745",
-            hover_color="#218838"
-        )
-        self.confirm_btn.grid(row=0, column=1, padx=5, pady=5, sticky="ew", rowspan=2)
-
-    def show(self, entry_widget, og_page_name):
-        """Prepare and show the numpad page"""
-        self.target_entry = entry_widget
-        self.og_page = og_page_name
-        self.original_value = entry_widget.get()
-        self.display.delete(0, 'end')
-        self.display.insert(0, self.original_value)
-        self.page_manager.show_page("Numpad")
-        self.display.focus()
-
-    def confirm(self):
-        """Confirm the entered value and return to previous page"""
-        new_value = self.display.get()
-        try:
-            Decimal(new_value)
-        except DecimalException as ex:
-            print(ex)
-            return
-
-        if self.target_entry:
-            self.target_entry.delete(0, 'end')
-            self.target_entry.insert(0, self.display.get())
-        self.cleanup()
-
-    def cancel(self):
-        """Cancel the entry and return to previous page"""
-        if self.target_entry and self.original_value is not None:
-            self.target_entry.delete(0, 'end')
-            self.target_entry.insert(0, self.original_value)
-        self.cleanup()
-
-    def cleanup(self):
-        """Reset the numpad state"""
-        self.target_entry = None
-        self.original_value = None
-        self.display.delete(0, 'end')
-        self.page_manager.show_page(self.og_page)
-        self.og_page = None
-
-    def on_page_leave(self):
-        """Called when switching away from numpad page"""
-        if self.target_entry:
-            self.cancel()
-
-
-class HomePage(BasePage):
-    def __init__(self, master, sw_event):
-        super().__init__(master)
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_columnconfigure((0, 1), weight=1)
-
-        self.vFrame = ctk.CTkFrame(self, fg_color=infBlue)
-        self.vFrame.grid(row=1, column=0, sticky="ew", padx=10, pady=5, columnspan=2)
-
-        self.vFrame.grid_rowconfigure(0, weight=1)
-        self.vFrame.grid_columnconfigure((0, 1, 2, 3, 4, 5), weight=1)
-
-        self.Voltages = {
-            "Bias": ValueDisplay(self.vFrame, "Bias (V):", 0, 0),
-            "Wehnelt": ValueDisplay(self.vFrame, "Wehnelt (V):", 0, 1),
-            "Faraday": ValueDisplay(self.vFrame, "Faraday (V):", 0, 2),
-            "Cage": ValueDisplay(self.vFrame, "Cage (V):", 0, 3),
-            "Deflector": ValueDisplay(self.vFrame, "Deflector (V):", 0, 4),
-            "Filament": ValueDisplay(self.vFrame, "Filament (A):", 0, 5)
-        }
-
-        self.emFrame = ctk.CTkFrame(self, fg_color=infBlue)
-        self.emFrame.grid(row=0, column=0)
-
-        self.emOn = StartButton(self.emFrame, text="", corner_radius=30, height=60, width=60, border_width=5,
-                                border_color="white", fg_color="#BBD396", command=sw_event, hover=False)
-        self.emOn.grid(row=0, column=0)
-
-        self.lblEmission = ctk.CTkLabel(self.emFrame, text="Emission in uA:", font=("Arial", 18, "bold"))
-        self.lblEmission.grid(row=1, column=0, pady=(10, 0))
-
-        self.entryEmission = TouchEntry(self.emFrame, 2, 0, font=("Arial", 18, "normal"))
-        self.entryEmission.insert(0, "30")
-        self.entryEmission.bind("<Button-1>", lambda event: master.show_numpad(self.entryEmission, "Home"))
-        self.entryEmission.grid(sticky="ew")
-
-        self.pressFrame = ctk.CTkFrame(self, fg_color="white", corner_radius=10)
-        self.pressFrame.grid(row=0, column=1, sticky="nsew", pady=30, padx=30)
-        self.pressFrame.grid_columnconfigure(0, weight=1)
-        self.pressFrame.grid_rowconfigure(0, weight=1)
-
-        self.pressure = ctk.DoubleVar(value=1.0083e-5)
-        self.lblPressure = ctk.CTkLabel(self.pressFrame, textvariable=self.pressure, font=("Arial", 64, "bold"),
-                                        anchor="center", text_color="black")
-        self.lblPressure.grid(row=0, column=0, sticky="nsew", pady=10, padx=10)
-
-        self.transmissionFrame = ctk.CTkFrame(self.pressFrame, fg_color="white")
-        self.transmissionFrame.grid(row=1, column=0, sticky="nsew", pady=10, padx=(50, 5))
-        self.transmission = ctk.DoubleVar(value=98.55)
-        ctk.CTkLabel(self.transmissionFrame, font=("Arial", 36, "bold"), text_color="black",
-                     text="Transmission: ", fg_color="white", anchor="e").grid(row=0, column=0, padx=2)
-
-        self.lblTransmission = ctk.CTkLabel(self.transmissionFrame, textvariable=self.transmission,
-                                            font=("Arial", 36, "bold"),
-                                            anchor="center", text_color="black")
-        self.lblTransmission.grid(row=0, column=1, sticky="nsew")
-
-        ctk.CTkLabel(self.transmissionFrame, font=("Arial", 36, "bold"), text_color="black",
-                     text="%", anchor="w", fg_color="white").grid(row=0, column=2, sticky="nsew")
-
-
-class StartButton(ctk.CTkButton):
-    def __init__(self, master, **kwargs):
-        super().__init__(master, **kwargs)
-
-
-class TouchEntry(ctk.CTkEntry):
-    def __init__(self, master, row, col, pady=5, **kwargs):
-        super().__init__(master, height=50, justify="center", **kwargs)
-        self.grid(row=row, column=col, pady=pady)
-
-
-class ValueDisplay(ctk.CTkFrame):
-    def __init__(self, master, text, row, col, **kwargs):
-        super().__init__(master, fg_color="white", corner_radius=5, border_color="white", border_width=5, **kwargs)
-        self.grid(row=row, column=col, sticky="nsew", pady=5, padx=5)
-
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure((0, 1), weight=1)
-
-        self.lblName = ctk.CTkLabel(self, text=text, anchor="center", height=15, width=100, corner_radius=5, padx=3,
-                                    font=("Arial", 14, "bold"), text_color="black")
-        self.lblName.grid(row=0, column=0, sticky="ew", padx=3)
-        self.value = ctk.DoubleVar(value=12.34)
-        self.lblValue = ctk.CTkLabel(self, textvariable=self.value, anchor="center", height=20, width=100,
-                                     text_color="black", corner_radius=5)
-        self.lblValue.grid(row=1, column=0, sticky="ew", padx=3)
-
-
-class PlotPage(BasePage):
-    def __init__(self, master):
-        super().__init__(master)
-
-
-class InfoPage(BasePage):
-    def __init__(self, master):
-        super().__init__(master)
-
-
-class SettingsPage(BasePage):
-    def __init__(self, master):
-        super().__init__(master)
-
-
 class TrapezoidFrame(ctk.CTkFrame):
     def __init__(
             self,
@@ -695,7 +418,7 @@ class TrapezoidFrame(ctk.CTkFrame):
         # Bind resize event
         self.bind("<Configure>", self.on_resize)
 
-    def draw_trapezoid(self):
+    def draw_trapezoid(self) -> None:
         """Draw the trapezoid shape on the canvas"""
         self.canvas.delete("trapezoid")  # Clear previous shape
 
@@ -726,7 +449,7 @@ class TrapezoidFrame(ctk.CTkFrame):
             joinstyle="miter"
         )
 
-    def load_logo(self):
+    def load_logo(self) -> None:
         """Load and display the logo image inside the trapezoid"""
         # Use PIL to open the image (supports formats like PNG, JPEG, etc.)
 
@@ -735,7 +458,7 @@ class TrapezoidFrame(ctk.CTkFrame):
         self.lblI = ctk.CTkLabel(self, image=self.logo_image, text="", bg_color=infBlue)
         self.lblI.pack(expand=True)
 
-    def on_resize(self, event):
+    def on_resize(self, event) -> None:
         """Handle resize events"""
         self.width = event.width
         self.height = event.height
