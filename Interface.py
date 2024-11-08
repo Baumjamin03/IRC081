@@ -215,21 +215,23 @@ class App(ctk.CTk):
         """
         Reads the Data from the IRC081 and Displays it.
         """
-        self.content_frame.pages["Home"].Voltages["Wehnelt"].value.set(
-            "{:.3f}".format(self.irc081.get_voltage_wehnelt()))
-        self.content_frame.pages["Home"].Voltages["Cage"].value.set(
-            "{:.3f}".format(self.irc081.get_voltage_cage()))
-        self.content_frame.pages["Home"].Voltages["Faraday"].value.set(
-            "{:.3f}".format(self.irc081.get_voltage_faraday()))
-        self.content_frame.pages["Home"].Voltages["Bias"].value.set(
-            "{:.3f}".format(self.irc081.get_voltage_bias()))
-        self.content_frame.pages["Home"].Voltages["Deflector"].value.set(
-            "{:.3f}".format(self.irc081.get_voltage_deflector()))
-        self.content_frame.pages["Home"].Voltages["Filament"].value.set(
-            "{:.3f}".format(self.irc081.get_current_filament()))
+        if self.content_frame.current_page == "Home":
+            self.content_frame.pages["Home"].Voltages["Wehnelt"].value.set(
+                "{:.3f}".format(self.irc081.get_voltage_wehnelt()))
+            self.content_frame.pages["Home"].Voltages["Cage"].value.set(
+                "{:.3f}".format(self.irc081.get_voltage_cage()))
+            self.content_frame.pages["Home"].Voltages["Faraday"].value.set(
+                "{:.3f}".format(self.irc081.get_voltage_faraday()))
+            self.content_frame.pages["Home"].Voltages["Bias"].value.set(
+                "{:.3f}".format(self.irc081.get_voltage_bias()))
+            self.content_frame.pages["Home"].Voltages["Deflector"].value.set(
+                "{:.3f}".format(self.irc081.get_voltage_deflector()))
+            self.content_frame.pages["Home"].Voltages["Filament"].value.set(
+                "{:.3f}".format(self.irc081.get_current_filament()))
 
-        self.content_frame.pages["Home"].pressure.set("{:.5e}".format(self.irc081.get_pressure_mbar()))
-        self.content_frame.pages["Home"].transmission.set("{:.2f}".format(self.irc081.get_transmission()))
+            self.content_frame.pages["Home"].pressure.set("{:.5e}".format(self.irc081.get_pressure_mbar()))
+            self.content_frame.pages["Home"].transmission.set("{:.2f}".format(self.irc081.get_transmission()))
+
 
     def update_aout(self) -> None:
         """

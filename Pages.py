@@ -4,12 +4,17 @@ from decimal import *
 
 
 class BasePage(ctk.CTkFrame):
-    def __init__(self, master, **kwargs):
+    def __init__(self,
+                 master: any,
+                 **kwargs: any):
         super().__init__(master, fg_color=infBlue, bg_color="white", corner_radius=10, **kwargs)
 
 
 class PageManager(BasePage):
-    def __init__(self, master, lbl_page, **kwargs):
+    def __init__(self,
+                 master: any,
+                 lbl_page: ctk.CTkLabel,
+                 **kwargs: any):
         super().__init__(master, **kwargs)
         self.current_page = None
         self.pages = {}
@@ -21,7 +26,7 @@ class PageManager(BasePage):
         self.add_page("Numpad", NumpadPage(self))
 
     def add_page(self,
-                 page_name,
+                 page_name: str,
                  page) -> None:
         """Add a page to the manager"""
         self.pages[page_name] = page
@@ -30,7 +35,7 @@ class PageManager(BasePage):
             self.current_page = page_name
 
     def show_page(self,
-                  page_name) -> None:
+                  page_name: str) -> None:
         """Switch to a specific page"""
         if page_name in self.pages:
             # Notify current page it's being hidden
@@ -48,7 +53,7 @@ class PageManager(BasePage):
             self.lbl_page.configure(text=page_name)
 
     def show_numpad(self,
-                    entry,
+                    entry: ctk.CTkEntry,
                     caller_page) -> None:
         self.pages["Numpad"].show(entry, caller_page)
 
@@ -340,5 +345,33 @@ class InfoPage(BasePage):
 
 
 class SettingsPage(BasePage):
-    def __init__(self, master):
+    def __init__(self, master: any):
         super().__init__(master)
+        self.grid_columnconfigure((0, 1), weight=1)
+        self.grid_rowconfigure(0, weight=1)
+
+        self.frameRange = ctk.CTkFrame(self, fg_color=infBlue, bg_color=infBlue)
+        self.frameRange.grid(row=0, column=0)
+
+        self.frameAnalogue = ctk.CTkFrame(self, fg_color=infBlue, bg_color=infBlue)
+        self.frameAnalogue.grid(row=0, column=1)
+
+        self.entryUpper = TouchEntry(self.frameRange, 0, 0)
+        self.entryUpper.insert(0, "5E-6")
+        self.entryUpper.bind("<Button-1>", lambda event: master.show_numpad(self.entryUpper, "Settings"))
+
+        self.entryLower = TouchEntry(self.frameRange, 1, 0)
+        self.entryLower.insert(0, "5E-9")
+        self.entryLower.bind("<Button-1>", lambda event: master.show_numpad(self.entryLower, "Settings"))
+
+        self.lblOut = ValueDisplay(self.frameAnalogue, "Analogue Out (V):", 0, 0)
+
+        self.frameValues = ctk.CTkFrame(self, fg_color=infBlue, bg_color=infBlue)
+        self.frameValues.grid(row=1, column=0, columnspan=2, pady=3)
+        self.values = {
+            "iFaraday": ValueDisplay(self.frameValues, "Faraday (A):", 0, 0),
+            "iCage": ValueDisplay(self.frameValues, "Cage (A):", 0, 1),
+            "iEmission": ValueDisplay(self.frameValues, "Emission (A):", 0, 2),
+            "iCollector": ValueDisplay(self.frameValues, "Collector (A):", 0, 3)
+
+        }
