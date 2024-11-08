@@ -48,7 +48,7 @@ class App(ctk.CTk):
 
         self.running = False
 
-        self.TitleBar = TrapezoidFrame(master=self, logo_path="./IFCN.SW_BIG.D.png", height=50)
+        self.TitleBar = TrapezoidFrame(master=self, logo_path="Pictures/IFCN.SW_BIG.D.png", height=50)
         self.TitleBar.grid(row=0, column=1, sticky="nsew", pady=(0, 5))
 
         self.NavBar = TrapezoidFrame(master=self, height=50, invert=True)
@@ -77,10 +77,14 @@ class App(ctk.CTk):
         self.content_frame.add_page("Info", InfoPage(self.content_frame))
 
         self.corner_buttons = {
-            "top_left": self.create_corner_button("⚙️", 0, 0, lambda: self.content_frame.show_page("Settings")),
-            "top_right": self.create_corner_button("A️", 0, 2, lambda: self.content_frame.show_page("Plot")),
-            "bottom_left": self.create_corner_button("B", 2, 0, lambda: self.content_frame.show_page("Home")),
-            "bottom_right": self.create_corner_button("C", 2, 2, lambda: self.content_frame.show_page("Info"))
+            "top_left": self.create_corner_button(0, 0, lambda: self.content_frame.show_page("Settings"),
+                                                  "Pictures/settings.png"),
+            "top_right": self.create_corner_button(0, 2, lambda: self.content_frame.show_page("Plot"),
+                                                   "Pictures/operation.png"),
+            "bottom_left": self.create_corner_button(2, 0, lambda: self.content_frame.show_page("Home"),
+                                                     "Pictures/basic_user.png"),
+            "bottom_right": self.create_corner_button(2, 2, lambda: self.content_frame.show_page("Info"),
+                                                      "Pictures/help.png")
         }
         # Show the default page (Home)
         self.content_frame.show_page("Home")
@@ -98,12 +102,33 @@ class App(ctk.CTk):
         # self.RS232Listener.stop()
         # self.com.close_port()
 
-    def create_corner_button(self, text: str, row: int, col: int, command) -> ctk.CTkButton:
+    def create_corner_button(self, row: int, col: int, command, logo_path: str = None) -> ctk.CTkButton:
+        # Create image if logo path is provided
+        if logo_path:
+            # Open the image and get its original dimensions
+            original_image = Image.open(logo_path)
+            orig_width, orig_height = original_image.size
+
+            # Calculate aspect ratio from original image
+            aspect_ratio = orig_width / orig_height
+
+            # Calculate new dimensions maintaining aspect ratio with height=50
+            target_height = 50
+            target_width = int(target_height * aspect_ratio)
+
+            button_image = ctk.CTkImage(
+                light_image=original_image,
+                dark_image=original_image,
+                size=(target_width, target_height)
+            )
+        else:
+            button_image = None
+
         button = ctk.CTkButton(
             self,
-            text=text,
-            # width=60,
-            # height=60,
+            text="",
+            image=button_image,
+            compound="left",
             text_color="#5D74A1",
             command=command,
             fg_color="white",
