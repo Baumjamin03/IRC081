@@ -282,7 +282,8 @@ class HomePage(BasePage):
         self.entryEmission.bind("<Button-1>", lambda event: master.show_numpad(self.entryEmission, "Home"))
         self.entryEmission.grid(sticky="ew")
 
-        self.btnEmission = ctk.CTkButton(self.emFrame, border_color="white", border_width=3, text_color="white", text="Set Emission",
+        self.btnEmission = ctk.CTkButton(self.emFrame, border_color="white", border_width=3, text_color="white",
+                                         text="Set Emission",
                                          height=40, command=emission_setter)
         self.btnEmission.grid(row=3, column=0, pady=5)
 
@@ -317,7 +318,7 @@ class StartButton(ctk.CTkButton):
 
 
 class TouchEntry(ctk.CTkEntry):
-    def __init__(self, master, row, col, pady=5, **kwargs):
+    def __init__(self, master, row, col, pady=10, **kwargs):
         super().__init__(master, height=50, justify="center", **kwargs)
         self.grid(row=row, column=col, pady=pady)
 
@@ -331,11 +332,11 @@ class ValueDisplay(ctk.CTkFrame):
         self.grid_rowconfigure((0, 1), weight=1)
 
         self.lblName = ctk.CTkLabel(self, text=text, anchor="center", height=15, width=100, corner_radius=5, padx=3,
-                                    font=("Arial", 14, "bold"), text_color="black")
+                                    font=("Arial", 15, "bold"), text_color="black")
         self.lblName.grid(row=0, column=0, sticky="ew", padx=3)
         self.value = ctk.DoubleVar(value=12.34)
         self.lblValue = ctk.CTkLabel(self, textvariable=self.value, anchor="center", height=20, width=100,
-                                     text_color="black", corner_radius=5)
+                                     text_color="black", corner_radius=5, font=("Arial", 14,))
         self.lblValue.grid(row=1, column=0, sticky="ew", padx=3)
 
 
@@ -350,7 +351,9 @@ class InfoPage(BasePage):
 
 
 class SettingsPage(BasePage):
-    def __init__(self, master: any):
+    def __init__(self,
+                 master: any,
+                 range_setter: callable):
         super().__init__(master)
         self.grid_columnconfigure((0, 1), weight=1)
         self.grid_rowconfigure(0, weight=1)
@@ -368,6 +371,10 @@ class SettingsPage(BasePage):
         self.entryLower = TouchEntry(self.frameRange, 1, 0)
         self.entryLower.insert(0, "5E-9")
         self.entryLower.bind("<Button-1>", lambda event: master.show_numpad(self.entryLower, "Settings"))
+
+        self.btnSetRange = ctk.CTkButton(self.frameRange, border_color="white", border_width=3, text_color="white",
+                                         text="Set Range", height=40, command=range_setter)
+        self.btnSetRange.grid(row=2, column=0, pady=10)
 
         self.lblOut = ValueDisplay(self.frameAnalogue, "Analogue Out (V):", 0, 0)
 

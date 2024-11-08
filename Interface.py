@@ -48,6 +48,8 @@ class App(ctk.CTk):
             self.RS232Listener.start()
 
         self.uOut = 0
+        self.lowerRange = 0
+        self.upperRange = 0
         self.dPot = None
 
         if platform.system() != "Windows":
@@ -104,7 +106,7 @@ class App(ctk.CTk):
 
         self.content_frame.add_page("Home", HomePage(self.content_frame, sw_event=self.switch_event,
                                                      emission_setter=self.set_emission_curr))
-        self.content_frame.add_page("Settings", SettingsPage(self.content_frame))
+        self.content_frame.add_page("Settings", SettingsPage(self.content_frame, range_setter=self.set_range))
         self.content_frame.add_page("Plot", PlotPage(self.content_frame))
         self.content_frame.add_page("Info", InfoPage(self.content_frame))
 
@@ -177,7 +179,6 @@ class App(ctk.CTk):
         """
         Turns the IRG080 Measurements on/off.
         """
-        print("----------------SWTICH---------------")
         if not self.running:
             self.running = True
             self.content_frame.pages["Home"].emOn.configure(fg_color="#3F7432")
@@ -236,6 +237,7 @@ class App(ctk.CTk):
 
             self.content_frame.pages["Home"].pressure.set("{:.5e}".format(self.irc081.get_pressure_mbar()))
             self.content_frame.pages["Home"].transmission.set("{:.2f}".format(self.irc081.get_transmission()))
+
         elif self.content_frame.current_page == "Settings":
             self.content_frame.pages["Settings"].values["iEmission"].value.set(
                 "{:.3f}".format(self.irc081.get_emission_current()))
@@ -260,13 +262,25 @@ class App(ctk.CTk):
             print(er)
 
     def analogue_out_handler(self):
-        if self.frameAnalogOut.frameVoltageDisplay.check_var.get() or not (self.lowerRange and self.upperRange):
-            voltage = self.irc081.get_ion_voltage() * 2
-            self.frameAnalogOut.frameVoltageDisplay.value.set("{:.3f}".format(voltage))
+        if False or not (self.lowerRange and self.upperRange):
+            self.uOut = self.irc081.get_ion_voltage() * 2
+            self.content_frame.pages["Settings"].lblOut.value.set("{:.3f}".format(self.uOut))
         else:
             pressure = self.irc081.get_pressure_mbar()
-            voltage = (pressure - self.lowerRange) / (self.upperRange - self.lowerRange) * 10
-            self.frameAnalogOut.frameVoltageDisplay.value.set("{:.3f}".format(voltage))
+            self.uOut = (pressure - self.lowerRange) / (self.upperRange - self.lowerRange) * 10
+            self.content_frame.pages["Settings"].lblOut.value.set("{:.3f}".format(self.uOut))
+
+    def set_range(self):
+        try:
+            lower_range = Decimal(self.content_frame.pages["Settings"].entryLower.get())
+            upper_range = Decimal(self.content_frame.pages["Settings"].entryUpper.get())
+            print(f"new ranges: {upper_range} to {lower_range}")
+        except Exception as er:
+            print("Range Error: " + str(er))
+            return
+
+        self.lowerRange = lower_range
+        self.upperRange = upper_range
 
     def async_start_loop(self, loop: asyncio.AbstractEventLoop) -> None:
         """

@@ -47,8 +47,8 @@ KillMode=process
 TimeoutStopSec=20
 
 # Logging setup
-StandardOutput=append:/home/$USER_NAME/IRC081/irc081.log
-StandardError=append:/home/$USER_NAME/IRC081/irc081.log
+StandardOutput=append:/home/$USER_NAME/irc081.log
+StandardError=append:/home/$USER_NAME/irc081.log
 
 [Install]
 WantedBy=graphical.target
