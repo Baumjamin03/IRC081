@@ -349,6 +349,48 @@ class InfoPage(BasePage):
     def __init__(self, master):
         super().__init__(master)
 
+        """
+        Ai cooked on this one ngl
+        """
+
+        # Get git information
+        import subprocess
+        import datetime
+
+        try:
+            # Get latest commit hash
+            version = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('utf-8').strip()
+
+            # Get commit author
+            author = subprocess.check_output(['git', 'log', '-1', '--pretty=format:%an']).decode('utf-8').strip()
+
+            # Get commit date and format it
+            date_str = subprocess.check_output(['git', 'log', '-1', '--pretty=format:%ci']).decode('utf-8').strip()
+            date = datetime.datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S %z').strftime('%Y-%m-%d %H:%M')
+
+        except subprocess.CalledProcessError:
+            # If git commands fail, use default values
+            version = "N/A"
+            author = "Unknown"
+            date = "N/A"
+
+        self.info_labels = {
+            "Version": HorizontalValueDisplay(self, "Version:", 0, 0, value=version),
+            "Author": HorizontalValueDisplay(self, "Author:", 1, 0, value=author),
+            "Date": HorizontalValueDisplay(self, "Date:", 2, 0, value=date)
+        }
+
+
+class HorizontalValueDisplay(ValueDisplay):
+    def __init__(self, *args, value="", **kwargs):
+        super().__init__(*args, **kwargs)
+        self.grid(pady=10, sticky="ns")
+        self.lblValue.grid(row=0, column=1, padx=5)
+        self.lblName.configure(anchor="e")
+        self.lblValue.configure(anchor="w")
+        self.s_value = ctk.StringVar(value=value)
+        self.lblValue.configure(textvariable=self.s_value)
+
 
 class SettingsPage(BasePage):
     def __init__(self,
