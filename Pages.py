@@ -407,11 +407,11 @@ class SettingsPage(BasePage):
         self.frameAnalogue.grid(row=0, column=1)
 
         self.entryUpper = TouchEntry(self.frameRange, 0, 0)
-        self.entryUpper.insert(0, "5E-6")
+        self.entryUpper.insert(0, "9E-7")
         self.entryUpper.bind("<Button-1>", lambda event: master.show_numpad(self.entryUpper, "Settings"))
 
         self.entryLower = TouchEntry(self.frameRange, 1, 0)
-        self.entryLower.insert(0, "5E-9")
+        self.entryLower.insert(0, "1E-7")
         self.entryLower.bind("<Button-1>", lambda event: master.show_numpad(self.entryLower, "Settings"))
 
         self.btnSetRange = ctk.CTkButton(self.frameRange, border_color="white", border_width=3, text_color="white",
