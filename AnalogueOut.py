@@ -11,6 +11,11 @@ class MCP4725:
         self.address = address
 
     def set_analogue_out(self, value: int):
+        """
+
+        :param value: 12 bit value for the DAC
+        :return: None
+        """
         # Constrain the value to 12-bit range (0 - 4095)
         value = max(0, min(4095, value))
 

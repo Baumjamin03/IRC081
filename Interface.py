@@ -352,16 +352,8 @@ class App(ctk.CTk):
                     response += b'missing [E-]'
             else:
                 response += str(self.upperRange).encode()
-        elif command_code == b'AA':  # Analogue Autorange
-            if writing:
-                if value == "1":
-                    self.frameDaq.switch_var.set(True)
-                else:
-                    self.frameDaq.switch_var.set(False)
-            else:
-                response += str(self.frameAnalogOut.frameVoltageDisplay.check_var.get()).encode()
         elif command_code == b'AV':  # Analogue Voltage
-            response += str(self.frameAnalogOut.frameVoltageDisplay.value.get()).encode()
+            response += str(self.uOut).encode()
         elif command_code == b'EC':  # Emission current
             if writing:
                 self.content_frame.pages["Home"].entryEmission.delete(0, ctk.END)
