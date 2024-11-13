@@ -221,7 +221,7 @@ class IRC081(usb_2408_2AO):
         """
         voltage = self.get_voltage(15)
         self.uIon = voltage
-        print("u Ion: {:.5e}".format(voltage) + ", range: " + str(self.ionRange))
+        # print("u Ion: {:.5e}".format(voltage) + ", range: " + str(self.ionRange))
         current = 0
         if self.ionRange == 0:
             current = Decimal(voltage) * Decimal("1e-11") * Decimal("1e6") * self.factorIIon6
