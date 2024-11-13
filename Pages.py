@@ -274,7 +274,8 @@ class HomePage(BasePage):
                                 border_color="white", fg_color="#BBD396", command=sw_event, hover=False)
         self.emOn.grid(row=0, column=0)
 
-        self.lblEmission = ctk.CTkLabel(self.emFrame, text="Emission in uA:", font=("Arial", 18, "bold"))
+        self.lblEmission = ctk.CTkLabel(self.emFrame, text="Emission in uA:", font=("Arial", 18, "bold"),
+                                        text_color="white")
         self.lblEmission.grid(row=1, column=0, pady=(10, 0))
 
         self.entryEmission = TouchEntry(self.emFrame, 2, 0, font=("Arial", 18, "normal"))
@@ -406,17 +407,25 @@ class SettingsPage(BasePage):
         self.frameAnalogue = ctk.CTkFrame(self, fg_color=infBlue, bg_color=infBlue)
         self.frameAnalogue.grid(row=0, column=1)
 
-        self.entryUpper = TouchEntry(self.frameRange, 0, 0)
+        self.lblUpper = ctk.CTkLabel(self.frameRange, text="Upper Range: ", text_color="white",
+                                     font=("Arial", 14, "bold"), fg_color=infBlue)
+        self.lblUpper.grid(row=0, column=0)
+
+        self.entryUpper = TouchEntry(self.frameRange, 0, 1)
         self.entryUpper.insert(0, "9E-7")
         self.entryUpper.bind("<Button-1>", lambda event: master.show_numpad(self.entryUpper, "Settings"))
 
-        self.entryLower = TouchEntry(self.frameRange, 1, 0)
+        self.lblLower = ctk.CTkLabel(self.frameRange, text="Lower Range: ", text_color="white",
+                                     font=("Arial", 14, "bold"), fg_color=infBlue)
+        self.lblLower.grid(row=1, column=0)
+
+        self.entryLower = TouchEntry(self.frameRange, 1, 1)
         self.entryLower.insert(0, "1E-7")
         self.entryLower.bind("<Button-1>", lambda event: master.show_numpad(self.entryLower, "Settings"))
 
         self.btnSetRange = ctk.CTkButton(self.frameRange, border_color="white", border_width=3, text_color="white",
                                          text="Set Range", height=40, command=range_setter)
-        self.btnSetRange.grid(row=2, column=0, pady=10)
+        self.btnSetRange.grid(row=2, column=1, pady=10)
 
         self.lblOut = ValueDisplay(self.frameAnalogue, "Analogue Out (V):", 0, 0)
 
