@@ -267,7 +267,7 @@ class IRC081(usb_2408_2AO):
         i_e_should = Decimal(i_e_should * Decimal("1e-6"))
         bias_voltage = self.get_voltage_bias()
         value = ((i_e_should - (bias_voltage / RESISTOR1G11)) * (10 ** 5)) / self.factorIEmission0
-        print("emission_current_should 100uA: " + str(value))
+        # print("emission_current_should 100uA: " + str(value))
         self.bitE = 1
         self.update_digital_output()
         self.AOut(1, float(value))
@@ -280,7 +280,7 @@ class IRC081(usb_2408_2AO):
         i_e_should = Decimal(i_e_should * Decimal("1e-6"))
         bias_voltage = self.get_voltage_bias()
         value = ((i_e_should - (bias_voltage / RESISTOR1G11)) * (10 ** 4)) / self.factorIEmission1
-        print("emission_current_should 1mA: " + str(value))
+        # print("emission_current_should 1mA: " + str(value))
         self.bitE = 0
         self.update_digital_output()
         self.AOut(1, float(value))
