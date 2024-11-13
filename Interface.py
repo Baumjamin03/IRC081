@@ -257,7 +257,7 @@ class App(ctk.CTk):
         """
         try:
             voltage = Decimal(self.uOut)
-            d_value = voltage * 4095 // 10
+            d_value = voltage * 4096 // 10 - 1
             self.dPot.set_analogue_out(int(d_value))
         except Exception as er:
             print(er)
