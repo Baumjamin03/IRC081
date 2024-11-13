@@ -125,7 +125,7 @@ class IRC081(usb_2408_2AO):
         """
         output_value = ((self.bitA << 7) | (self.bitB << 6) | (self.bitC << 5) | (self.bitD << 4) | (self.bitE << 3) |
                         (self.bitF << 2) | (self.bitOn << 1))
-        print("digital output: " + str(output_value))
+        # print("digital output: " + str(output_value))
         if self.dOut != output_value:
             self.DOut(output_value)
             self.dOut = output_value
