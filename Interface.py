@@ -266,9 +266,13 @@ class App(ctk.CTk):
 
     def analogue_out_handler(self):
         pressure = Decimal(self.irc081.get_pressure_mbar())
-        self.uOut = (pressure - self.lowerRange) / (self.upperRange - self.lowerRange) * 10
-        print(f"Pressure: {pressure}, Range: {self.lowerRange}-{self.upperRange}, Output: {self.uOut}")
-        self.content_frame.pages["Settings"].lblOut.value.set("{:.3f}".format(self.uOut))
+
+        try:
+            self.uOut = (pressure - self.lowerRange) / (self.upperRange - self.lowerRange) * 10
+            print(f"Pressure: {pressure}, Range: {self.lowerRange}-{self.upperRange}, Output: {self.uOut}")
+            self.content_frame.pages["Settings"].lblOut.value.set("{:.3f}".format(self.uOut))
+        except DecimalException as er:
+            print("Analogue Handler ERR: " + str(er))
 
     def set_range(self):
         try:
