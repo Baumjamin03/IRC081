@@ -263,13 +263,9 @@ class App(ctk.CTk):
             print(er)
 
     def analogue_out_handler(self):
-        if not (self.lowerRange and self.upperRange):
-            self.uOut = self.irc081.get_ion_voltage() * 2
-            self.content_frame.pages["Settings"].lblOut.value.set("{:.3f}".format(self.uOut))
-        else:
-            pressure = self.irc081.get_pressure_mbar()
-            self.uOut = (pressure - self.lowerRange) / (self.upperRange - self.lowerRange) * 10
-            self.content_frame.pages["Settings"].lblOut.value.set("{:.3f}".format(self.uOut))
+        pressure = Decimal(self.irc081.get_pressure_mbar())
+        self.uOut = (pressure - self.lowerRange) / (self.upperRange - self.lowerRange) * 10
+        self.content_frame.pages["Settings"].lblOut.value.set("{:.3f}".format(self.uOut))
 
     def set_range(self):
         try:
@@ -282,6 +278,7 @@ class App(ctk.CTk):
 
         self.lowerRange = lower_range
         self.upperRange = upper_range
+        print(f"new real ranges: {self.upperRange} to {self.lowerRange}")
 
     def async_start_loop(self, loop: asyncio.AbstractEventLoop) -> None:
         """
