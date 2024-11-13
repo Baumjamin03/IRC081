@@ -237,6 +237,8 @@ class App(ctk.CTk):
             self.content_frame.pages["Home"].pressure.set("{:.5e}".format(self.irc081.get_pressure_mbar()))
             self.content_frame.pages["Home"].transmission.set("{:.2f}".format(self.irc081.get_transmission()))
 
+            self.analogue_out_handler()
+
         elif self.content_frame.current_page == "Settings":
             self.content_frame.pages["Settings"].values["iEmission"].value.set(
                 "{:.3f}".format(self.irc081.get_emission_current()))
