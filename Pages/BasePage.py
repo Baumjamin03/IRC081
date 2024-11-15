@@ -36,7 +36,7 @@ class ValueDisplay(ctk.CTkFrame):
 class HorizontalValueDisplay(ValueDisplay):
     def __init__(self, *args, value="", **kwargs):
         super().__init__(*args, **kwargs)
-        self.grid(pady=5, padx=5, sticky="ns")
+        self.grid(pady=10, padx=10, sticky="ns")
         self.lblValue.grid(row=0, column=1, padx=5)
         self.lblName.configure(anchor="e")
         self.lblValue.configure(anchor="w")

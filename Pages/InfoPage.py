@@ -1,4 +1,6 @@
 from Pages.BasePage import *
+import subprocess
+import datetime
 
 
 class InfoPageClass(BasePageClass):
@@ -8,11 +10,8 @@ class InfoPageClass(BasePageClass):
         """
         Ai cooked on this one ngl
         """
-
-        # Get git information
-        import subprocess
-        import datetime
-
+        self.configure(bg_color=infBlue)
+        self.grid(pady=5, padx=5)
         try:
             # Get latest commit hash
             version = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('utf-8').strip()

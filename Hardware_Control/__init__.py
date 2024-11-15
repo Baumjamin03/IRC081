@@ -7,5 +7,6 @@ __all__ = [
     'RS232Communication',
     'MCP4725',
     'IRC081',
-    'Decimal'
+    'Decimal',
+    'DecimalException'
 ]
