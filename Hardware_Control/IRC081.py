@@ -1,6 +1,6 @@
 # Backend File for IRC081 raspi extension
 
-from usb_2400 import *  # https://github.com/wjasper/Linux_Drivers/tree/master/USB
+from Hardware_Control.usb_2400 import *  # https://github.com/wjasper/Linux_Drivers/tree/master/USB
 from decimal import *
 import asyncio
 import configparser
@@ -367,7 +367,7 @@ def get_calibration_values(serial_number):
     """
     # Set up Configparser
     calibration_file = configparser.ConfigParser()
-    calibration_file.read('IRC081 Calibration.ini')
+    calibration_file.read('Assets/IRC081 Calibration.ini')
     # Create output array , write values and return
     output_array = []
     for key in calibration_file[serial_number]:

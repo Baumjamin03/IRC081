@@ -54,7 +54,7 @@ class SerialListener(threading.Thread):
         self.timeout = timeout
         self.running = True
 
-    def run(self):
+    def run(self) -> None:
         """
         Run the listener thread.
         """
@@ -71,13 +71,17 @@ class SerialListener(threading.Thread):
             else:
                 time.sleep(0.1)  # Sleep for 100ms before checking again
 
-    def stop(self):
+    def stop(self) -> None:
         """
         Stop the listener thread.
         """
         self.running = False
 
-    def read_command(self):
+    def read_command(self) -> None | bytes:
+        """
+        Reads Data from the RS232 serial Interface
+        :return: returns read bytes or None on timeout
+        """
         received_data = b''
         start_time = time.time()
         while True:
@@ -88,7 +92,6 @@ class SerialListener(threading.Thread):
                     return received_data
             else:
                 time.sleep(0.05)
-
             if time.time() - start_time > 5:
                 print("timeout, no termination character received")
                 return None

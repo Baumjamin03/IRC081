@@ -6,11 +6,11 @@ import time
 import atexit
 import platform
 from Pages import *
-from RS232 import RS232Communication, SerialListener
+from Hardware_Control.RS232 import RS232Communication, SerialListener
 
 if platform.system() != "Windows":
-    from IRC081 import IRC081
-    from AnalogueOut import MCP4725
+    from Hardware_Control.IRC081 import IRC081
+    from Hardware_Control.AnalogueOut import MCP4725
 
 infBlue = "#24517F"
 txtColor = "white"
@@ -217,7 +217,7 @@ class App(ctk.CTk):
                 self.update_aout()
                 self.analogue_out_handler()
 
-    def update_values(self):
+    def update_values(self) -> None:
         """
         Reads the Data from the IRC081 and Displays it.
         """
@@ -263,7 +263,7 @@ class App(ctk.CTk):
         except Exception as er:
             print(er)
 
-    def analogue_out_handler(self):
+    def analogue_out_handler(self) -> None:
         pressure = Decimal(self.irc081.get_pressure_mbar())
 
         try:
@@ -273,7 +273,7 @@ class App(ctk.CTk):
         except DecimalException as er:
             print("Analogue Handler ERR: " + str(er))
 
-    def set_range(self):
+    def set_range(self) -> None:
         try:
             lower_range = Decimal(self.content_frame.pages["Settings"].entryLower.get())
             upper_range = Decimal(self.content_frame.pages["Settings"].entryUpper.get())

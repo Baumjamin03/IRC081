@@ -10,9 +10,9 @@ class MCP4725:
         self.bus = smbus.SMBus(bus_number)
         self.address = address
 
-    def set_analogue_out(self, value: int):
+    def set_analogue_out(self,
+                         value: int) -> None:
         """
-
         :param value: 12 bit value for the DAC
         :return: None
         """

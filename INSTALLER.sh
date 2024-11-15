@@ -3,7 +3,7 @@
 # Define variables
 REPO_URL="https://github.com/Baumjamin03/IRC081.git"
 CLONE_DIR="./IRC081"
-UDEV_RULE_FILE="61-mcc.rules"
+UDEV_RULE_FILE="Assets/61-mcc.rules"
 DEST_UDEV_RULE_FILE="/etc/udev/rules.d"
 DEPENDENCIES="git python3 python3-pip python3-venv python3-tk python3-pil python3-pil.imagetk i2c-tools libjpeg-dev zlib1g-dev libpng-dev libfreetype6-dev"
 MAIN_SCRIPT="Interface.py"  # Updated main script name
@@ -96,9 +96,9 @@ source venv/bin/activate
 
 pip install --upgrade pip setuptools wheel
 
-if [ -f "requirements.txt" ]; then
+if [ -f "Assets/requirements.txt" ]; then
     echo "Installing Python dependencies in the virtual environment..."
-    pip install -r requirements.txt
+    pip install -r Assets/requirements.txt
 fi
 
 if [ -f "$UDEV_RULE_FILE" ]; then

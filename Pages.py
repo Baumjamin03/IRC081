@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from GlobalVariables import *
+from Assets.GlobalVariables import *
 from decimal import *
 
 
@@ -325,7 +325,7 @@ class TouchEntry(ctk.CTkEntry):
 
 
 class ValueDisplay(ctk.CTkFrame):
-    def __init__(self, master, text, row, col, **kwargs):
+    def __init__(self, master, text, row=0, col=0, **kwargs):
         super().__init__(master, fg_color="white", corner_radius=5, border_color="white", border_width=5, **kwargs)
         self.grid(row=row, column=col, sticky="nsew", pady=5, padx=5)
 
@@ -376,10 +376,14 @@ class InfoPage(BasePage):
             date = "N/A"
 
         self.info_labels = {
-            "Version": HorizontalValueDisplay(self, "Version:", 0, 0, value=version),
-            "Author": HorizontalValueDisplay(self, "Author:", 1, 0, value=author),
-            "Date": HorizontalValueDisplay(self, "Date:", 2, 0, value=date)
+            "AppName": HorizontalValueDisplay(self, "Name", value="IRC081-Interface"),
+            "Version": HorizontalValueDisplay(self, "Version:", value=version),
+            "Author": HorizontalValueDisplay(self, "Author:", value=author),
+            "Date": HorizontalValueDisplay(self, "Date:", value=date)
         }
+
+        for i, label in enumerate(self.info_labels.values()):
+            label.grid(row=i, column=0, sticky="nsew")
 
 
 class HorizontalValueDisplay(ValueDisplay):
