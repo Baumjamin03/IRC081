@@ -22,8 +22,8 @@ import sys
 
 from struct import *
 from datetime import datetime
-from thermocouple import *
-from mccUSB import *
+from Hardware_Control.thermocouple import *
+from Hardware_Control.mccUSB import *
 
 
 # Base class for AIn scan queue

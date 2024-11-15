@@ -1,16 +1,16 @@
-import tkinter as tk
+from threading import Thread
 from PIL import Image
 import asyncio
-from threading import Thread
 import time
 import atexit
 import platform
+import tkinter as tk
+import customtkinter as ctk
+
 from Pages import *
-from Hardware_Control.RS232 import RS232Communication, SerialListener
 
 if platform.system() != "Windows":
-    from Hardware_Control.IRC081 import IRC081
-    from Hardware_Control.AnalogueOut import MCP4725
+    from Hardware_Control import *
 
 infBlue = "#24517F"
 txtColor = "white"
@@ -96,7 +96,7 @@ class App(ctk.CTk):
         #                               font=("Arial", 18, "bold"), width=100, fg_color=infBlue)
         # self.lblStatus.grid(row=0, column=1, padx=70, sticky="nsew")
 
-        self.content_frame = PageManager(self, self.lblPage)
+        self.content_frame = PageManagerClass(self, self.lblPage)
         self.content_frame.grid(row=1, column=0, sticky="nsew", columnspan=3, padx=5)
 
         self.grid_columnconfigure(1, weight=1)
@@ -104,11 +104,11 @@ class App(ctk.CTk):
         self.grid_rowconfigure(1, weight=1)
         self.grid_rowconfigure(2, minsize=55)  # Ensure NavBar row height
 
-        self.content_frame.add_page("Home", HomePage(self.content_frame, sw_event=self.switch_event,
-                                                     emission_setter=self.set_emission_curr))
-        self.content_frame.add_page("Settings", SettingsPage(self.content_frame, range_setter=self.set_range))
-        self.content_frame.add_page("Plot", PlotPage(self.content_frame))
-        self.content_frame.add_page("Info", InfoPage(self.content_frame))
+        self.content_frame.add_page("Home", HomePageClass(self.content_frame, sw_event=self.switch_event,
+                                                          emission_setter=self.set_emission_curr))
+        self.content_frame.add_page("Settings", SettingsPageClass(self.content_frame, range_setter=self.set_range))
+        self.content_frame.add_page("Plot", PlotPageClass(self.content_frame))
+        self.content_frame.add_page("Info", InfoPageClass(self.content_frame))
 
         self.corner_buttons = {
             "top_left": self.create_corner_button(0, 0, lambda: self.content_frame.show_page("Settings"),
