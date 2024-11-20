@@ -10,5 +10,6 @@ __all__ = [
     'HomePageClass',
     'InfoPageClass',
     'PlotPageClass',
-    'PageManagerClass'
+    'PageManagerClass',
+    'TrapezoidFrame'
 ]

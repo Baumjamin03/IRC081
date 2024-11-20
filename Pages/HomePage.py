@@ -12,7 +12,7 @@ class HomePageClass(BasePageClass):
         self.grid_columnconfigure((0, 1), weight=1)
 
         self.vFrame = ctk.CTkFrame(self, fg_color=infBlue)
-        self.vFrame.grid(row=1, column=0, sticky="ew", padx=10, pady=5, columnspan=2)
+        self.vFrame.grid(row=1, column=0, sticky="ew", padx=10, pady=(5, 10), columnspan=2)
 
         self.vFrame.grid_rowconfigure(0, weight=1)
         self.vFrame.grid_columnconfigure((0, 1, 2, 3, 4, 5), weight=1)
