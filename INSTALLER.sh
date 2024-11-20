@@ -5,9 +5,9 @@ REPO_URL="https://github.com/Baumjamin03/IRC081.git"
 CLONE_DIR="./IRC081"
 UDEV_RULE_FILE="Assets/61-mcc.rules"
 DEST_UDEV_RULE_FILE="/etc/udev/rules.d"
-DEPENDENCIES="git python3 python3-pip python3-venv python3-tk python3-pil python3-pil.imagetk i2c-tools libjpeg-dev zlib1g-dev libpng-dev libfreetype6-dev"
+DEPENDENCIES="git python3 python3-pip python3-venv python3-tk python3-pil python3-pil.imagetk i2c-tools libjpeg-dev zlib1g-dev libpng-dev libfreetype6-dev imagemagick"
 MAIN_SCRIPT="Interface.py"
-SPLASH_IMAGE="Pictures/INFICON logo_Inspired Proven_2C_CMYK_vertical 1-Line.jpg"  # Expected path to splash image in repo
+SPLASH_IMAGE="Pictures/INFICON logo_Inspired Proven_2C_CMYK_vertical 1-Line.jpg"  # Updated image path
 SPLASH_DEST="/usr/share/plymouth/themes/custom"
 
 # Get the current username
@@ -18,14 +18,28 @@ setup_splash_screen() {
     echo "Setting up custom splash screen..."
 
     # Install plymouth if not already installed
-    sudo apt-get install -y plymouth plymouth-themes
+    sudo apt-get install -y plymouth plymouth-themes imagemagick
 
     # Create custom theme directory
     sudo mkdir -p "$SPLASH_DEST"
 
-    # Copy splash image if it exists
+    # Convert and prepare image if it exists
     if [ -f "$SPLASH_IMAGE" ]; then
-        sudo cp "$SPLASH_IMAGE" "$SPLASH_DEST/splash.png"
+        # Convert and resize image specifically for 800x480 screen
+        # - Resize to width of 800, maintaining aspect ratio
+        # - Crop to exactly 800x480 with center gravity
+        # - Add black background to ensure full screen coverage
+        sudo convert "$SPLASH_IMAGE" \
+            -resize 800x \
+            -gravity center \
+            -crop 800x480+0+0 \
+            -background black \
+            -gravity center \
+            -extent 800x480 \
+            "$SPLASH_DEST/splash.png"
+
+        # Ensure correct permissions
+        sudo chmod 644 "$SPLASH_DEST/splash.png"
     else
         echo "Warning: Splash image not found at $SPLASH_IMAGE"
         return 1
