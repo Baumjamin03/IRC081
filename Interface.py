@@ -88,7 +88,7 @@ class App(ctk.CTk):
         self.NavBar.grid_rowconfigure(0, weight=1)
 
         self.lblPage = ctk.CTkLabel(self.NavBar, text_color="white", text="", fg_color=infBlue,
-                                    font=("Arial", 22, "bold"), bg_color=infBlue, justify="center")
+                                    font=("Arial", 24, "bold"), bg_color=infBlue, justify="center")
         self.lblPage.pack(anchor="center", expand=True)
 
         # self.lblStatus = ctk.CTkLabel(self.NavBar, text="OFF", anchor="e", text_color="white", bg_color=infBlue,
