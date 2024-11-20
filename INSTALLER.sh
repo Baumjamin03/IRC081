@@ -6,16 +6,72 @@ CLONE_DIR="./IRC081"
 UDEV_RULE_FILE="Assets/61-mcc.rules"
 DEST_UDEV_RULE_FILE="/etc/udev/rules.d"
 DEPENDENCIES="git python3 python3-pip python3-venv python3-tk python3-pil python3-pil.imagetk i2c-tools libjpeg-dev zlib1g-dev libpng-dev libfreetype6-dev"
-MAIN_SCRIPT="Interface.py"  # Updated main script name
+MAIN_SCRIPT="Interface.py"
+SPLASH_IMAGE="Pictures/INFICON logo_Inspired Proven_2C_CMYK_vertical 1-Line.jpg"  # Expected path to splash image in repo
+SPLASH_DEST="/usr/share/plymouth/themes/custom"
 
 # Get the current username
 USER_NAME=$(whoami)
+
+# Function to set up splash screen
+setup_splash_screen() {
+    echo "Setting up custom splash screen..."
+
+    # Install plymouth if not already installed
+    sudo apt-get install -y plymouth plymouth-themes
+
+    # Create custom theme directory
+    sudo mkdir -p "$SPLASH_DEST"
+
+    # Copy splash image if it exists
+    if [ -f "$SPLASH_IMAGE" ]; then
+        sudo cp "$SPLASH_IMAGE" "$SPLASH_DEST/splash.png"
+    else
+        echo "Warning: Splash image not found at $SPLASH_IMAGE"
+        return 1
+    fi
+
+    # Create plymouth theme file
+    sudo bash -c "cat > $SPLASH_DEST/custom.plymouth << EOL
+[Plymouth Theme]
+Name=Custom Theme
+Description=Custom boot splash theme
+ModuleName=script
+
+[script]
+ImageDir=$SPLASH_DEST
+ScriptFile=$SPLASH_DEST/custom.script
+EOL"
+
+    # Create plymouth script file
+    sudo bash -c "cat > $SPLASH_DEST/custom.script << EOL
+Window.SetBackgroundTopColor(0, 0, 0);
+Window.SetBackgroundBottomColor(0, 0, 0);
+
+splash_image = Image(\"splash.png\");
+splash = Sprite(splash_image);
+
+fun refresh_callback ()
+  {
+    splash.SetX(Window.GetWidth() / 2 - splash_image.GetWidth() / 2);
+    splash.SetY(Window.GetHeight() / 2 - splash_image.GetHeight() / 2);
+  }
+
+Plymouth.SetRefreshFunction(refresh_callback);
+EOL"
+
+    # Install and set the custom theme
+    sudo update-alternatives --install /usr/share/plymouth/themes/default.plymouth default.plymouth "$SPLASH_DEST/custom.plymouth" 100
+    sudo update-alternatives --set default.plymouth "$SPLASH_DEST/custom.plymouth"
+
+    # Update initramfs
+    sudo update-initramfs -u
+}
 
 # Function to create launcher script
 create_launcher() {
     cat > launcher.sh << EOL
 #!/bin/bash
-sleep 10
 export DISPLAY=:0
 export XAUTHORITY=/home/$USER_NAME/.Xauthority
 export PYTHONPATH="\${PYTHONPATH}:/usr/lib/python3/dist-packages"
@@ -73,6 +129,16 @@ configure_interfaces() {
     fi
 }
 
+# Configure quiet boot
+configure_quiet_boot() {
+    echo "Configuring quiet boot..."
+    # Modify cmdline.txt to enable quiet boot
+    sudo sed -i 's/$/ quiet splash plymouth.ignore-serial-consoles/' /boot/cmdline.txt
+
+    # Disable boot text
+    sudo sed -i 's/^#\?disable_splash=.*$/disable_splash=0/' /boot/config.txt
+}
+
 # Main installation process
 echo "Updating package list and installing dependencies..."
 sudo apt update
@@ -87,6 +153,10 @@ if [ -d "$CLONE_DIR" ]; then
 fi
 git clone -b Interface2.0 $REPO_URL $CLONE_DIR
 cd $CLONE_DIR || exit
+
+echo "Setting up splash screen..."
+setup_splash_screen
+configure_quiet_boot
 
 echo "Creating a virtual environment..."
 python3 -m venv venv
