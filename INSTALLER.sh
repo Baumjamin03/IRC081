@@ -5,100 +5,35 @@ REPO_URL="https://github.com/Baumjamin03/IRC081.git"
 CLONE_DIR="./IRC081"
 UDEV_RULE_FILE="Assets/61-mcc.rules"
 DEST_UDEV_RULE_FILE="/etc/udev/rules.d"
-DEPENDENCIES="git python3 python3-pip python3-venv python3-tk python3-pil python3-pil.imagetk i2c-tools libjpeg-dev zlib1g-dev libpng-dev libfreetype6-dev imagemagick"
+DEPENDENCIES="git python3 python3-pip python3-venv python3-tk python3-pil python3-pil.imagetk i2c-tools libjpeg-dev zlib1g-dev libpng-dev libfreetype6-dev plymouth plymouth-themes"
 MAIN_SCRIPT="Interface.py"
-SPLASH_IMAGE="Pictures/INFICON logo_Inspired Proven_2C_CMYK_vertical 1-Line.jpg"
-SPLASH_DEST="/usr/share/plymouth/themes/custom"
+SPLASH_IMAGE="Pictures/INFICONlogo_InspiredProven_2C_CMYK_vertical1-Line.png"
 
 # Get the current username
 USER_NAME=$(whoami)
 
 # Function to set up splash screen
 setup_splash_screen() {
-    echo "Detailed Plymouth Splash Screen Setup..."
+    echo "Setting up custom splash screen..."
 
-    # Ensure dependencies are installed
-    sudo apt-get update
-    sudo apt-get install -y plymouth plymouth-themes imagemagick
+    # Backup original plymouth theme splash image
+    if [ -f "/usr/share/plymouth/themes/raspberrypi/splash.png" ]; then
+        sudo cp "/usr/share/plymouth/themes/pix/splash.png" "/usr/share/plymouth/themes/pix/splash.png.bak"
+    fi
 
-    # Create custom theme directory
-    sudo mkdir -p "$SPLASH_DEST"
-
-    # Convert and prepare image
+    # Copy the new splash image
     if [ -f "$SPLASH_IMAGE" ]; then
-        # Detailed image conversion for 800x480
-        sudo convert "$SPLASH_IMAGE" \
-            -resize 800x \
-            -gravity center \
-            -crop 800x480+0+0 \
-            -background black \
-            -gravity center \
-            -extent 800x480 \
-            "$SPLASH_DEST/splash.png"
-
-        sudo chmod 644 "$SPLASH_DEST/splash.png"
+        sudo cp "$SPLASH_IMAGE" "/usr/share/plymouth/themes/pix/splash.png"
+        sudo chmod 644 "/usr/share/plymouth/themes/pix/splash.png"
+        echo "Custom splash image installed directly in raspberrypi theme"
     else
         echo "ERROR: Splash image not found at $SPLASH_IMAGE"
         return 1
     fi
 
-    # Create more comprehensive Plymouth theme files
-    # Plymouth configuration file
-    sudo bash -c "cat > $SPLASH_DEST/inficon.plymouth << EOL
-[Plymouth Theme]
-Name=Inficon Custom Theme
-Description=Custom boot splash for Inficon
-ModuleName=script
-
-[script]
-ImageDir=$SPLASH_DEST
-ScriptFile=$SPLASH_DEST/inficon.script
-EOL"
-
-    # Plymouth script
-    sudo bash -c "cat > $SPLASH_DEST/inficon.script << EOL
-Window.SetBackgroundTopColor(0, 0, 0);
-Window.SetBackgroundBottomColor(0, 0, 0);
-
-splash_image = Image(\"splash.png\");
-splash = Sprite(splash_image);
-
-fun refresh_callback ()
-  {
-    splash.SetX(Window.GetWidth() / 2 - splash_image.GetWidth() / 2);
-    splash.SetY(Window.GetHeight() / 2 - splash_image.GetHeight() / 2);
-  }
-
-Plymouth.SetRefreshFunction(refresh_callback);
-EOL"
-
-    # Modify boot configuration
-    echo "Configuring boot parameters..."
-
-    # Modify cmdline.txt for Plymouth
-    sudo sed -i 's/quiet/quiet splash plymouth.ignore-serial-consoles/' /boot/cmdline.txt
-
-    # Ensure Plymouth is enabled in config.txt
-    if ! grep -q "^plymouth.enable" /boot/config.txt; then
-        echo "plymouth.enable=1" | sudo tee -a /boot/config.txt
-    fi
-
-    # Register and update Plymouth theme
-    echo "Registering Plymouth theme..."
-    sudo update-alternatives --install /usr/share/plymouth/themes/default.plymouth default.plymouth "$SPLASH_DEST/inficon.plymouth" 100
-    sudo update-alternatives --set default.plymouth "$SPLASH_DEST/inficon.plymouth"
-
-    # Update initramfs with verbose output
-    echo "Updating initramfs..."
-    sudo update-initramfs -u -v
-
-    # Additional debugging information
-    echo "Plymouth theme installation complete."
-    echo "Installed theme details:"
-    sudo plymouth-set-default-theme -l
-    sudo plymouth-set-default-theme -v
+    # Update initramfs
+    sudo update-initramfs -u
 }
-
 # Function to create launcher script
 create_launcher() {
     cat > launcher.sh << EOL
