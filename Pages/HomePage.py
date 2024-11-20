@@ -47,18 +47,19 @@ class HomePageClass(BasePageClass):
                                          height=40, command=emission_setter)
         self.btnEmission.grid(row=3, column=0, pady=5)
 
-        self.pressFrame = ctk.CTkFrame(self, fg_color="white", corner_radius=10)
+        self.pressFrame = ctk.CTkFrame(self, fg_color="white", corner_radius=10, width=450)
         self.pressFrame.grid(row=0, column=1, sticky="nsew", pady=30, padx=30)
         self.pressFrame.grid_columnconfigure(0, weight=1)
         self.pressFrame.grid_rowconfigure(0, weight=1)
+        self.pressFrame.grid_propagate(False)
 
-        self.pressure = ctk.DoubleVar(value=1.0083e-5)
+        self.pressure = ctk.DoubleVar(value=1.03083e-5)
         self.lblPressure = ctk.CTkLabel(self.pressFrame, textvariable=self.pressure, font=("Arial", 64, "bold"),
                                         anchor="center", text_color="black")
         self.lblPressure.grid(row=0, column=0, sticky="nsew", pady=10, padx=10)
 
         self.transmissionFrame = ctk.CTkFrame(self.pressFrame, fg_color="white")
-        self.transmissionFrame.grid(row=1, column=0, sticky="nsew", pady=10, padx=(50, 5))
+        self.transmissionFrame.grid(row=1, column=0, sticky="ns", pady=10)
         self.transmission = ctk.DoubleVar(value=98.55)
         ctk.CTkLabel(self.transmissionFrame, font=("Arial", 36, "bold"), text_color="black",
                      text="Transmission: ", fg_color="white", anchor="e").grid(row=0, column=0, padx=2)
