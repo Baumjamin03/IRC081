@@ -96,9 +96,9 @@ source venv/bin/activate
 
 pip install --upgrade pip setuptools wheel
 
-if [ -f "Assets/requirements.txt" ]; then
+if [ -f "./Assets/requirements.txt" ]; then
     echo "Installing Python dependencies in the virtual environment..."
-    pip install -r Assets/requirements.txt
+    pip install -r ./Assets/requirements.txt
 fi
 
 if [ -f "$UDEV_RULE_FILE" ]; then
