@@ -7,7 +7,7 @@ UDEV_RULE_FILE="Assets/61-mcc.rules"
 DEST_UDEV_RULE_FILE="/etc/udev/rules.d"
 DEPENDENCIES="git python3 python3-pip python3-venv python3-tk python3-pil python3-pil.imagetk i2c-tools libjpeg-dev zlib1g-dev libpng-dev libfreetype6-dev plymouth plymouth-themes"
 MAIN_SCRIPT="Interface.py"
-SPLASH_IMAGE="Pictures/INFICONlogo_InspiredProven_2C_CMYK_vertical1-Line.png"
+SPLASH_IMAGE="Pictures/INFICON_InspiredProvenE.PNG"
 
 # Get the current username
 USER_NAME=$(whoami)
