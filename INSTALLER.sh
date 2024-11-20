@@ -7,7 +7,7 @@ UDEV_RULE_FILE="Assets/61-mcc.rules"
 DEST_UDEV_RULE_FILE="/etc/udev/rules.d"
 DEPENDENCIES="git python3 python3-pip python3-venv python3-tk python3-pil python3-pil.imagetk i2c-tools libjpeg-dev zlib1g-dev libpng-dev libfreetype6-dev imagemagick"
 MAIN_SCRIPT="Interface.py"
-SPLASH_IMAGE="Pictures/INFICON logo_Inspired Proven_2C_CMYK_vertical 1-Line.jpg"  # Updated image path
+SPLASH_IMAGE="Pictures/INFICON logo_Inspired Proven_2C_CMYK_vertical 1-Line.jpg"
 SPLASH_DEST="/usr/share/plymouth/themes/custom"
 
 # Get the current username
@@ -15,20 +15,18 @@ USER_NAME=$(whoami)
 
 # Function to set up splash screen
 setup_splash_screen() {
-    echo "Setting up custom splash screen..."
+    echo "Detailed Plymouth Splash Screen Setup..."
 
-    # Install plymouth if not already installed
+    # Ensure dependencies are installed
+    sudo apt-get update
     sudo apt-get install -y plymouth plymouth-themes imagemagick
 
     # Create custom theme directory
     sudo mkdir -p "$SPLASH_DEST"
 
-    # Convert and prepare image if it exists
+    # Convert and prepare image
     if [ -f "$SPLASH_IMAGE" ]; then
-        # Convert and resize image specifically for 800x480 screen
-        # - Resize to width of 800, maintaining aspect ratio
-        # - Crop to exactly 800x480 with center gravity
-        # - Add black background to ensure full screen coverage
+        # Detailed image conversion for 800x480
         sudo convert "$SPLASH_IMAGE" \
             -resize 800x \
             -gravity center \
@@ -38,27 +36,27 @@ setup_splash_screen() {
             -extent 800x480 \
             "$SPLASH_DEST/splash.png"
 
-        # Ensure correct permissions
         sudo chmod 644 "$SPLASH_DEST/splash.png"
     else
-        echo "Warning: Splash image not found at $SPLASH_IMAGE"
+        echo "ERROR: Splash image not found at $SPLASH_IMAGE"
         return 1
     fi
 
-    # Create plymouth theme file
-    sudo bash -c "cat > $SPLASH_DEST/custom.plymouth << EOL
+    # Create more comprehensive Plymouth theme files
+    # Plymouth configuration file
+    sudo bash -c "cat > $SPLASH_DEST/inficon.plymouth << EOL
 [Plymouth Theme]
-Name=Custom Theme
-Description=Custom boot splash theme
+Name=Inficon Custom Theme
+Description=Custom boot splash for Inficon
 ModuleName=script
 
 [script]
 ImageDir=$SPLASH_DEST
-ScriptFile=$SPLASH_DEST/custom.script
+ScriptFile=$SPLASH_DEST/inficon.script
 EOL"
 
-    # Create plymouth script file
-    sudo bash -c "cat > $SPLASH_DEST/custom.script << EOL
+    # Plymouth script
+    sudo bash -c "cat > $SPLASH_DEST/inficon.script << EOL
 Window.SetBackgroundTopColor(0, 0, 0);
 Window.SetBackgroundBottomColor(0, 0, 0);
 
@@ -74,12 +72,31 @@ fun refresh_callback ()
 Plymouth.SetRefreshFunction(refresh_callback);
 EOL"
 
-    # Install and set the custom theme
-    sudo update-alternatives --install /usr/share/plymouth/themes/default.plymouth default.plymouth "$SPLASH_DEST/custom.plymouth" 100
-    sudo update-alternatives --set default.plymouth "$SPLASH_DEST/custom.plymouth"
+    # Modify boot configuration
+    echo "Configuring boot parameters..."
 
-    # Update initramfs
-    sudo update-initramfs -u
+    # Modify cmdline.txt for Plymouth
+    sudo sed -i 's/quiet/quiet splash plymouth.ignore-serial-consoles/' /boot/cmdline.txt
+
+    # Ensure Plymouth is enabled in config.txt
+    if ! grep -q "^plymouth.enable" /boot/config.txt; then
+        echo "plymouth.enable=1" | sudo tee -a /boot/config.txt
+    fi
+
+    # Register and update Plymouth theme
+    echo "Registering Plymouth theme..."
+    sudo update-alternatives --install /usr/share/plymouth/themes/default.plymouth default.plymouth "$SPLASH_DEST/inficon.plymouth" 100
+    sudo update-alternatives --set default.plymouth "$SPLASH_DEST/inficon.plymouth"
+
+    # Update initramfs with verbose output
+    echo "Updating initramfs..."
+    sudo update-initramfs -u -v
+
+    # Additional debugging information
+    echo "Plymouth theme installation complete."
+    echo "Installed theme details:"
+    sudo plymouth-set-default-theme -l
+    sudo plymouth-set-default-theme -v
 }
 
 # Function to create launcher script
@@ -145,7 +162,7 @@ configure_interfaces() {
 
 # Configure quiet boot
 configure_quiet_boot() {
-    echo "Configuring quiet boot..."
+    echo "-----Configuring quiet boot..."
     # Modify cmdline.txt to enable quiet boot
     sudo sed -i 's/$/ quiet splash plymouth.ignore-serial-consoles/' /boot/cmdline.txt
 
@@ -154,70 +171,70 @@ configure_quiet_boot() {
 }
 
 # Main installation process
-echo "Updating package list and installing dependencies..."
+echo "-----Updating package list and installing dependencies..."
 sudo apt update
 sudo apt install -y $DEPENDENCIES
 
-echo "Configuring I2C and Serial interfaces..."
+echo "-----Configuring I2C and Serial interfaces..."
 configure_interfaces
 
-echo "Cloning the repository..."
+echo "-----Cloning the repository..."
 if [ -d "$CLONE_DIR" ]; then
     rm -rf "$CLONE_DIR"
 fi
 git clone -b Interface2.0 $REPO_URL $CLONE_DIR
 cd $CLONE_DIR || exit
 
-echo "Setting up splash screen..."
+echo "-----Setting up splash screen..."
 setup_splash_screen
 configure_quiet_boot
 
-echo "Creating a virtual environment..."
+echo "-----Creating a virtual environment..."
 python3 -m venv venv
 
-echo "Activating the virtual environment..."
+echo "-----Activating the virtual environment..."
 source venv/bin/activate
 
 pip install --upgrade pip setuptools wheel
 
 if [ -f "./Assets/requirements.txt" ]; then
-    echo "Installing Python dependencies in the virtual environment..."
+    echo "-----Installing Python dependencies in the virtual environment..."
     pip install -r ./Assets/requirements.txt
 fi
 
 if [ -f "$UDEV_RULE_FILE" ]; then
-    echo "Copying udev rules file to /etc/udev/rules.d/"
+    echo "-----Copying udev rules file to /etc/udev/rules.d/"
     sudo cp "$UDEV_RULE_FILE" "$DEST_UDEV_RULE_FILE"
 else
-    echo "No udev rules file found in the repository. Skipping udev rule installation."
+    echo "-----No udev rules file found in the repository. Skipping udev rule installation."
 fi
 
-echo "Creating launcher script..."
+echo "-----Creating launcher script..."
 create_launcher
 
-echo "Creating and enabling systemd service..."
+echo "-----Creating and enabling systemd service..."
 create_service
 sudo systemctl daemon-reload
 sudo systemctl enable irc081.service
 
-echo "Setting up X server permissions..."
-echo "xhost +local:$USER_NAME" >> ~/.bashrc
+echo "-----Setting up X server permissions..."
+echo "-----xhost +local:$USER_NAME" >> ~/.bashrc
 xhost +local:$USER_NAME
 
-echo "Reloading udev rules..."
+echo "-----Reloading udev rules..."
 sudo udevadm control --reload
 
-echo "Installation complete! The application will start automatically on next boot."
-echo "To start it now without rebooting, run: sudo systemctl start irc081.service"
-echo "To check status: sudo systemctl status irc081.service"
+echo "-----Installation complete! The application will start automatically on next boot."
+echo "-----To start it now without rebooting, run: sudo systemctl start irc081.service"
+echo "-----To check status: sudo systemctl status irc081.service"
 
 # Verify main script exists
 if [ ! -f "$MAIN_SCRIPT" ]; then
-    echo "WARNING: $MAIN_SCRIPT not found in repository. Please verify the main script name."
+    echo "--WARNING: $MAIN_SCRIPT not found in repository. Please verify the main script name."
 fi
 
 # Offer to reboot
-read -p "Would you like to reboot now? (y/n) " -n 1 -r
+read -p "-Would you like to reboot now? (y/n) " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
