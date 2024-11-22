@@ -6,6 +6,8 @@ CLONE_DIR="./IRC081"
 DEPENDENCIES="git python3 python3-pip python3-venv python3-tk python3-pil python3-pil.imagetk i2c-tools libjpeg-dev zlib1g-dev libpng-dev libfreetype6-dev plymouth plymouth-themes"
 MAIN_SCRIPT="Interface.py"
 
+USER_NAME=$(whoami)
+
 create_launcher() {
     cat > launcher.sh << EOL
 #!/bin/bash
@@ -18,6 +20,33 @@ source venv/bin/activate
 python3 Interface.py
 EOL
     chmod +x launcher.sh
+}
+
+create_service() {
+    sudo bash -c "cat > /etc/systemd/system/irc081.service << EOL
+[Unit]
+Description=IRC081 Python Application
+After=network.target graphical.target
+
+[Service]
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/$USER_NAME/.Xauthority
+User=$USER_NAME
+Group=$USER_NAME
+ExecStart=/home/$USER_NAME/IRC081/launcher.sh
+Restart=always
+RestartSec=10
+Type=simple
+KillMode=process
+TimeoutStopSec=20
+
+# Logging setup
+StandardOutput=append:/home/$USER_NAME/irc081.log
+StandardError=append:/home/$USER_NAME/irc081.log
+
+[Install]
+WantedBy=graphical.target
+EOL"
 }
 
 # Main installation process
@@ -47,6 +76,7 @@ echo "-----Creating launcher script..."
 create_launcher
 
 echo "-----Creating and enabling systemd service..."
+create_service
 sudo systemctl daemon-reload
 sudo systemctl enable irc081.service
 
