@@ -31,7 +31,6 @@ setup_splash_screen() {
         return 1
     fi
 
-    # Update initramfs
     sudo update-initramfs -u
 }
 # Function to create launcher script
@@ -153,7 +152,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable irc081.service
 
 echo "-----Setting up X server permissions..."
-echo "-----xhost +local:$USER_NAME" >> ~/.bashrc
+echo "xhost +local:$USER_NAME" >> ~/.bashrc
 xhost +local:$USER_NAME
 
 echo "-----Reloading udev rules..."
