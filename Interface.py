@@ -220,6 +220,8 @@ class App(ctk.CTk):
         """
         Reads the Data from the IRC081 and Displays it.
         """
+        self.content_frame.pages["Plot"].add_point(self.irc081.get_pressure_mbar())
+
         if self.content_frame.current_page == "Home":
             self.content_frame.pages["Home"].Voltages["Wehnelt"].value.set(
                 "{:.3f}".format(self.irc081.get_voltage_wehnelt()))
@@ -248,6 +250,9 @@ class App(ctk.CTk):
                 "{:.3f}".format(self.irc081.get_ion_current()))
             self.content_frame.pages["Settings"].lblOut.value.set(
                 "{:.3f}".format(self.uOut))
+
+        elif self.content_frame.current_page == "Plot":
+            self.content_frame.pages["Plot"].update_plot()
 
     def update_aout(self) -> None:
         """

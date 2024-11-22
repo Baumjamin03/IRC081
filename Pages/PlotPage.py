@@ -27,10 +27,10 @@ class PlotPageClass(BasePageClass):
 
     def add_point(self, y_value):
         current_time = datetime.now()
-
         self.x_data.append(current_time)
         self.y_data.append(y_value)
 
+    def update_plot(self):
         self.ax.clear()
         self.ax.plot(self.x_data, self.y_data, marker='o')
 
