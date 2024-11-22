@@ -56,8 +56,7 @@ class PlotPageClass(BasePageClass):
         self.ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S'))
         self.ax.xaxis.set_major_locator(mdates.AutoDateLocator())
 
-        self.ax.set_xlabel('Time', fontsize=14)
-        self.ax.set_ylabel('Pressure', fontsize=14)
+        self.ax.set_ylabel('Pressure in mBar', fontsize=14)
         self.ax.set_title('Pressure Plot', fontsize=14)
 
         # Rotate x-axis labels for better readability
