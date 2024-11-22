@@ -6,6 +6,20 @@ CLONE_DIR="./IRC081"
 DEPENDENCIES="git python3 python3-pip python3-venv python3-tk python3-pil python3-pil.imagetk i2c-tools libjpeg-dev zlib1g-dev libpng-dev libfreetype6-dev plymouth plymouth-themes"
 MAIN_SCRIPT="Interface.py"
 
+create_launcher() {
+    cat > launcher.sh << EOL
+#!/bin/bash
+export DISPLAY=:0
+export XAUTHORITY=/home/$USER_NAME/.Xauthority
+export PYTHONPATH="\${PYTHONPATH}:/usr/lib/python3/dist-packages"
+
+cd /home/$USER_NAME/IRC081
+source venv/bin/activate
+python3 Interface.py
+EOL
+    chmod +x launcher.sh
+}
+
 # Main installation process
 echo "-----Updating package list and installing dependencies..."
 sudo apt update
@@ -28,6 +42,9 @@ if [ -f "./Assets/requirements.txt" ]; then
     echo "-----Installing Python dependencies in the virtual environment..."
     pip install -r ./Assets/requirements.txt
 fi
+
+echo "-----Creating launcher script..."
+create_launcher
 
 echo "-----Creating and enabling systemd service..."
 sudo systemctl daemon-reload
