@@ -19,7 +19,7 @@ class PlotPageClass(BasePageClass):
 
         # Create Matplotlib figure with smaller size
         self.figure = plt.Figure(figsize=(6.2, 3.2), dpi=100)
-        self.ax = self.figure.add_subplot(111)
+        self.ax = self.figure.add_subplot(1, 1, 1)
 
         # Embed plot in CustomTkinter frame
         self.canvas = FigureCanvasTkAgg(self.figure, master=self.plot_frame)
@@ -30,20 +30,21 @@ class PlotPageClass(BasePageClass):
         self.x_data = []
         self.y_data = []
         self.data_count = 0  # Counter for total data points
-
-        # Set the maximum number of points to display
         self.max_points = 20
 
     def add_point(self, y_value):
         self.data_count += 1
         current_time = datetime.now().strftime('%H:%M:%S')
+
+        if len(self.x_data) >= self.max_points:
+            # Remove first element (oldest point)
+            self.x_data.pop(0)
+            self.y_data.pop(0)
+
+        # Add new point at the end
         self.x_data.append(current_time)
         self.y_data.append(y_value)
 
-        # Keep only the most recent max_points
-        if len(self.x_data) > self.max_points:
-            self.x_data = self.x_data[-self.max_points:]
-            self.y_data = self.y_data[-self.max_points:]
 
     def update_plot(self):
         self.ax.clear()
