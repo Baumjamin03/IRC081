@@ -7,7 +7,14 @@ from GlobalVariables import *
 
 
 class PlotPageClass(BasePageClass):
-    def __init__(self, master, **kwargs):
+    def __init__(self,
+                 master: any,
+                 **kwargs: any):
+        """
+        creates a page based on a ctk.CTkFrame that contains a data plotter
+        :param master: ctk.CTkFrame containing the plotpage
+        :param kwargs: passed onto ctk.CTkFrame
+        """
         super().__init__(master, **kwargs)
 
         self.grid_columnconfigure(0, weight=1)
@@ -19,16 +26,13 @@ class PlotPageClass(BasePageClass):
 
         self.plot_frame.grid_propagate(False)
 
-        # Create Matplotlib figure with smaller size
         self.figure = plt.Figure(figsize=(6.2, 3.0), dpi=100)
         self.ax = self.figure.add_subplot(1, 1, 1)
 
-        # Embed plot in CustomTkinter frame
         self.canvas = FigureCanvasTkAgg(self.figure, master=self.plot_frame)
         self.canvas_widget = self.canvas.get_tk_widget()
         self.canvas_widget.pack(fill='both', expand=True)
 
-        # Initialize data lists
         self.x_data = []
         self.y_data = []
         self.data_count = 0  # Counter for total data points
@@ -36,19 +40,24 @@ class PlotPageClass(BasePageClass):
 
         self.update_plot()
 
-    def add_point(self, y_value):
+    def add_point(self, y_value) -> None:
+        """
+        appends a data point with timestamp
+        :param y_value: pressure value
+        """
         current_time = datetime.now()
 
         if len(self.x_data) >= self.max_points:
-            # Remove first element (oldest point)
             self.x_data.pop(0)
             self.y_data.pop(0)
 
-        # Add new point at the end
         self.x_data.append(current_time)
         self.y_data.append(y_value)
 
-    def update_plot(self):
+    def update_plot(self) -> None:
+        """
+        updates the graphical elements of the plot
+        """
         self.ax.clear()
         self.ax.plot(self.x_data, self.y_data, marker='o', markersize=4)
 
@@ -64,7 +73,10 @@ class PlotPageClass(BasePageClass):
 
         self.canvas.draw()
 
-    def clear_plot(self):
+    def clear_plot(self) -> None:
+        """
+        clears the plot
+        """
         self.x_data = []
         self.y_data = []
         self.ax.clear()
