@@ -365,10 +365,8 @@ def get_calibration_values(serial_number):
     """
     Inserts the calibration values by serial number into an array and returns it
     """
-    # Set up Configparser
     calibration_file = configparser.ConfigParser()
     calibration_file.read('Assets/IRC081 Calibration.ini')
-    # Create output array , write values and return
     output_array = []
     for key in calibration_file[serial_number]:
         key_value = calibration_file[serial_number][key]
