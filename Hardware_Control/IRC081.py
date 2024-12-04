@@ -336,5 +336,9 @@ def get_calibration_values(serial_number) -> dict[str, Decimal]:
     output_dict = {}
     for key in calibration_file[serial_number]:
         key_value = calibration_file[serial_number][key]
-        output_dict[key] = Decimal(key_value)
+        try:
+            output_dict[key] = Decimal(key_value)
+        except Exception as e:
+            print(f"Error in get_calibration_values: {e}")
+            output_dict[key] = 0
     return output_dict
