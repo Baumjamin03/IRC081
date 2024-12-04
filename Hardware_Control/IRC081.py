@@ -1,4 +1,5 @@
 # Backend File for IRC081 raspi extension
+from concurrent.futures.thread import ThreadPoolExecutor
 
 from Hardware_Control.usb_2400 import *  # https://github.com/wjasper/Linux_Drivers/tree/master/USB
 from decimal import *
@@ -41,6 +42,7 @@ class IRC081(usb_2408_2AO):
                   ' CJC Gradient =', format(self.CJCGradient[chan], '.5f'))
         print('\nMFG Calibration date: ', self.getMFGCAL())
 
+        self.executor = ThreadPoolExecutor()
 
         self.measMode = self.SINGLE_ENDED
         self.measGain = self.BP_10V
@@ -106,22 +108,22 @@ class IRC081(usb_2408_2AO):
         """
         while not False:
             try:
-                self.uDeflector = Decimal(await self.get_voltage(0)) * Decimal(10.1) * self.factorAI0
-                self.uWehnelt = Decimal(await self.get_voltage(1)) * Decimal(10.1) * self.factorAI1
+                self.uDeflector = Decimal(await self.async_get_voltage(0)) * Decimal(10.1) * self.factorAI0
+                self.uWehnelt = Decimal(await self.async_get_voltage(1)) * Decimal(10.1) * self.factorAI1
                 await asyncio.sleep(0.1)
-                self.uFaraday = Decimal(await self.get_voltage(3)) * Decimal(51) * self.factorAI3
-                self.uBias = Decimal(await self.get_voltage(5)) * Decimal(10.1) * self.factorAI5
-                self.uCage = Decimal(await self.get_voltage(2)) * Decimal(51) * self.factorAI2
-                self.iFil = Decimal(await self.get_voltage(6)) * self.factorAI6
+                self.uFaraday = Decimal(await self.async_get_voltage(3)) * Decimal(51) * self.factorAI3
+                self.uBias = Decimal(await self.async_get_voltage(5)) * Decimal(10.1) * self.factorAI5
+                self.uCage = Decimal(await self.async_get_voltage(2)) * Decimal(51) * self.factorAI2
+                self.iFil = Decimal(await self.async_get_voltage(6)) * self.factorAI6
                 await asyncio.sleep(0.1)
                 self.iCollector = await self.read_ion_current()
                 self.iEmission = await self.read_emission_curr()
-                self.uEmission = await self.set_emission_prop()
-                self.pressure = await self.calculate_pressure_mbar()
+                self.uEmission = self.set_emission_prop()
+                self.pressure = self.calculate_pressure_mbar()
                 await asyncio.sleep(0.1)
                 self.iFaraday = await self.read_faraday_current()
                 self.iCage = await self.read_cage_current()
-                self.transmission = (self.get_faraday_current() / self.get_emission_current()) * 100
+                self.transmission = (await self.async_get_voltage(11) / await self.async_get_voltage(12)) * 100
                 await asyncio.sleep(0.2)
             except Exception as e:
                 print(f"Error in refresh_controller_data: {e}")
@@ -153,7 +155,7 @@ class IRC081(usb_2408_2AO):
         print("A: " + str(self.bitA) + " B: " + str(self.bitB) + " C: " + str(self.bitC))
         return
 
-    async def calculate_pressure_mbar(self):
+    def calculate_pressure_mbar(self):
         """
         Calculates the pressure from the ion current, emission current and sensitivity factor.
         """
@@ -168,7 +170,7 @@ class IRC081(usb_2408_2AO):
         """
         self.setEmission = curr
 
-    async def set_emission_prop(self):
+    def set_emission_prop(self):
         """
         Calculates and sets the voltage level corresponding to the set emission current.
         Returns voltage level
@@ -179,9 +181,9 @@ class IRC081(usb_2408_2AO):
         emission_current = Decimal(current)
         voltage = 0
         if emission_current < 100:
-            voltage = await self.set_emission_current_should_100u(emission_current)
+            voltage = self.set_emission_current_should_100u(emission_current)
         elif emission_current < 1000:
-            voltage = await self.set_emission_current_should_1m(emission_current)
+            voltage = self.set_emission_current_should_1m(emission_current)
         else:
             print("current too big")
         return voltage
@@ -190,7 +192,7 @@ class IRC081(usb_2408_2AO):
         """
         Reads and calculates actual emission current.
         """
-        emission_voltage = Decimal(await self.get_voltage(13))
+        emission_voltage = Decimal(await self.async_get_voltage(13))
         bias_voltage = self.get_voltage_bias()
         if self.bitE == 0:
             value = (emission_voltage * DECIMAL_2E5 * 10 + (bias_voltage / RESISTOR1G11)) * self.factorIEmission1
@@ -202,7 +204,7 @@ class IRC081(usb_2408_2AO):
         """
         Reads and calculates faraday current.
         """
-        voltage = Decimal(await self.get_voltage(11))
+        voltage = Decimal(await self.async_get_voltage(11))
         faraday_voltage = self.get_voltage_faraday()
         if self.bitE == 0:
             value = (voltage * DECIMAL_1_98E5 * 10 - (faraday_voltage / RESISTOR1G02)) * self.factorIF1
@@ -214,7 +216,7 @@ class IRC081(usb_2408_2AO):
         """
         Reads and calculates cage current.
         """
-        voltage = Decimal(await self.get_voltage(10))
+        voltage = Decimal(await self.async_get_voltage(10))
         cage_voltage = self.get_voltage_cage()
         if self.bitE == 0:
             value = (voltage * DECIMAL_1_98E5 * 10 - (cage_voltage / RESISTOR1G02)) * self.factorIC1
@@ -226,7 +228,7 @@ class IRC081(usb_2408_2AO):
         """
         Reads and calculates ion current respective to the range.
         """
-        voltage = await self.get_voltage(15)
+        voltage = await self.async_get_voltage(15)
         self.uIon = voltage
         current = 0
         if self.ionRange == 0:
@@ -287,13 +289,20 @@ class IRC081(usb_2408_2AO):
         self.AOut(1, float(value))
         return value
 
-    async def get_voltage(self, channel):
+    def get_voltage(self, channel):
         """
         Reads and returns voltage of selected analog input channel (0-15).
         """
-        data, flags = await self.AIn(channel, self.measMode, self.measGain, self.measRate)
+        data, flags = self.AIn(channel, self.measMode, self.measGain, self.measRate)
         data = int(data * self.Cal[self.measGain].slope + self.Cal[self.measGain].intercept)
         return self.volts(self.measGain, data)
+
+    async def async_get_voltage(self, channel):
+        """
+        Reads and returns voltage of selected analog input channel (0-15) asynchronously.
+        """
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(self.executor, self.get_voltage, channel)
 
     def measurement_start(self):
         """

@@ -290,21 +290,17 @@ class App(ctk.CTk):
         self.upperRange = upper_range
         print(f"new real ranges: {self.upperRange} to {self.lowerRange}")
 
-    def async_start_loop(self, loop: asyncio.AbstractEventLoop) -> None:
-        """
-        Target function for Thread
-        :param loop: asyncio eventloop
-        """
-        asyncio.set_event_loop(loop)
-        loop.run_forever()
-
     def start_loop_in_thread(self, func) -> None:
         """
         Takes a function, creates an async Loop and runs it in a Thread
         :param func: any function to be run in a separate Thread
         """
+        def run_loop(_loop):
+            asyncio.set_event_loop(_loop)
+            loop.run_forever()
+
         loop = asyncio.new_event_loop()
-        loop_thread = Thread(target=self.async_start_loop, args=(loop,), daemon=True)
+        loop_thread = Thread(target=run_loop, args=(loop,), daemon=True)
         loop_thread.start()
         asyncio.run_coroutine_threadsafe(func(), loop)
 
