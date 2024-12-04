@@ -105,23 +105,27 @@ class IRC081(usb_2408_2AO):
         Reads and Calculates measurement Data
         """
         while not False:
-            self.uDeflector = Decimal(await self.get_voltage(0)) * Decimal(10.1) * self.factorAI0
-            self.uWehnelt = Decimal(await self.get_voltage(1)) * Decimal(10.1) * self.factorAI1
-            await asyncio.sleep(0.1)
-            self.uFaraday = Decimal(await self.get_voltage(3)) * Decimal(51) * self.factorAI3
-            self.uBias = Decimal(await self.get_voltage(5)) * Decimal(10.1) * self.factorAI5
-            self.uCage = Decimal(await self.get_voltage(2)) * Decimal(51) * self.factorAI2
-            self.iFil = Decimal(await self.get_voltage(6)) * self.factorAI6
-            await asyncio.sleep(0.1)
-            self.iCollector = await self.read_ion_current()
-            self.iEmission = await self.read_emission_curr()
-            self.uEmission = await self.set_emission_prop()
-            self.pressure = await self.calculate_pressure_mbar()
-            await asyncio.sleep(0.1)
-            self.iFaraday = await self.read_faraday_current()
-            self.iCage = await self.read_cage_current()
-            self.transmission = (self.get_faraday_current() / self.get_emission_current()) * 100
-            await asyncio.sleep(0.2)
+            try:
+                self.uDeflector = Decimal(await self.get_voltage(0)) * Decimal(10.1) * self.factorAI0
+                self.uWehnelt = Decimal(await self.get_voltage(1)) * Decimal(10.1) * self.factorAI1
+                await asyncio.sleep(0.1)
+                self.uFaraday = Decimal(await self.get_voltage(3)) * Decimal(51) * self.factorAI3
+                self.uBias = Decimal(await self.get_voltage(5)) * Decimal(10.1) * self.factorAI5
+                self.uCage = Decimal(await self.get_voltage(2)) * Decimal(51) * self.factorAI2
+                self.iFil = Decimal(await self.get_voltage(6)) * self.factorAI6
+                await asyncio.sleep(0.1)
+                self.iCollector = await self.read_ion_current()
+                self.iEmission = await self.read_emission_curr()
+                self.uEmission = await self.set_emission_prop()
+                self.pressure = await self.calculate_pressure_mbar()
+                await asyncio.sleep(0.1)
+                self.iFaraday = await self.read_faraday_current()
+                self.iCage = await self.read_cage_current()
+                self.transmission = (self.get_faraday_current() / self.get_emission_current()) * 100
+                await asyncio.sleep(0.2)
+            except Exception as e:
+                print(f"Error in refresh_controller_data: {e}")
+                await asyncio.sleep(1)
 
     def update_digital_output(self):
         """
