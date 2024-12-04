@@ -26,7 +26,9 @@ class IRC081(usb_2408_2AO):
         getcontext().prec = 15
 
         self.executor = ThreadPoolExecutor()
-        self.loop = asyncio.get_event_loop()
+
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
 
         self.measMode = self.SINGLE_ENDED
         self.measGain = self.BP_10V
