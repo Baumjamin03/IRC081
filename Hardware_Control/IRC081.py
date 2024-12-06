@@ -98,7 +98,7 @@ class IRC081(usb_2408_2AO):
                 self.uEmission = await self.set_emission_prop()
                 self.pressure = self.calculate_pressure_mbar()
 
-                self.iFaraday = await self.read_faraday_current()
+                self.iFaraday = self.read_faraday_current()
                 self.iCage = self.read_cage_current()
                 self.transmission = (self.get_faraday_current() / self.get_emission_current()) * 100
 
@@ -217,7 +217,7 @@ class IRC081(usb_2408_2AO):
         await self.loop.run_in_executor(self.executor, self.AOut, (0, float(value)))
         return
 
-    async def read_faraday_current(self):
+    def read_faraday_current(self):
         """
         Reads and calculates faraday current.
         """
@@ -229,7 +229,7 @@ class IRC081(usb_2408_2AO):
             value = (voltage * DECIMAL_1_98E5 - (faraday_voltage / RESISTOR1G02)) * self.factors["factor i faraday0"]
         return value
 
-    async def read_cage_current(self):
+    def read_cage_current(self):
         """
         Reads and calculates cage current.
         """
