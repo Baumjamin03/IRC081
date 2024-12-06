@@ -124,7 +124,7 @@ class App(ctk.CTk):
 
         if self.irc081 is not None:
             print("starting meas. thread")
-            self.start_loop_in_thread(self.irc081.refresh_controller_data)
+            self.irc081.start_refresh_thread()
 
     def shutdown(self) -> None:
         """
@@ -289,20 +289,6 @@ class App(ctk.CTk):
         self.lowerRange = lower_range
         self.upperRange = upper_range
         print(f"new real ranges: {self.upperRange} to {self.lowerRange}")
-
-    def start_loop_in_thread(self, func) -> None:
-        """
-        Takes a function, creates an async Loop and runs it in a Thread
-        :param func: any function to be run in a separate Thread
-        """
-        def run_loop(_loop):
-            asyncio.set_event_loop(_loop)
-            loop.run_forever()
-
-        loop = asyncio.new_event_loop()
-        loop_thread = Thread(target=run_loop, args=(loop,), daemon=True)
-        loop_thread.start()
-        asyncio.run_coroutine_threadsafe(func(), loop)
 
     def handle_serial_data(self,
                            data) -> None | str:

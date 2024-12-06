@@ -1,5 +1,7 @@
 # Backend File for IRC081 raspi extension
 from concurrent.futures.thread import ThreadPoolExecutor
+from threading import Thread
+
 from Hardware_Control.usb_2400 import *  # https://github.com/wjasper/Linux_Drivers/tree/master/USB
 from decimal import *
 import asyncio
@@ -28,7 +30,6 @@ class IRC081(usb_2408_2AO):
         self.executor = ThreadPoolExecutor()
 
         self.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(self.loop)
 
         self.measMode = self.SINGLE_ENDED
         self.measGain = self.BP_10V
@@ -67,6 +68,15 @@ class IRC081(usb_2408_2AO):
         self.transmission = 0
 
         self.dOut = 0
+
+    def start_refresh_thread(self):
+        def run_loop():
+            asyncio.set_event_loop(self.loop)
+            self.loop.run_forever()
+
+        loop_thread = Thread(target=run_loop, daemon=True)
+        loop_thread.start()
+        asyncio.run_coroutine_threadsafe(self.refresh_controller_data(), self.loop)
 
     async def refresh_controller_data(self):
         """
