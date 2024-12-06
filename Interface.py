@@ -212,9 +212,13 @@ class App(ctk.CTk):
         if self.running:
             self.after(1000, self.measurement_loop)
             if self.irc081 is not None:
-                self.update_values()
-                self.update_aout()
-                self.analogue_out_handler()
+                try:
+                    self.update_values()
+                    self.update_aout()
+                    self.analogue_out_handler()
+                    print("Beep Beep (good kind of Beep)")
+                except Exception as er:
+                    print(f"Error in measurement_loop: {er}")
 
     def update_values(self) -> None:
         """
@@ -272,7 +276,7 @@ class App(ctk.CTk):
 
         try:
             self.uOut = (pressure - self.lowerRange) / (self.upperRange - self.lowerRange) * 10
-            print(f"Pressure: {pressure}, Range: {self.lowerRange}-{self.upperRange}, Output: {self.uOut}")
+            #print(f"Pressure: {pressure}, Range: {self.lowerRange}-{self.upperRange}, Output: {self.uOut}")
             self.content_frame.pages["Settings"].lblOut.value.set("{:.3f}".format(self.uOut))
         except DecimalException as er:
             print("Analogue Handler ERR: " + str(er))
