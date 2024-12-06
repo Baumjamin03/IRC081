@@ -86,12 +86,12 @@ class IRC081(usb_2408_2AO):
             try:
                 await self.read_analogue_inputs()
 
-                self.uDeflector = self.aInput[0] * D10d1 * self.factors["Factor AI0"]
-                self.uWehnelt = self.aInput[1] * D10d1 * self.factors["Factor AI1"]
-                self.uCage = self.aInput[2] * D51 * self.factors["Factor AI2"]
-                self.uFaraday = self.aInput[3] * D51 * self.factors["Factor AI3"]
-                self.uBias = self.aInput[5] * D10d1 * self.factors["Factor AI5"]
-                self.iFil = self.aInput[6] * self.factors["Factor AI6"]
+                self.uDeflector = self.aInput[0] * D10d1 * self.factors["factor ai0"]
+                self.uWehnelt = self.aInput[1] * D10d1 * self.factors["factor ai1"]
+                self.uCage = self.aInput[2] * D51 * self.factors["factor ai2"]
+                self.uFaraday = self.aInput[3] * D51 * self.factors["factor ai3"]
+                self.uBias = self.aInput[5] * D10d1 * self.factors["factor ai5"]
+                self.iFil = self.aInput[6] * self.factors["factor ai6"]
 
                 self.iCollector = await self.compute_ion_current()
                 self.iEmission = self.compute_emission_curr()
@@ -127,7 +127,7 @@ class IRC081(usb_2408_2AO):
         """
         i_e_should = Decimal(i_e_should * Decimal("1e-6"))
         bias_voltage = self.get_voltage_bias()
-        value = ((i_e_should - (bias_voltage / RESISTOR1G11)) * (10 ** 5)) / self.factors["Factor I Emission0"]
+        value = ((i_e_should - (bias_voltage / RESISTOR1G11)) * (10 ** 5)) / self.factors["factor i emission0"]
         self.bitE = 1
         await self.update_digital_output()
         self.AOut(1, float(value))
@@ -139,7 +139,7 @@ class IRC081(usb_2408_2AO):
         """
         i_e_should = Decimal(i_e_should * Decimal("1e-6"))
         bias_voltage = self.get_voltage_bias()
-        value = ((i_e_should - (bias_voltage / RESISTOR1G11)) * (10 ** 4)) / self.factors["Factor I Emission1"]
+        value = ((i_e_should - (bias_voltage / RESISTOR1G11)) * (10 ** 4)) / self.factors["factor i emission1"]
         self.bitE = 0
         await self.update_digital_output()
         self.AOut(1, float(value))
@@ -176,9 +176,9 @@ class IRC081(usb_2408_2AO):
         emission_voltage = self.aInput[13]
         bias_voltage = self.get_voltage_bias()
         if self.bitE == 0:
-            value = (emission_voltage * DECIMAL_2E5 * 10 + (bias_voltage / RESISTOR1G11)) * self.factors["Factor I Emission1"]
+            value = (emission_voltage * DECIMAL_2E5 * 10 + (bias_voltage / RESISTOR1G11)) * self.factors["factor i emission1"]
         else:
-            value = (emission_voltage * DECIMAL_2E5 + (bias_voltage / RESISTOR1G11)) * self.factors["Factor I Emission0"]
+            value = (emission_voltage * DECIMAL_2E5 + (bias_voltage / RESISTOR1G11)) * self.factors["factor i emission0"]
         return value
 
     def get_voltage(self, channel: int) -> Decimal:
@@ -212,7 +212,7 @@ class IRC081(usb_2408_2AO):
         """
         if i_fil_max > 2:
             i_fil_max = 2
-        value = i_fil_max / self.factors["Factor AI6"]
+        value = i_fil_max / self.factors["factor ai6"]
         print("filament_current_limitation: " + str(value))
         await self.loop.run_in_executor(self.executor, self.AOut, (0, float(value)))
         return
@@ -224,9 +224,9 @@ class IRC081(usb_2408_2AO):
         voltage = self.aInput[11]
         faraday_voltage = self.get_voltage_faraday()
         if self.bitE == 0:
-            value = (voltage * DECIMAL_1_98E5 * 10 - (faraday_voltage / RESISTOR1G02)) * self.factors["Factor I Faraday1"]
+            value = (voltage * DECIMAL_1_98E5 * 10 - (faraday_voltage / RESISTOR1G02)) * self.factors["factor i faraday1"]
         else:
-            value = (voltage * DECIMAL_1_98E5 - (faraday_voltage / RESISTOR1G02)) * self.factors["Factor I Faraday0"]
+            value = (voltage * DECIMAL_1_98E5 - (faraday_voltage / RESISTOR1G02)) * self.factors["factor i faraday0"]
         return value
 
     async def read_cage_current(self):
@@ -236,9 +236,9 @@ class IRC081(usb_2408_2AO):
         voltage = self.aInput[10]
         cage_voltage = self.get_voltage_cage()
         if self.bitE == 0:
-            value = (voltage * DECIMAL_1_98E5 * 10 - (cage_voltage / RESISTOR1G02)) * self.factors["Factor I Cage1"]
+            value = (voltage * DECIMAL_1_98E5 * 10 - (cage_voltage / RESISTOR1G02)) * self.factors["factor i cage1"]
         else:
-            value = (voltage * DECIMAL_1_98E5 - (cage_voltage / RESISTOR1G02)) * self.factors["Factor I Cage0"]
+            value = (voltage * DECIMAL_1_98E5 - (cage_voltage / RESISTOR1G02)) * self.factors["factor i cage0"]
         return value
 
     async def compute_ion_current(self):
@@ -247,7 +247,7 @@ class IRC081(usb_2408_2AO):
         """
         voltage = self.aInput[15]
         current = Decimal(voltage) * DECIMAL_1E11 * (10 ** (6 - self.ionRange)) * self.factors[
-            f"Factor I Ion{6 - self.ionRange}"]
+            f"factor i ion{6 - self.ionRange}"]
 
         if (voltage > 4.5) and (self.ionRange > 0):
             self.ionRange = self.ionRange - 1
