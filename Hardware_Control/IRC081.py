@@ -38,7 +38,7 @@ class IRC081(usb_2408_2AO):
         self.set_filament_current_limitation(2)
 
         self.factors = get_calibration_values(self.getSerialNumber())
-        self.aInput = []
+        self.aInput = [0] * 16
 
         self.bitA = 1
         self.bitB = 1
