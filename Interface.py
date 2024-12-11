@@ -6,12 +6,13 @@ import atexit
 import platform
 import customtkinter as ctk
 
+from GlobalVariables import infBlue
 from Pages import *
 
 if platform.system() != "Windows":
     from Hardware_Control import *
 
-infBlue = "#24517F"
+
 txtColor = "white"
 
 
@@ -169,6 +170,7 @@ class App(ctk.CTk):
             command=command,
             fg_color="white",
             hover_color=infBlue,
+            hover=False
         )
         button.grid(row=row, column=col, sticky="nsew")
         return button
