@@ -46,7 +46,7 @@ class RS232Communication(Serial):
 class SerialListener(threading.Thread):
     def __init__(self, com, callback, timeout=5.0):
         """
-        Initialize the serial listener with the given RS232 communication object and callback function.
+        Initialize the serial listener with the given RS232 communication interface and callback function.
         """
         super().__init__()
         self.com = com

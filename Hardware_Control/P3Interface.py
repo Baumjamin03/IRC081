@@ -1,15 +1,110 @@
 import abc
 import struct
 import logging
-
+from serial import Serial
+import asyncio
+from concurrent.futures.thread import ThreadPoolExecutor
+from threading import Thread
 from crccheck.crc import Crc
-
-from .constants import *
-from .exceptions import *
+from enum import IntEnum
 
 log = logging.getLogger(__name__)
 
+class RS232Communication(Serial):
+    def __init__(self, port='/dev/ttyAMA10', baudrate=9600):
+        """
+        Initialize the RS232 communication object with the given port and baudrate.
+        """
+        super().__init__(port, baudrate)
 
+        self.executor = ThreadPoolExecutor()
+        self.loop = asyncio.new_event_loop()
+        self.p3 = P3V0(self)
+
+    def open_port(self):
+        """
+        Open the serial port for communication.
+        """
+        try:
+            self.open()
+        except Exception as e:
+            print(f"Error opening port: {e}")
+
+    def close_port(self):
+        """
+        Close the serial port.
+        """
+        if self is not None:
+            self.close()
+
+    def start_listener_thread(self):
+        def run_loop():
+            asyncio.set_event_loop(self.loop)
+            self.loop.run_forever()
+
+        loop_thread = Thread(target=run_loop, daemon=True)
+        loop_thread.start()
+        asyncio.run_coroutine_threadsafe(self.serial_listener_start(), self.loop)
+
+    async def serial_listener_start(self):
+        while True:
+            await asyncio.sleep(0.1)
+            if self.in_waiting:
+                pass
+
+
+"""
+I copied everything below this line, ngl I don't understand it
+----------------------------------------------------------------------
+"""
+class P3ValueError(Exception):
+    pass
+
+
+class P3CommError(Exception):
+    pass
+
+
+class P3DevError(Exception):
+    def __init__(self, err_code=0, err_code_ext=0):
+        self.err_code = err_code
+        self.err_code_ext = err_code_ext
+
+
+class ADDR(IntEnum):
+    RS232 = 0x00
+    RS485 = 0x00
+
+
+class ID(IntEnum):
+    NONE = -1
+    MASTER = 0x00
+    PCG5X0 = 0x02
+    MPG5X0 = 0x04
+    CDG_STRIPE = 0x06
+    BxG5X0 = 0x08
+    PXG100 = 0x09
+    DDG = 0x0A
+    OPG550 = 0x0B
+    PSG5X0 = 0x12
+    MAG5X0 = 0x14
+    CDG_DCI = 0x16
+    CDG_SYNE = 0x20
+
+
+class HEADER_ACK(IntEnum):
+    MASTER = 0
+    SLAVE = 1
+
+
+CRC_PARAMS = {
+    "width": 16,
+    "poly": int(0x1021),
+    "initvalue": int(0xFFFF),
+    "reflect_input": True,
+    "reflect_output": True,
+    "xor_output": 0,
+}
 # ----------------------------------------------------------------------
 # Abstract specification of protocol 3
 # ----------------------------------------------------------------------
