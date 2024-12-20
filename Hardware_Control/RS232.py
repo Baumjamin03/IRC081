@@ -3,6 +3,98 @@ import threading
 import time
 
 
+def handle_serial_data(self,
+                       data) -> None | str:
+    """
+    serial data handling for more information visit:
+    https://colla.inficon.com/display/VCRD/RS232+Protocoll
+    """
+    while data.endswith(b'\r') or data.endswith(b'\n'):
+        data = data[:len(data) - 1]
+    response = data + b'\r\n'
+
+    if len(data) < 2:
+        return response + b'Error, cmd too short\r\n'
+
+    command_code = data[:2]
+    print("command: " + str(command_code))
+
+    writing = False
+    value = None
+    if len(data) > 2:
+        writing = data[2:3] == b';'
+        if not writing:
+            return response + b'cmd too long or invalid writing operator\r\n'
+        value = data[3:].decode()
+
+    if command_code == b'AL':  # Analogue range lower
+        if writing:
+            if 'E-' in value:
+                try:
+                    self.content_frame.pages["Setting"].entryLower.set(value)
+                    self.set_range()
+                except ValueError:
+                    response += b'value Error'
+            else:
+                response += b'missing [E-]'
+        else:
+            response += str(self.lowerRange).encode()
+    elif command_code == b'AU':  # Analogue range upper
+        if writing:
+            if 'E-' in value:
+                try:
+                    self.content_frame.pages["Setting"].entryUpper.set(value)
+                    self.set_range()
+                except ValueError:
+                    response += b'value Error'
+            else:
+                response += b'missing [E-]'
+        else:
+            response += str(self.upperRange).encode()
+    elif command_code == b'AV':  # Analogue Voltage
+        response += str(self.uOut).encode()
+    elif command_code == b'EC':  # Emission current
+        if writing:
+            self.content_frame.pages["Home"].entryEmission.delete(0, ctk.END)
+            self.content_frame.pages["Home"].entryEmission.insert(0, value)
+            answ = self.set_emission_curr()
+            if answ is not None:
+                response += answ
+        else:
+            response += str(self.content_frame.pages["Home"].entryEmission.get()).encode()
+    elif command_code == b'ME':  # Measurement on/off
+        if writing:
+            if value == "1":
+                if not self.running:
+                    self.switch_event()
+            else:
+                if self.running:
+                    self.switch_event()
+        else:
+            response += self.running
+    elif command_code == b'VW':  # Get Voltage Wehnelt
+        response += str(self.content_frame.pages["Home"].Voltages["Wehnelt"].value.get()).encode()
+    elif command_code == b'VC':  # Get Voltage Cage
+        response += str(self.content_frame.pages["Home"].Voltages["Cage"].value.get()).encode()
+    elif command_code == b'VF':  # Get Voltage Faraday
+        response += str(self.content_frame.pages["Home"].Voltages["Faraday"].value.get()).encode()
+    elif command_code == b'VB':  # Get Voltage Bias
+        response += str(self.content_frame.pages["Home"].Voltages["Bias"].value.get()).encode()
+    elif command_code == b'VD':  # Get Voltage Deflector
+        response += str(self.content_frame.pages["Home"].Voltages["Deflector"].value.get()).encode()
+    elif command_code == b'IF':  # Get Filament Current
+        response += str(self.content_frame.pages["Home"].Voltages["Current"].value.get()).encode()
+    elif command_code == b'PR':  # Get Pressure
+        response += str(self.content_frame.pages["Home"].pressure.get()).encode()
+    else:
+        response += b'unknown command'
+
+    if response.endswith(b'\r\n'):
+        return response
+    else:
+        return response + b'\r\n'
+
+
 class RS232Communication(Serial):
     def __init__(self, port='/dev/ttyAMA10', baudrate=9600):
         """

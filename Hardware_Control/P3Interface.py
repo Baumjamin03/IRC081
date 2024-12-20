@@ -11,7 +11,7 @@ from enum import IntEnum
 log = logging.getLogger(__name__)
 
 class RS232Communication(Serial):
-    def __init__(self, port='/dev/ttyAMA10', baudrate=9600):
+    def __init__(self, data_callback, port='/dev/ttyAMA10', baudrate=115200):
         """
         Initialize the RS232 communication object with the given port and baudrate.
         """
@@ -19,7 +19,7 @@ class RS232Communication(Serial):
 
         self.executor = ThreadPoolExecutor()
         self.loop = asyncio.new_event_loop()
-        self.p3 = P3V0(self)
+        self.p3 = P3V0(self, data_callback)
 
     def open_port(self):
         """
@@ -48,9 +48,9 @@ class RS232Communication(Serial):
 
     async def serial_listener_start(self):
         while True:
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(0.05)
             if self.in_waiting:
-                pass
+                self.p3.receive_send_data()
 
 
 """
@@ -127,7 +127,7 @@ class P3(metaclass=abc.ABCMeta):
     POSITION_CMD = 0
     POSITION_DATA = 0
 
-    def __init__(self, int_obj):
+    def __init__(self, int_obj, data_callback=None):
         """
         Parameters
         ---------
@@ -136,6 +136,7 @@ class P3(metaclass=abc.ABCMeta):
         """
         log.debug("Instantiating P3")
         self._crccalc = Crc(**CRC_PARAMS)
+        self.data_callback = data_callback
         self._interface = int_obj
         self._protocol_version = None
         self._known_devices = [dev.value for dev in ID]
@@ -151,59 +152,11 @@ class P3(metaclass=abc.ABCMeta):
 
     @property
     def comm_handle(self):
-        return self._interface.comm_handle
+        return self._interface
 
     @abc.abstractmethod
     def _encode_package(self, cmd, pid, data=None) -> tuple:
         pass
-
-    def _decode_package(self, cmd, pid, data_rcv: bytes) -> bytes:
-        """
-        Extracts the data from a raw response message.
-        Raises exception in case of an incoming error message.
-
-        Parameters
-        ----------
-        cmd : int
-        pid : int
-        data_rcv : bytes
-            data as received from device
-
-        Returns
-        -------
-        bytes
-
-        Raises
-        ------
-        P3DevError:
-            - if device returns an error message
-        P3CommError:
-            - in case of a correspondence mismatch
-        """
-        log.debug(f"Decode package for cmd: {cmd}, pid: {pid}.")
-        dev_id = data_rcv[1]
-        if dev_id in self._known_devices:
-            self._dev_id = ID(dev_id)
-        cmd_rcv = data_rcv[self.POSITION_CMD]
-        pid_rcv = data_rcv[self.POSITION_PID: self.POSITION_PID + 2]
-        pid_rcv = struct.unpack(">H", pid_rcv)[0]
-
-        comm_ok = (cmd_rcv == cmd + 1) and (pid_rcv == pid)
-        dev_error = pid_rcv == 65535
-
-        data = data_rcv[self.POSITION_DATA: -2]
-        if dev_error:
-            error_code = data[0]
-            error_ext = None
-            if len(data) == 2:
-                error_ext = data[1]
-            raise P3DevError(error_code, err_code_ext=error_ext)
-        if not comm_ok:
-            raise P3CommError(
-                "Correspondence mismatch: " "try to run the command again."
-            )
-        else:
-            return data
 
     def _send_raw(self, comm_handle, data_raw: bytes):
         log.debug("write bytes")
@@ -213,56 +166,22 @@ class P3(metaclass=abc.ABCMeta):
     def _receive_raw(self, comm_handle):
         pass
 
-    def send_receive_data(self, cmd, pid, data=None, timeout=None) -> bytes:
-        """
-        check data format and send data as bytearray. The protocol P3
-        requires the acknowledgement of every command, which is why
-        sending and receiving data have to be bundled together
+    def receive_send_data(self):
+        log.debug("receive/send data")
 
-        Parameters
-        ----------
-        cmd : int
-            A decimal integer
-        pid : int
-            Another decimal integer
-        data : tuple[int], list[int]
-            tuple or list of 8-bit ints
-        timeout : float or None
-            communication timeout, can be used for commands that take
-            longer to execute.
-
-        Returns
-        -------
-        bytes
-            raw bytestream sent by device
-
-        Raises
-        ------
-        P3ValueError
-            - if passed list contains values larger than 8-bit
-            - if input data is too large
-        P3CommError
-            - if checksum fails, if pid does not match sent pid
-        P3DevError
-            - if device returns an error
-        """
-        log.debug("send/receive data")
-        timeout_old = self.comm_handle.timeout
-        set_timeout = timeout is not None
-        if set_timeout:
-            log.debug(f"set timeout {timeout}")
-            self.comm_handle.timeout = timeout
-
-        pkg_send = bytes(self._encode_package(cmd, pid, data=data))
         with self.comm_handle as com_obj:
-            self._send_raw(com_obj, pkg_send)
             pkg_rcv = self._receive_raw(com_obj)
+            if pkg_rcv:
+                cmd = pkg_rcv[self.POSITION_CMD]
+                pid = struct.unpack(">H", pkg_rcv[self.POSITION_PID: self.POSITION_PID + 2])[0]
+                read_data = pkg_rcv[self.POSITION_DATA: -2]
 
-        if set_timeout:
-            log.debug(f"reset timeout {timeout}")
-            self.comm_handle.timeout = timeout_old
-        return self._decode_package(cmd, pid, pkg_rcv)
+                if read_data:
+                    data = self.data_callback(cmd, pid, read_data)
 
+                pkg_send = bytes(self._encode_package(cmd, pid, data=data))
+
+                self._send_raw(com_obj, pkg_send)
 
 # ----------------------------------------------------------------------
 # Actual implementation of protocol family 3
@@ -271,7 +190,6 @@ class P3V0(P3):
     """
     Base class for communication with devices, using P3V0.
     """
-
     PREAMBLE_HEADER_MASTER = (
         ADDR.RS232.value,
         ID.MASTER.value,
@@ -291,13 +209,13 @@ class P3V0(P3):
     POSITION_CMD = 4
     POSITION_DATA = 9
 
-    def __init__(self, interface_obj):
+    def __init__(self, interface_obj, data_callback):
         """
         Parameters
         ---------
         interface_obj: InterfaceImpl
         """
-        super().__init__(interface_obj)
+        super().__init__(interface_obj, data_callback)
         log.debug("Instantiating P3V0")
         self._protocol_version = "P3V0"
 
