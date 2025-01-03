@@ -1,14 +1,11 @@
 import abc
 import struct
-import logging
 from serial import Serial
 import asyncio
 from concurrent.futures.thread import ThreadPoolExecutor
 from threading import Thread
 from crccheck.crc import Crc
 from enum import IntEnum
-
-log = logging.getLogger(__name__)
 
 class RS232Communication(Serial):
     def __init__(self, data_callback, port='/dev/ttyAMA10', baudrate=115200):
@@ -143,7 +140,6 @@ class P3(metaclass=abc.ABCMeta):
         int_obj : InterfaceImpl
             An instance of an interface implementation (InterfaceSerial,...).
         """
-        log.debug("Instantiating P3")
         self._crccalc = Crc(**CRC_PARAMS)
         self.data_callback = data_callback
         self._interface = int_obj
@@ -179,9 +175,7 @@ class P3(metaclass=abc.ABCMeta):
 
     def receive_send_data(self):
         # log.debug("receive/send data")
-        print("check 1")
         with self.comm_handle as com_obj:
-            print("check 2")
             pkg_rcv = self._receive_raw(com_obj)
             print("check 3")
             if pkg_rcv:
@@ -229,7 +223,6 @@ class P3V0(P3):
         interface_obj: InterfaceImpl
         """
         super().__init__(interface_obj, data_callback)
-        log.debug("Instantiating P3V0")
         self._protocol_version = "P3V0"
 
     def _encode_package(self, cmd, pid, data=None) -> tuple:
@@ -250,7 +243,6 @@ class P3V0(P3):
         tuple :
             list of ints each representing a byte.
         """
-        log.debug(f"Encode package for cmd: {cmd}, pid: {pid}.")
 
         data = [] if data is None else data
         if len(data) > self.MAX_LENGTH_DATA:
@@ -284,7 +276,6 @@ class P3V0(P3):
         return tuple(pkg_payload)
 
     def _receive_raw(self, com_obj):
-        log.debug("read bytes")
         pkg_rcv = b""
 
         # preamble & header
