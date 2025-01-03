@@ -44,10 +44,10 @@ class RS232Communication(Serial):
 
         loop_thread = Thread(target=run_loop, daemon=True)
         loop_thread.start()
-        asyncio.run_coroutine_threadsafe(self.serial_listener_start(), self.loop)
+        asyncio.run_coroutine_threadsafe(self.serial_listener_loop(), self.loop)
         print("Listener thread started")
 
-    async def serial_listener_start(self):
+    async def serial_listener_loop(self):
         counter = 0
         while True:
             await asyncio.sleep(0.1)
@@ -176,7 +176,7 @@ class P3(metaclass=abc.ABCMeta):
     def receive_send_data(self):
         log.debug("receive/send data")
 
-        with self._interface as com_obj:
+        with self.comm_handle as com_obj:
             pkg_rcv = self._receive_raw(com_obj)
             if pkg_rcv:
                 cmd = pkg_rcv[self.POSITION_CMD]

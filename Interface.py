@@ -44,7 +44,7 @@ class App(ctk.CTk):
                 time.sleep(1)
 
         if self.com is not None:
-            self.com.serial_listener_start()
+            self.com.start_listener_thread()
 
         self.uOut = 0
         self.lowerRange = 0
@@ -132,7 +132,7 @@ class App(ctk.CTk):
         """
         if self.irc081 is not None:
             self.irc081.measurement_end()
-            self.RS232Listener.stop()
+
             self.com.close_port()
 
     def create_corner_button(self,
