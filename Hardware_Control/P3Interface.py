@@ -49,7 +49,7 @@ class RS232Communication(Serial):
         while True:
             try:
                 await asyncio.sleep(0.1)
-                if self.in_waiting:
+                if self.in_waiting > 0:
                     print("Data received")
                     try:
                         self.p3.receive_send_data()
