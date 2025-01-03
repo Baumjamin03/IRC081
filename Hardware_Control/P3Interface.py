@@ -48,14 +48,17 @@ class RS232Communication(Serial):
         while True:
             try:
                 await asyncio.sleep(0.1)
-                if self.in_waiting is not None:
+                if self.is_open:
                     if int(self.in_waiting) > 0:
                         print("Data received")
                         try:
                             self.p3.receive_send_data()
                         except Exception as e:
                             print(f"Error reading data: {e}")
-
+                            await asyncio.sleep(1)
+                else:
+                    self.open_port()
+                    await asyncio.sleep(1)
             except Exception as e:
                 await asyncio.sleep(1)
                 print(f"Unexpected Error in listener loop: {e}")
