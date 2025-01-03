@@ -53,7 +53,6 @@ class RS232Communication(Serial):
                 print("Data received")
                 self.p3.receive_send_data()
 
-
 """
 I copied everything below this line, ngl I don't understand it
 ----------------------------------------------------------------------
@@ -171,7 +170,7 @@ class P3(metaclass=abc.ABCMeta):
     def receive_send_data(self):
         log.debug("receive/send data")
 
-        with self.comm_handle as com_obj:
+        with self._interface as com_obj:
             pkg_rcv = self._receive_raw(com_obj)
             if pkg_rcv:
                 cmd = pkg_rcv[self.POSITION_CMD]
