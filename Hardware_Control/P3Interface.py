@@ -53,7 +53,10 @@ class RS232Communication(Serial):
             await asyncio.sleep(0.1)
             if self.in_waiting:
                 print("Data received")
-                self.p3.receive_send_data()
+                try:
+                    self.p3.receive_send_data()
+                except Exception as e:
+                    print(f"Error reading data: {e}")
             counter += 1
             if counter >= 10:
                 print("Listening for data...")
