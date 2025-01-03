@@ -45,13 +45,19 @@ class RS232Communication(Serial):
         loop_thread = Thread(target=run_loop, daemon=True)
         loop_thread.start()
         asyncio.run_coroutine_threadsafe(self.serial_listener_start(), self.loop)
+        print("Listener thread started")
 
     async def serial_listener_start(self):
+        counter = 0
         while True:
             await asyncio.sleep(0.1)
             if self.in_waiting:
                 print("Data received")
                 self.p3.receive_send_data()
+            counter += 1
+            if counter >= 10:
+                print("Listening for data...")
+                counter = 0
 
 """
 I copied everything below this line, ngl I don't understand it
