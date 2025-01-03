@@ -48,7 +48,7 @@ class RS232Communication(Serial):
 
     async def serial_listener_start(self):
         while True:
-            await asyncio.sleep(0.05)
+            await asyncio.sleep(0.1)
             if self.in_waiting:
                 self.p3.receive_send_data()
 
@@ -158,7 +158,8 @@ class P3(metaclass=abc.ABCMeta):
     def _encode_package(self, cmd, pid, data=None) -> tuple:
         pass
 
-    def _send_raw(self, comm_handle, data_raw: bytes):
+    @staticmethod
+    def _send_raw(comm_handle, data_raw: bytes):
         log.debug("write bytes")
         comm_handle.write(data_raw)
 
