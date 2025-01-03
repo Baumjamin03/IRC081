@@ -169,7 +169,8 @@ class P3(metaclass=abc.ABCMeta):
 
     @staticmethod
     def _send_raw(comm_handle, data_raw: bytes):
-        log.debug("write bytes")
+        # log.debug("write bytes")
+        print("responding with data")
         comm_handle.write(data_raw)
 
     @abc.abstractmethod
@@ -177,20 +178,22 @@ class P3(metaclass=abc.ABCMeta):
         pass
 
     def receive_send_data(self):
-        log.debug("receive/send data")
-
+        # log.debug("receive/send data")
+        print("check 1")
         with self.comm_handle as com_obj:
+            print("check 2")
             pkg_rcv = self._receive_raw(com_obj)
+            print("check 3")
             if pkg_rcv:
                 cmd = pkg_rcv[self.POSITION_CMD]
                 pid = struct.unpack(">H", pkg_rcv[self.POSITION_PID: self.POSITION_PID + 2])[0]
                 read_data = pkg_rcv[self.POSITION_DATA: -2]
-
+                print("check 4")
                 if read_data:
                     data = self.data_callback(cmd, pid, read_data)
 
                 pkg_send = bytes(self._encode_package(cmd, pid, data=data))
-
+                print("check 5")
                 self._send_raw(com_obj, pkg_send)
 
 # ----------------------------------------------------------------------
