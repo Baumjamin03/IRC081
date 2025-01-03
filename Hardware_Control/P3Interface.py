@@ -49,7 +49,7 @@ class RS232Communication(Serial):
             try:
                 await asyncio.sleep(0.1)
                 if self.in_waiting is not None:
-                    if self.in_waiting > 0:
+                    if int(self.in_waiting) > 0:
                         print("Data received")
                         try:
                             self.p3.receive_send_data()
@@ -283,7 +283,6 @@ class P3V0(P3):
         # preamble & header
         header_size = len(self.PREAMBLE_HEADER_MASTER)
         pkg_rcv += com_obj.read(header_size)
-        print("check 1")
         if len(pkg_rcv) < header_size:
             # may happen when running into timeout problems.
             msg = (
