@@ -310,15 +310,15 @@ class App(ctk.CTk):
             case 207:  # P3_PID_SERIAL_NUMBER
                 return 0
             case 208:  # P3_PID_PRODUCT_NAME
-                return b'IRG081'
+                return tuple(ord(char) for char in "IRG081")
             case 21:  # P3_PID_INI_NAME
-                return b'IRG081'
+                return tuple(ord(char) for char in "IRG081")
             case 22:  # P3_PID_INI_VERSION
-                return b'IRG081'
+                return tuple(ord(char) for char in "IRG081")
             case 209:  # P3_PID_MANUF_NAME
-                return b'Inficon'
+                return tuple(ord(char) for char in "Inficon")
             case 210:  # P3_PID_MANUF_MODEL
-                return b'IRG081'
+                return tuple(ord(char) for char in "IRG081")
             case 212:  # P3_PID_DEVSTATE
                 return 0
             case 218:  # P3_PID_REVISION
