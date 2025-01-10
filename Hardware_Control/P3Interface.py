@@ -189,6 +189,8 @@ class P3(metaclass=abc.ABCMeta):
                 data = []
                 if read_data:
                     data = self.data_callback(cmd, pid, read_data)
+                else :
+                    data = self.data_callback(cmd, pid)
                 print("check 4")
 
                 pkg_send = bytes(self._encode_package(cmd, pid, data=data))
