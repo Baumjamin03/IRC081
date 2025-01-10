@@ -310,6 +310,6 @@ class P3V0(P3):
         checksum_rcvd = struct.unpack("<H", pkg_rcv[-2::])[0]
         checksum_calc = self._crccalc.calc(pkg_rcv[0:-2])
         if checksum_rcvd != checksum_calc:
-            raise P3CommError("data: Checksum mismatch")
+            raise P3CommError(f"data: Checksum mismatch rcvd {checksum_rcvd} != calc {checksum_calc}")
 
         return pkg_rcv
