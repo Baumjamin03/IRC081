@@ -302,13 +302,13 @@ class App(ctk.CTk):
 
         match pid:
             case 102:  # P3_PID_PASSWORD
-                return 0
+                return (0,)
             case 103:  # P3_PID_RESET
-                return 0
+                return (0,)
             case 200:  # P3_PID_PRODUCTION_NUMBER
-                return 0
+                return (0,)
             case 207:  # P3_PID_SERIAL_NUMBER
-                return 0
+                return (0,)
             case 208:  # P3_PID_PRODUCT_NAME
                 return tuple(ord(char) for char in "IRG081")
             case 21:  # P3_PID_INI_NAME
@@ -320,15 +320,15 @@ class App(ctk.CTk):
             case 210:  # P3_PID_MANUF_MODEL
                 return tuple(ord(char) for char in "IRG081")
             case 212:  # P3_PID_DEVSTATE
-                return 0
+                return (0,)
             case 218:  # P3_PID_REVISION
-                return 0
+                return (0,)
             case 222:  # P3_PID_Pressure
                 return self.irc081.get_pressure_mbar()
             case 224:  # P3_PID_UNIT
-                return 0
+                return (0,)
             case _:
-                return 0
+                return (0,)
 
 
 if __name__ == "__main__":
