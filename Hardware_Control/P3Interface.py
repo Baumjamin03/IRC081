@@ -186,6 +186,7 @@ class P3(metaclass=abc.ABCMeta):
                 cmd = pkg_rcv[self.POSITION_CMD]
                 pid = struct.unpack(">H", pkg_rcv[self.POSITION_PID: self.POSITION_PID + 2])[0]
                 read_data = pkg_rcv[self.POSITION_DATA: -2]
+                data = []
                 if read_data:
                     data = self.data_callback(cmd, pid, read_data)
                 print("check 4")
