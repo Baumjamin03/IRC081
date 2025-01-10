@@ -282,7 +282,7 @@ class P3V0(P3):
 
         return tuple(pkg_payload)
 
-    def _receive_raw(self, com_obj):
+    def _receive_raw(self, com_obj: Serial) -> bytes:
         pkg_rcv = b""
 
         # preamble & header
@@ -309,6 +309,9 @@ class P3V0(P3):
         # check package integrity
         checksum_rcvd = struct.unpack("<H", pkg_rcv[-2::])[0]
         checksum_calc = self._crccalc.calc(pkg_rcv[0:-2])
+
+        com_obj.reset_input_buffer()
+
         if checksum_rcvd != checksum_calc:
             raise P3CommError(f"data: Checksum mismatch rcvd {checksum_rcvd} != calc {checksum_calc}")
 
