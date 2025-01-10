@@ -209,7 +209,7 @@ class P3V0(P3):
     )
     PREAMBLE_HEADER_SLAVE = (
         ADDR.RS232.value,
-        ID.NONE.value,
+        ID.PCG5X0.value,
         HEADER_ACK.SLAVE.value,
         5,
     )
@@ -258,9 +258,9 @@ class P3V0(P3):
             raise P3ValueError("At least one entry in list is >256")
 
         # Header
-        pkg_payload = list(self.PREAMBLE_HEADER_MASTER[0:3])
+        pkg_payload = list(self.PREAMBLE_HEADER_SLAVE[0:3])
 
-        len_data = self.PREAMBLE_HEADER_MASTER[-1]
+        len_data = self.PREAMBLE_HEADER_SLAVE[-1]
         if data is not None:
             len_data += len(data)
         pkg_payload.append(len_data)
@@ -284,7 +284,7 @@ class P3V0(P3):
         pkg_rcv = b""
 
         # preamble & header
-        header_size = len(self.PREAMBLE_HEADER_MASTER)
+        header_size = len(self.PREAMBLE_HEADER_SLAVE)
         pkg_rcv += com_obj.read(header_size)
         if len(pkg_rcv) < header_size:
             # may happen when running into timeout problems.
