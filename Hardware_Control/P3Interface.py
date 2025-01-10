@@ -280,7 +280,6 @@ class P3V0(P3):
         return tuple(pkg_payload)
 
     def _receive_raw(self, com_obj):
-        print("receiving raw data")
         pkg_rcv = b""
 
         # preamble & header
@@ -294,7 +293,6 @@ class P3V0(P3):
             )
             raise P3CommError(msg)
         package_size = pkg_rcv[-1]
-        print("check 2")
         if self.MAX_LENGTH_RMF < package_size:
             msg = f"data: " f"size of RMF exceeds {self.MAX_LENGTH_RMF} bytes"
             raise P3CommError(msg)
