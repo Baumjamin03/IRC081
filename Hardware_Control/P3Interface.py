@@ -196,11 +196,11 @@ class P3(metaclass=abc.ABCMeta):
                     r_cmd = cmd
 
                 if read_data:
-                    data = self.data_callback(r_cmd, pid, read_data)
+                    data = self.data_callback(cmd, pid, read_data)
                 else :
-                    data = self.data_callback(r_cmd, pid)
+                    data = self.data_callback(cmd, pid)
 
-                pkg_send = bytes(self._encode_package(cmd, pid, data=data))
+                pkg_send = bytes(self._encode_package(r_cmd, pid, data=data))
                 self._send_raw(com_obj, pkg_send)
 
 # ----------------------------------------------------------------------
