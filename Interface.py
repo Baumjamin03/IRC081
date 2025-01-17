@@ -1,6 +1,5 @@
-from threading import Thread
 from PIL import Image
-import asyncio
+import struct
 import time
 import atexit
 import platform
@@ -322,7 +321,7 @@ class App(ctk.CTk):
             case 212:  # P3_PID_DEVSTATE
                 return (0,)
             case 218:  # P3_PID_REVISION
-                return (0,)
+                return tuple(struct.pack(">H", 112))
             case 222:  # P3_PID_Pressure
                 return self.irc081.get_pressure_mbar()
             case 224:  # P3_PID_UNIT
