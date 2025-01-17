@@ -305,9 +305,9 @@ class App(ctk.CTk):
             case 103:  # P3_PID_RESET
                 return (0,)
             case 200:  # P3_PID_PRODUCTION_NUMBER
-                return (0,)
+                return tuple(ord(char) for char in "1234")
             case 207:  # P3_PID_SERIAL_NUMBER
-                return (0,)
+                return struct.pack(">I", 0x12345678)
             case 208:  # P3_PID_PRODUCT_NAME
                 return tuple(ord(char) for char in "IRG081")
             case 21:  # P3_PID_INI_NAME
@@ -321,12 +321,12 @@ class App(ctk.CTk):
             case 212:  # P3_PID_DEVSTATE
                 return (0,)
             case 218:  # P3_PID_REVISION
-                return tuple(struct.pack(">H", 112))
+                return struct.pack(">H", 112 & 0xFFFF)
             case 222:  # P3_PID_Pressure
                 pressure_mbar = float(self.irc081.get_pressure_mbar())
                 return tuple(struct.pack('>e', pressure_mbar))
             case 224:  # P3_PID_UNIT
-                return (0,)
+                return struct.pack('B', 1)
             case _:
                 return (0,)
 
