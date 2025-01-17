@@ -295,9 +295,9 @@ class App(ctk.CTk):
         print(f"new real ranges: {self.upperRange} to {self.lowerRange}")
 
     def handle_serial_data(self, cmd, pid, data=None):
-        print("data callback called with: " + str(data))
-        print("cmd: " + str(cmd))
-        print("pid: " + str(pid))
+        # print("data callback called with: " + str(data))
+        # print("cmd: " + str(cmd))
+        # print("pid: " + str(pid))
 
         match pid:
             case 102:  # P3_PID_PASSWORD

@@ -181,7 +181,7 @@ class P3(metaclass=abc.ABCMeta):
         # log.debug("receive/send data")
         with self.comm_handle as com_obj:
             pkg_rcv = self._receive_raw(com_obj)
-            print("check 3")
+
             if pkg_rcv:
                 cmd = pkg_rcv[self.POSITION_CMD]
                 pid = struct.unpack(">H", pkg_rcv[self.POSITION_PID: self.POSITION_PID + 2])[0]
