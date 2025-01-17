@@ -38,7 +38,7 @@ class IRC081(usb_2408_2AO):
         self.set_filament_current_limitation(2)
 
         self.factors = get_calibration_values(self.getSerialNumber())
-        self.aInput = [0] * 16
+        self.aInput = [Decimal(0)] * 16
 
         self.bitA = 1
         self.bitB = 1
@@ -50,24 +50,24 @@ class IRC081(usb_2408_2AO):
 
         self.ionRange = 0
 
-        self.uBias = 0
-        self.uWehnelt = 0
-        self.uDeflector = 0
-        self.uFaraday = 0
-        self.uCage = 0
-        self.uEmission = 0
+        self.uBias = Decimal(0)
+        self.uWehnelt = Decimal(0)
+        self.uDeflector = Decimal(0)
+        self.uFaraday = Decimal(0)
+        self.uCage = Decimal(0)
+        self.uEmission = Decimal(0)
 
-        self.iFaraday = 0
-        self.iCage = 0
-        self.iFil = 0
-        self.iCollector = 0
-        self.iEmission = 0
+        self.iFaraday = Decimal(0)
+        self.iCage = Decimal(0)
+        self.iFil = Decimal(0)
+        self.iCollector = Decimal(0)
+        self.iEmission = Decimal(0)
 
-        self.setEmission = 0
-        self.pressure = 0
-        self.transmission = 0
+        self.setEmission = Decimal(0)
+        self.pressure = Decimal(0)
+        self.transmission = Decimal(0)
 
-        self.dOut = 0
+        self.dOut = Decimal(0)
 
     def start_refresh_thread(self):
         def run_loop():
@@ -296,46 +296,46 @@ class IRC081(usb_2408_2AO):
         self.AOut(1, 0)
         return
 
-    def get_pressure_mbar(self):
+    def get_pressure_mbar(self) -> Decimal:
         return self.pressure
 
-    def get_voltage_wehnelt(self):
+    def get_voltage_wehnelt(self) -> Decimal:
         return self.uWehnelt
 
-    def get_voltage_deflector(self):
+    def get_voltage_deflector(self) -> Decimal:
         return self.uDeflector
 
-    def get_voltage_cage(self):
+    def get_voltage_cage(self) -> Decimal:
         return self.uCage
 
-    def get_voltage_faraday(self):
+    def get_voltage_faraday(self) -> Decimal:
         return self.uFaraday
 
-    def get_voltage_bias(self):
+    def get_voltage_bias(self) -> Decimal:
         return self.uBias
 
-    def get_current_filament(self):
+    def get_current_filament(self) -> Decimal:
         return self.iFil
 
-    def get_ion_current(self):
+    def get_ion_current(self) -> Decimal:
         return self.iCollector
 
-    def get_ion_voltage(self):
+    def get_ion_voltage(self) -> Decimal:
         return self.aInput[15]
 
-    def get_emission_current(self):
+    def get_emission_current(self) -> Decimal:
         return self.iEmission
 
-    def get_emission_voltage(self):
+    def get_emission_voltage(self) -> Decimal:
         return self.uEmission
 
-    def get_transmission(self):
+    def get_transmission(self) -> Decimal:
         return self.transmission
 
-    def get_faraday_current(self):
+    def get_faraday_current(self) -> Decimal:
         return self.iFaraday
 
-    def get_cage_current(self):
+    def get_cage_current(self) -> Decimal:
         return self.iCage
 
 
