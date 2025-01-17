@@ -187,10 +187,18 @@ class P3(metaclass=abc.ABCMeta):
                 pid = struct.unpack(">H", pkg_rcv[self.POSITION_PID: self.POSITION_PID + 2])[0]
                 read_data = pkg_rcv[self.POSITION_DATA: -2]
                 data = []
+                r_cmd = 0
+                if cmd == 1:
+                    r_cmd = 2
+                elif cmd == 3:
+                    r_cmd = 4
+                else:
+                    r_cmd = cmd
+
                 if read_data:
-                    data = self.data_callback(cmd, pid, read_data)
+                    data = self.data_callback(r_cmd, pid, read_data)
                 else :
-                    data = self.data_callback(cmd, pid)
+                    data = self.data_callback(r_cmd, pid)
 
                 pkg_send = bytes(self._encode_package(cmd, pid, data=data))
                 self._send_raw(com_obj, pkg_send)
