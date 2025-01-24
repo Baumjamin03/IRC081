@@ -301,7 +301,7 @@ class App(ctk.CTk):
         # print("pid: " + str(pid))
 
         match pid:
-            case 4:
+            case 8:
                 return bytearray(
                     self.handle_serial_data(0, 213) +
                     self.handle_serial_data(0, 201) +
@@ -321,6 +321,8 @@ class App(ctk.CTk):
                 if data == 1:
                     self.after(300, os.system("sudo reboot"))
                 return struct.pack('B', 1)
+            case 151:
+                return struct.pack('B', 4)
             case 200:  # P3_PID_PRODUCTION_NUMBER
                 return tuple(ord(char) for char in self.irc081.getSerialNumber())
             case 201:  # GAUGE STATE

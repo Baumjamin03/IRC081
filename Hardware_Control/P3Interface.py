@@ -222,7 +222,7 @@ class P3V0(P3):
     )
     PREAMBLE_HEADER_SLAVE = (
         ADDR.RS232.value,
-        0x80,
+        80,
         HEADER_ACK.SLAVE.value,
         5,
     )
