@@ -47,7 +47,7 @@ class RS232Communication(Serial):
     async def serial_listener_loop(self):
         while True:
             try:
-                await asyncio.sleep(0.02)
+                await asyncio.sleep(0.01)
                 if self.is_open:
                     if int(self.in_waiting) > 0:
                         print("Data received")
@@ -222,7 +222,7 @@ class P3V0(P3):
     )
     PREAMBLE_HEADER_SLAVE = (
         ADDR.RS232.value,
-        0x46, #80
+        0x50, #80
         HEADER_ACK.SLAVE.value,
         5,
     )
