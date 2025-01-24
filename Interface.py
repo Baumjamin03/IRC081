@@ -295,14 +295,14 @@ class App(ctk.CTk):
         self.upperRange = upper_range
         print(f"new real ranges: {self.upperRange} to {self.lowerRange}")
 
-    def handle_serial_data(self, cmd, pid, data=None):
+    def handle_serial_data(self, cmd: int, pid: int, data=None):
         # print("data callback called with: " + str(data))
         # print("cmd: " + str(cmd))
         # print("pid: " + str(pid))
 
         match pid:
             case 8:
-                return bytearray(
+                return (
                     self.handle_serial_data(0, 213) +
                     self.handle_serial_data(0, 201) +
                     self.handle_serial_data(0, 222) +
