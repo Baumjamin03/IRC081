@@ -346,7 +346,7 @@ class App(ctk.CTk):
             case 213:
                 return tuple(struct.pack('B', 0))
             case 218:  # P3_PID_REVISION
-                return tuple(struct.pack(">H", 112 & 0xFFFF))
+                return tuple(struct.pack(">H", 0 & 0xFFFF))
             case 222:  # P3_PID_Pressure
                 pressure_mbar = float(self.irc081.get_pressure_mbar())
                 return tuple(struct.pack('>f', pressure_mbar))
