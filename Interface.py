@@ -303,11 +303,11 @@ class App(ctk.CTk):
         match pid:
             case 8:
                 return (
-                    self.handle_serial_data(0, 213) +
-                    self.handle_serial_data(0, 201) +
-                    self.handle_serial_data(0, 222) +
-                    self.handle_serial_data(0, 279) +
-                    self.handle_serial_data(0, 286)
+                    bytes(self.handle_serial_data(0, 213)) +
+                    bytes(self.handle_serial_data(0, 201)) +
+                    bytes(self.handle_serial_data(0, 222)) +
+                    bytes(self.handle_serial_data(0, 279)) +
+                    bytes(self.handle_serial_data(0, 286))
                 )
             case 21:  # P3_PID_INI_NAME
                 return tuple(ord(char) for char in "IRG081")
