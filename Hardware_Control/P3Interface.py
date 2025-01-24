@@ -200,6 +200,10 @@ class P3(metaclass=abc.ABCMeta):
                 else :
                     data = self.data_callback(cmd, pid)
 
+                if data == -1:
+                    data = struct.pack('B', 0)
+                    pid = 0xFFFF
+
                 pkg_send = bytes(self._encode_package(r_cmd, pid, data=data))
                 self._send_raw(com_obj, pkg_send)
 
@@ -218,7 +222,7 @@ class P3V0(P3):
     )
     PREAMBLE_HEADER_SLAVE = (
         ADDR.RS232.value,
-        ID.PCG5X0.value,
+        0x80,
         HEADER_ACK.SLAVE.value,
         5,
     )

@@ -4,6 +4,7 @@ import time
 import atexit
 import platform
 import customtkinter as ctk
+import os
 
 from GlobalVariables import infBlue
 from Pages import *
@@ -300,35 +301,108 @@ class App(ctk.CTk):
         # print("pid: " + str(pid))
 
         match pid:
-            case 102:  # P3_PID_PASSWORD
-                return (0,)
-            case 103:  # P3_PID_RESET
-                return (0,)
-            case 200:  # P3_PID_PRODUCTION_NUMBER
-                return tuple(ord(char) for char in "1234")
-            case 207:  # P3_PID_SERIAL_NUMBER
-                return struct.pack(">I", 0x12345678)
-            case 208:  # P3_PID_PRODUCT_NAME
-                return tuple(ord(char) for char in "IRG081")
+            case 4:
+                return bytearray(
+                    self.handle_serial_data(0, 213) +
+                    self.handle_serial_data(0, 201) +
+                    self.handle_serial_data(0, 222) +
+                    self.handle_serial_data(0, 279) +
+                    self.handle_serial_data(0, 286)
+                )
             case 21:  # P3_PID_INI_NAME
                 return tuple(ord(char) for char in "IRG081")
             case 22:  # P3_PID_INI_VERSION
                 return tuple(ord(char) for char in "IRG081")
+            case 102:  # P3_PID_PASSWORD
+                """
+                """
+                return struct.pack('B', 1)
+            case 103:  # P3_PID_RESET
+                if data == 1:
+                    self.after(300, os.system("sudo reboot"))
+                return struct.pack('B', 1)
+            case 200:  # P3_PID_PRODUCTION_NUMBER
+                return tuple(ord(char) for char in self.irc081.getSerialNumber())
+            case 201:  # GAUGE STATE
+                if self.running:
+                    return struct.pack('B', 1)
+                return struct.pack('B', 0)
+            case 207:  # P3_PID_SERIAL_NUMBER
+                """
+                """
+                return
+            case 208:  # P3_PID_PRODUCT_NAME
+                return tuple(ord(char) for char in "IRG080")
             case 209:  # P3_PID_MANUF_NAME
-                return tuple(ord(char) for char in "Inficon")
+                return tuple(ord(char) for char in "INFICON AG")
             case 210:  # P3_PID_MANUF_MODEL
-                return tuple(ord(char) for char in "IRG081")
-            case 212:  # P3_PID_DEVSTATE
-                return (0,)
+                return tuple(ord(char) for char in "IRG080")
+            case 212:  # DEVSTATE
+                if self.running:
+                    return struct.pack('B', 0)
+                return struct.pack('B', 1)
+            case 213:
+                return struct.pack('B', 0)
             case 218:  # P3_PID_REVISION
                 return struct.pack(">H", 112 & 0xFFFF)
             case 222:  # P3_PID_Pressure
                 pressure_mbar = float(self.irc081.get_pressure_mbar())
                 return tuple(struct.pack('>f', pressure_mbar))
+            case 223:  # P3_PID_FilCurr
+                fc = float(self.irc081.get_current_filament())
+                return tuple(struct.pack('>f', fc))
             case 224:  # P3_PID_UNIT
                 return struct.pack('B', 1)
+            case 225:  # P3_PID_FarVolt
+                fv = float(self.irc081.get_voltage_faraday())
+                return tuple(struct.pack('>f', fv))
+            case 226:  # P3_PID_BiasVolt
+                bv = float(self.irc081.get_voltage_bias())
+                return tuple(struct.pack('>f', bv))
+            case 227:  # P3_PID_WehnVolt
+                wv = float(self.irc081.get_voltage_wehnelt())
+                return tuple(struct.pack('>f', wv))
+            case 228:  # P3_PID_DefVolt
+                df = float(self.irc081.get_voltage_deflector())
+                return tuple(struct.pack('>f', df))
+            case 229:  # P3_PID_IonCurr
+                ic = float(self.irc081.get_ion_current())
+                return tuple(struct.pack('>f', ic))
+            case 230:  # P3_PID_IonVolt
+                iv = float(self.irc081.get_ion_voltage())
+                return tuple(struct.pack('>f', iv))
+            case 231:  # P3_PID_EmissionCurr
+                ec = float(self.irc081.get_emission_current())
+                return tuple(struct.pack('>f', ec))
+            case 232:  # P3_PID_EmissionVolt
+                ev = float(self.irc081.get_emission_voltage())
+                return tuple(struct.pack('>f', ev))
+            case 233:  # P3_PID_Transmission
+                tr = float(self.irc081.get_transmission())
+                return tuple(struct.pack('>f', tr))
+            case 234:  # P3_PID_FaradayCurrent
+                fc = float(self.irc081.get_faraday_current())
+                return tuple(struct.pack('>f', fc))
+            case 235:  # P3_PID_CageCurrent
+                cc = float(self.irc081.get_cage_current())
+                return tuple(struct.pack('>f', cc))
+            case 279:
+                return struct.pack('B', 0)
+            case 286:
+                return struct.pack('B', 0)
+            case 301:  # P3_PID_DefVolt
+                if data == 1:
+                    self.running = True
+                    self.switch_event()
+                    return struct.pack('B', 1)
+                elif data == 0:
+                    self.running = False
+                    self.switch_event()
+                    return struct.pack('B', 0)
+                else:
+                    return struct.pack('B', self.running)
             case _:
-                return (0,)
+                return -1
 
 
 if __name__ == "__main__":
