@@ -332,7 +332,7 @@ class App(ctk.CTk):
             case 207:  # P3_PID_SERIAL_NUMBER
                 """
                 """
-                return
+                return struct.pack('B', 0)
             case 208:  # P3_PID_PRODUCT_NAME
                 return tuple(ord(char) for char in "IRG080")
             case 209:  # P3_PID_MANUF_NAME
