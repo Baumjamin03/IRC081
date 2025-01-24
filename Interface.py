@@ -316,23 +316,23 @@ class App(ctk.CTk):
             case 102:  # P3_PID_PASSWORD
                 """
                 """
-                return (0, 1)
+                return tuple(struct.pack('B', 1))
             case 103:  # P3_PID_RESET
                 if data == 1:
                     self.after(300, os.system("sudo reboot"))
-                return (0, 1)
+                return tuple(struct.pack('B', 1))
             case 151:
-                return (0, 1)
+                return tuple(struct.pack('B', 4))
             case 200:  # P3_PID_PRODUCTION_NUMBER
                 return tuple(ord(char) for char in self.irc081.getSerialNumber())
             case 201:  # GAUGE STATE
                 if self.running:
-                    return (0, 1)
-                return (0, 0)
+                    return tuple(struct.pack('B', 1))
+                return tuple(struct.pack('B', 0))
             case 207:  # P3_PID_SERIAL_NUMBER
                 """
                 """
-                return (0, 0)
+                return tuple(struct.pack('B', 0))
             case 208:  # P3_PID_PRODUCT_NAME
                 return tuple(ord(char) for char in "IRG080")
             case 209:  # P3_PID_MANUF_NAME
@@ -341,12 +341,12 @@ class App(ctk.CTk):
                 return tuple(ord(char) for char in "IRG080")
             case 212:  # DEVSTATE
                 if self.running:
-                    return (0, 0)
-                return (0, 1)
+                    return tuple(struct.pack('B', 0))
+                return tuple(struct.pack('B', 1))
             case 213:
-                return (0, 0)
+                return tuple(struct.pack('B', 0))
             case 218:  # P3_PID_REVISION
-                return (0, 1)
+                return tuple(struct.pack(">H", 112 & 0xFFFF))
             case 222:  # P3_PID_Pressure
                 pressure_mbar = float(self.irc081.get_pressure_mbar())
                 return tuple(struct.pack('>f', pressure_mbar))
@@ -354,7 +354,7 @@ class App(ctk.CTk):
                 fc = float(self.irc081.get_current_filament())
                 return tuple(struct.pack('>f', fc))
             case 224:  # P3_PID_UNIT
-                return (0, 1)
+                return tuple(struct.pack('B', 1))
             case 225:  # P3_PID_FarVolt
                 fv = float(self.irc081.get_voltage_faraday())
                 return tuple(struct.pack('>f', fv))
@@ -389,20 +389,20 @@ class App(ctk.CTk):
                 cc = float(self.irc081.get_cage_current())
                 return tuple(struct.pack('>f', cc))
             case 279:
-                return (0, 1)
+                return tuple(struct.pack('B', 0))
             case 286:
-                return (0, 1)
+                return tuple(struct.pack('B', 0))
             case 301:  # P3_PID_DefVolt
                 if data == 1:
                     self.running = True
                     self.switch_event()
-                    return (0, 1)
+                    return tuple(struct.pack('B', 1))
                 elif data == 0:
                     self.running = False
                     self.switch_event()
-                    return (0, 0)
+                    return tuple(struct.pack('B', 0))
                 else:
-                    return (0, 1 if self.running else 0)
+                    return tuple(struct.pack('B', self.running))
             case _:
                 return -1
 
