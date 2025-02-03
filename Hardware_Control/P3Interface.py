@@ -63,10 +63,7 @@ class RS232Communication(Serial):
                 await asyncio.sleep(0.5)
                 print(f"Unexpected Error in listener loop: {e}")
 
-"""
-I copied everything below this line, ngl I don't understand it
-----------------------------------------------------------------------
-"""
+
 class P3ValueError(Exception):
     pass
 

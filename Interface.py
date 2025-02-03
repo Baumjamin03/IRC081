@@ -388,17 +388,19 @@ class App(ctk.CTk):
             case 235:  # P3_PID_CageCurrent
                 cc = float(self.irc081.get_cage_current())
                 return tuple(struct.pack('>f', cc))
+            case 265:
+                return tuple(struct.pack('B', 0))
             case 279:
                 return tuple(struct.pack('B', 0))
             case 286:
                 return tuple(struct.pack('B', 0))
-            case 301:  # P3_PID_DefVolt
-                if data == 1:
-                    self.running = True
+            case 301:  # P3_PID_On/Off
+                if cmd == 3 and data == 1:
+                    self.running = False
                     self.switch_event()
                     return tuple(struct.pack('B', 1))
-                elif data == 0:
-                    self.running = False
+                elif cmd == 3 and data == 0:
+                    self.running = True
                     self.switch_event()
                     return tuple(struct.pack('B', 0))
                 else:
