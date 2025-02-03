@@ -58,9 +58,9 @@ class RS232Communication(Serial):
                             await asyncio.sleep(0.1)
                 else:
                     self.open_port()
-                    await asyncio.sleep(0.1)
+                    await asyncio.sleep(0.05)
             except Exception as e:
-                await asyncio.sleep(0.2)
+                await asyncio.sleep(0.1)
                 print(f"Unexpected Error in listener loop: {e}")
 
 

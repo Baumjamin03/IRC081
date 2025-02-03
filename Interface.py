@@ -306,8 +306,9 @@ class App(ctk.CTk):
                     *self.handle_serial_data(1, 213),
                     *self.handle_serial_data(1, 201),
                     *self.handle_serial_data(1, 222),
+                    *self.handle_serial_data(1, 233),
                     *self.handle_serial_data(1, 279),
-                    *self.handle_serial_data(1, 286)
+                    *self.handle_serial_data(1, 224)
                 )
             case 21:  # P3_PID_INI_NAME
                 return tuple(ord(char) for char in "IRG081")
@@ -356,7 +357,7 @@ class App(ctk.CTk):
                 fc = float(self.irc081.get_current_filament())
                 return tuple(struct.pack('>f', fc))
             case 224:  # P3_PID_UNIT
-                return tuple(struct.pack('B', 1))
+                return tuple(struct.pack('B', 0))
             case 225:  # P3_PID_FarVolt
                 fv = float(self.irc081.get_voltage_faraday())
                 return tuple(struct.pack('>f', fv))
@@ -393,7 +394,7 @@ class App(ctk.CTk):
             case 265:
                 return tuple(struct.pack('B', 0))
             case 279:
-                return tuple(struct.pack('B', 0))
+                return tuple(struct.pack('BB', 0, 0))
             case 286:
                 return tuple(struct.pack('B', 0))
             case 301:  # P3_PID_On/Off
