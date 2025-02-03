@@ -319,7 +319,7 @@ class P3V0(P3):
 
         print("Package received:", pkg_rcv.hex())
 
-        com_obj.reset_input_buffer()
+        # com_obj.reset_input_buffer()
 
         if checksum_rcvd != checksum_calc:
             raise P3CommError(f"data: Checksum mismatch rcvd {checksum_rcvd} != calc {checksum_calc}")
