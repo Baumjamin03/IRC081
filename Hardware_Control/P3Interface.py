@@ -47,7 +47,7 @@ class RS232Communication(Serial):
     async def serial_listener_loop(self):
         while True:
             try:
-                await asyncio.sleep(0.002)
+                await asyncio.sleep(0.005)
                 if self.is_open:
                     if int(self.in_waiting) > 0:
                         try:
