@@ -411,11 +411,11 @@ class App(ctk.CTk):
                 return tuple(struct.pack('B', 0))
             case 801:
                 if cmd == 3 and data is not None:
-                    return tuple(struct.pack('>d', 0.0))
+                    return tuple(struct.pack('>d', 1.0))
                 else:
-                    return tuple(struct.pack('>d', 0.0))
+                    return tuple(struct.pack('>d', 2.0))
             case 802:
-                return tuple(struct.pack('>I', 0))
+                return tuple(struct.pack('>I', 7))
             case _:
                 return -1
 
