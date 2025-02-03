@@ -345,6 +345,8 @@ class App(ctk.CTk):
                 return tuple(struct.pack('B', 1))
             case 213:
                 return tuple(struct.pack('B', 0))
+            case 217:
+                return tuple(ord(char) for char in "a1a1a1")
             case 218:  # P3_PID_REVISION
                 return tuple(struct.pack(">H", 0 & 0xFFFF))
             case 222:  # P3_PID_Pressure

@@ -55,12 +55,12 @@ class RS232Communication(Serial):
                             self.p3.receive_send_data()
                         except Exception as e:
                             print(f"Error reading data: {e}")
-                            await asyncio.sleep(0.5)
+                            await asyncio.sleep(0.1)
                 else:
                     self.open_port()
-                    await asyncio.sleep(0.5)
+                    await asyncio.sleep(0.1)
             except Exception as e:
-                await asyncio.sleep(0.5)
+                await asyncio.sleep(0.2)
                 print(f"Unexpected Error in listener loop: {e}")
 
 
