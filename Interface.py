@@ -328,8 +328,8 @@ class App(ctk.CTk):
                 return tuple(ord(char) for char in self.irc081.getSerialNumber())
             case 201:  # GAUGE STATE
                 if self.running:
-                    return tuple(struct.pack('B', 1))
-                return tuple(struct.pack('B', 0))
+                    return tuple(struct.pack('BB', 0, 1))
+                return tuple(struct.pack('BB', 0, 0))
             case 207:  # P3_PID_SERIAL_NUMBER
                 """
                 """
