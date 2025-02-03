@@ -12,8 +12,8 @@ class RS232Communication(Serial):
         """
         Initialize the RS232 communication object with the given port and baudrate.
         """
-        super().__init__(port, baudrate, timeout=0.2)
-
+        super().__init__(port, baudrate, timeout=0.5)
+        self.open_port()
         self.executor = ThreadPoolExecutor()
         self.loop = asyncio.new_event_loop()
         self.p3 = P3V0(self, data_callback)
@@ -45,18 +45,19 @@ class RS232Communication(Serial):
         print("Listener thread started")
 
     async def serial_listener_loop(self):
-        self.open_port()
         while True:
             try:
                 await asyncio.sleep(0.005)
-                if self.in_waiting > 7:
+                if int(self.in_waiting) > 6:
                     try:
                         self.p3.receive_send_data()
                     except Exception as e:
                         print(f"Error reading data: {e}")
             except Exception as e:
+                print(f"Unexpected Error listener: {e}")
+                if not self.is_open:
+                    self.open_port()
                 await asyncio.sleep(0.1)
-                print(f"Unexpected Error in listener loop: {e}")
 
 
 class P3ValueError(Exception):
