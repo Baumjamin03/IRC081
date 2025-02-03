@@ -47,7 +47,7 @@ class RS232Communication(Serial):
     async def serial_listener_loop(self):
         while True:
             try:
-                await asyncio.sleep(0.005)
+                await asyncio.sleep(0.002)
                 if self.is_open:
                     if int(self.in_waiting) > 0:
                         try:
@@ -56,6 +56,7 @@ class RS232Communication(Serial):
                             print(f"Error reading data: {e}")
                 else:
                     self.open_port()
+                    print("opening port")
                     await asyncio.sleep(0.01)
             except Exception as e:
                 await asyncio.sleep(0.1)
@@ -165,7 +166,7 @@ class P3(metaclass=abc.ABCMeta):
     @staticmethod
     def _send_raw(comm_handle, data_raw: bytes):
         # log.debug("write bytes")
-        print(f"responding with data: {data_raw.hex()}")
+        # print(f"responding with data: {data_raw.hex()}")
         comm_handle.write(data_raw)
 
     @abc.abstractmethod
@@ -315,7 +316,7 @@ class P3V0(P3):
         checksum_rcvd = struct.unpack("<H", pkg_rcv[-2::])[0]
         checksum_calc = self._crccalc.calc(pkg_rcv[0:-2])
 
-        print("Package received:", pkg_rcv.hex())
+        # print("Package received:", pkg_rcv.hex())
 
         # com_obj.reset_input_buffer()
 
