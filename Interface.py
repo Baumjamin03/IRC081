@@ -318,7 +318,7 @@ class App(ctk.CTk):
                 """
                 return tuple(struct.pack('B', 1))
             case 103:  # P3_PID_RESET
-                if data == 1:
+                if cmd == 3 and data == 1:
                     self.after(300, os.system("sudo reboot"))
                 return tuple(struct.pack('B', 1))
             case 151:
