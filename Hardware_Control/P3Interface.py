@@ -174,7 +174,7 @@ class P3(metaclass=abc.ABCMeta):
     @staticmethod
     def _send_raw(comm_handle, data_raw: bytes):
         # log.debug("write bytes")
-        print(f"responding with data: {data_raw.hex()}")
+        # print(f"responding with data: {data_raw.hex()}")
         comm_handle.write(data_raw)
 
     @abc.abstractmethod
