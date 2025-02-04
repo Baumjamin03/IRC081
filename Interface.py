@@ -43,9 +43,6 @@ class App(ctk.CTk):
                 self.com = None
                 time.sleep(1)
 
-        if self.com is not None:
-            self.com.start_listener_thread()
-
         self.uOut = 0
         self.lowerRange = 0
         self.upperRange = 0
@@ -125,6 +122,9 @@ class App(ctk.CTk):
         if self.irc081 is not None:
             print("starting meas. thread")
             self.irc081.start_refresh_thread()
+
+        if self.com is not None:
+            self.com.start_listener_thread()
 
     def shutdown(self) -> None:
         """
