@@ -201,7 +201,7 @@ class P3(metaclass=abc.ABCMeta):
                 pid = 0xFFFF
 
             pkg_send = bytes(self._encode_package(r_cmd, pid, data=data))
-            time.sleep(0.005)
+            time.sleep(0.01)
             self._send_raw(com_obj, pkg_send)
 
 # ----------------------------------------------------------------------
