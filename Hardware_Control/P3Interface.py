@@ -61,8 +61,6 @@ class RS232Communication(Serial):
                             self.p3.receive_send_data()
                         except Exception as e:
                             print(f"Error reading data: {e}")
-                else:
-                    self.open()
             except Exception as e:
                 print(f"Unexpected Error listener: {e}")
                 if not self.is_open:
