@@ -55,6 +55,7 @@ class RS232Communication(Serial):
                         print(f"Error reading data: {e}")
             except Exception as e:
                 print(f"Unexpected Error listener: {e}")
+                print(f"Port open: {self.is_open}, in_waiting: {self.in_waiting}")
                 if not self.is_open:
                     self.open_port()
                 await asyncio.sleep(0.1)
