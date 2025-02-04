@@ -166,7 +166,7 @@ class P3(metaclass=abc.ABCMeta):
     @staticmethod
     def _send_raw(comm_handle, data_raw: bytes):
         # log.debug("write bytes")
-        # print(f"responding with data: {data_raw.hex()}")
+        print(f"responding with data: {data_raw.hex()}")
         comm_handle.write(data_raw)
 
     @abc.abstractmethod
@@ -308,7 +308,7 @@ class P3V0(P3):
         checksum_rcvd = struct.unpack("<H", pkg_rcv[-2::])[0]
         checksum_calc = self._crccalc.calc(pkg_rcv[0:-2])
 
-        # print("Package received:", pkg_rcv.hex())
+        print("Package received:", pkg_rcv.hex())
 
         # com_obj.reset_input_buffer()
 
