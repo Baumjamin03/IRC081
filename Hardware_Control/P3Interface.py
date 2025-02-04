@@ -179,26 +179,25 @@ class P3(metaclass=abc.ABCMeta):
         pass
 
     def receive_send_data(self):
-        with self.comm_handle as com_obj:
-            pkg_rcv = self._receive_raw(com_obj)
+        pkg_rcv = self._receive_raw(self.comm_handle)
 
-            if not pkg_rcv:
-                return
+        if not pkg_rcv:
+            return
 
-            cmd = pkg_rcv[self.POSITION_CMD]
-            pid = struct.unpack(">H", pkg_rcv[self.POSITION_PID: self.POSITION_PID + 2])[0]
-            read_data = pkg_rcv[self.POSITION_DATA: -2]
+        cmd = pkg_rcv[self.POSITION_CMD]
+        pid = struct.unpack(">H", pkg_rcv[self.POSITION_PID: self.POSITION_PID + 2])[0]
+        read_data = pkg_rcv[self.POSITION_DATA: -2]
 
-            r_cmd = {1: 2, 3: 4}.get(cmd, cmd)
+        r_cmd = {1: 2, 3: 4}.get(cmd, cmd)
 
-            data = self.data_callback(cmd, pid, read_data) if read_data else self.data_callback(cmd, pid)
+        data = self.data_callback(cmd, pid, read_data) if read_data else self.data_callback(cmd, pid)
 
-            if data == -1:
-                data = struct.pack('B', 0)
-                pid = 0xFFFF
+        if data == -1:
+            data = struct.pack('B', 0)
+            pid = 0xFFFF
 
-            pkg_send = bytes(self._encode_package(r_cmd, pid, data=data))
-            self._send_raw(com_obj, pkg_send)
+        pkg_send = bytes(self._encode_package(r_cmd, pid, data=data))
+        self._send_raw(self.comm_handle, pkg_send)
 
 # ----------------------------------------------------------------------
 # Actual implementation of protocol family 3

@@ -68,10 +68,6 @@ Type=simple
 KillMode=process
 TimeoutStopSec=20
 
-# Logging setup
-StandardOutput=append:/home/$USER_NAME/irc081.log
-StandardError=append:/home/$USER_NAME/irc081.log
-
 [Install]
 WantedBy=graphical.target
 EOL"
