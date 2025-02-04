@@ -201,7 +201,7 @@ class P3(metaclass=abc.ABCMeta):
                 pid = 0xFFFF
 
             pkg_send = bytes(self._encode_package(r_cmd, pid, data=data))
-            time.sleep(0.001)
+            time.sleep(0.005)
             self._send_raw(com_obj, pkg_send)
 
 # ----------------------------------------------------------------------
@@ -317,7 +317,7 @@ class P3V0(P3):
         checksum_rcvd = struct.unpack("<H", pkg_rcv[-2::])[0]
         checksum_calc = self._crccalc.calc(pkg_rcv[0:-2])
 
-        print("Package received:", pkg_rcv.hex())
+        # print("Package received:", pkg_rcv.hex())
 
         # com_obj.reset_input_buffer()
 
