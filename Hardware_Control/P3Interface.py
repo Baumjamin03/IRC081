@@ -1,5 +1,7 @@
 import abc
 import struct
+
+import serial.win32
 from serial import Serial
 import asyncio
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -46,6 +48,7 @@ class RS232Communication(Serial):
         print("Listener thread started")
 
     async def serial_listener_loop(self):
+        counter = 0
         while True:
             try:
                 await asyncio.sleep(0.005)
@@ -56,6 +59,12 @@ class RS232Communication(Serial):
                             self.p3.receive_send_data()
                         except Exception as e:
                             print(f"Error reading data: {e}")
+                    counter += 1
+                    if counter >= 200:
+                        print("serial beep")
+                        counter = 0
+                else:
+                    self.open()
             except Exception as e:
                 print(f"Unexpected Error listener: {e}")
                 if not self.is_open:
