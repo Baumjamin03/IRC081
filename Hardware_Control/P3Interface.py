@@ -46,12 +46,12 @@ class RS232Communication(Serial):
         print("Listener thread started")
 
     async def serial_listener_loop(self):
-        print("Starting listener loop, port open: ", self.is_open)
         while True:
             try:
-                await asyncio.sleep(0.007)
+                await asyncio.sleep(0.005)
                 if self.is_open:
-                    if int(self.in_waiting) > 7:
+                    if self.readable():
+                        await asyncio.sleep(0.001)
                         try:
                             self.p3.receive_send_data()
                         except Exception as e:
