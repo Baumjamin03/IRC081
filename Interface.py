@@ -323,7 +323,7 @@ class App(ctk.CTk):
                     self.after(300, os.system("sudo reboot"))
                 return tuple(struct.pack('B', 1))
             case 151:
-                return tuple(struct.pack('B', 1))
+                return tuple(struct.pack('B', 4))
             case 200:  # P3_PID_PRODUCTION_NUMBER
                 return tuple(ord(char) for char in self.irc081.getSerialNumber())
             case 201:  # GAUGE STATE

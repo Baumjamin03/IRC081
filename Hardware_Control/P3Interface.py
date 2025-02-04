@@ -10,7 +10,7 @@ from crccheck.crc import Crc
 from enum import IntEnum
 
 class RS232Communication(Serial):
-    def __init__(self, data_callback, port='/dev/ttyAMA10', baudrate=19200):
+    def __init__(self, data_callback, port='/dev/ttyAMA10', baudrate=115200):
         """
         Initialize the RS232 communication object with the given port and baudrate.
         """
@@ -53,9 +53,8 @@ class RS232Communication(Serial):
                 await asyncio.sleep(0.005)
                 if self.is_open:
                     if self.readable():
-                        await asyncio.sleep(0.001)
 
-                        while self.in_waiting < 7:
+                        while self.in_waiting < 5:
                             await asyncio.sleep(0.001)
 
                         try:
