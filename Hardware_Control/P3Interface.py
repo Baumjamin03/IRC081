@@ -10,7 +10,7 @@ from crccheck.crc import Crc
 from enum import IntEnum
 
 class RS232Communication(Serial):
-    def __init__(self, data_callback, port='/dev/ttyAMA10', baudrate=115200):
+    def __init__(self, data_callback, port='/dev/ttyAMA10', baudrate=19200):
         """
         Initialize the RS232 communication object with the given port and baudrate.
         """
