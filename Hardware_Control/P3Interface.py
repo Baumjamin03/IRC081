@@ -48,7 +48,7 @@ class RS232Communication(Serial):
         while True:
             try:
                 await asyncio.sleep(0.005)
-                if int(self.in_waiting) > 6:
+                if self.is_open and int(self.in_waiting) > 6:
                     try:
                         self.p3.receive_send_data()
                     except Exception as e:
