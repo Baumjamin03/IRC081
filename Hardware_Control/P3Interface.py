@@ -13,7 +13,6 @@ class RS232Communication(Serial):
         Initialize the RS232 communication object with the given port and baudrate.
         """
         super().__init__(port, baudrate, timeout=0.5)
-        self.open_port()
         self.executor = ThreadPoolExecutor()
         self.loop = asyncio.new_event_loop()
         self.p3 = P3V0(self, data_callback)
@@ -45,6 +44,7 @@ class RS232Communication(Serial):
         print("Listener thread started")
 
     async def serial_listener_loop(self):
+        print("Starting listener loop, port open: ", self.is_open)
         while True:
             try:
                 await asyncio.sleep(0.005)
