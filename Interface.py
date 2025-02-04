@@ -37,7 +37,6 @@ class App(ctk.CTk):
                     self.com = RS232Communication(data_callback=self.handle_serial_data, port='/dev/ttyS0')
                 if self.com.is_open:
                     self.com.close_port()
-                self.com.open_port()
             except Exception as er:
                 print(er)
                 self.com = None
@@ -74,6 +73,9 @@ class App(ctk.CTk):
                 time.sleep(5)
                 # continue
             break
+
+        if self.com is not None:
+            self.com.start_listener_thread()
 
         self.running = False
 
@@ -123,8 +125,6 @@ class App(ctk.CTk):
             print("starting meas. thread")
             self.irc081.start_refresh_thread()
 
-        if self.com is not None:
-            self.com.start_listener_thread()
 
     def shutdown(self) -> None:
         """

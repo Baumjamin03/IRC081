@@ -38,6 +38,8 @@ class RS232Communication(Serial):
             asyncio.set_event_loop(self.loop)
             self.loop.run_forever()
 
+        self.open_port()
+
         loop_thread = Thread(target=run_loop, daemon=True)
         loop_thread.start()
         asyncio.run_coroutine_threadsafe(self.serial_listener_loop(), self.loop)
