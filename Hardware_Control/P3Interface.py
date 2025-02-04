@@ -1,5 +1,7 @@
 import abc
 import struct
+import time
+
 from serial import Serial
 import asyncio
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -52,11 +54,14 @@ class RS232Communication(Serial):
                 if self.is_open:
                     if self.readable():
                         await asyncio.sleep(0.001)
-                        if self.in_waiting > 7:
-                            try:
-                                self.p3.receive_send_data()
-                            except Exception as e:
-                                print(f"Error reading data: {e}")
+
+                        while self.in_waiting < 7:
+                            await asyncio.sleep(0.001)
+
+                        try:
+                            self.p3.receive_send_data()
+                        except Exception as e:
+                            print(f"Error reading data: {e}")
                 else:
                     self.open()
             except Exception as e:
@@ -196,6 +201,7 @@ class P3(metaclass=abc.ABCMeta):
                 pid = 0xFFFF
 
             pkg_send = bytes(self._encode_package(r_cmd, pid, data=data))
+            time.sleep(0.001)
             self._send_raw(com_obj, pkg_send)
 
 # ----------------------------------------------------------------------
