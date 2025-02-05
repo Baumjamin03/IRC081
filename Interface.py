@@ -408,18 +408,22 @@ class App(ctk.CTk):
                     return tuple(struct.pack('B', 0))
                 else:
                     return tuple(struct.pack('B', self.running))
-            case 302:  # Interlock
+            case 302:  # F
                 return tuple(struct.pack('B', self.irc081.bitF))
-            case 303:  # Interlock
+            case 303:  # E
                 return tuple(struct.pack('B', self.irc081.bitE))
-            case 304:  # Interlock
+            case 304:  # D
                 return tuple(struct.pack('B', self.irc081.bitD))
-            case 305:  # Interlock
+            case 305:  # C
                 return tuple(struct.pack('B', self.irc081.bitC))
-            case 306:  # Interlock
+            case 306:  # B
                 return tuple(struct.pack('B', self.irc081.bitB))
-            case 307:  # Interlock
+            case 307:  # A
                 return tuple(struct.pack('B', self.irc081.bitA))
+            case 333:  # Emission Current
+                if cmd == 3 and data is not None:
+                    self.irc081.set_emission(struct.unpack('>f', data)[0])
+                return tuple(struct.pack('>f', self.irc081.setEmission))
             case 401:  # Stabilization filter
                 return tuple(struct.pack('B', 0))
             case 801:
