@@ -394,6 +394,8 @@ class App(ctk.CTk):
                 return tuple(struct.pack('>f', cc))
             case pid if 236 <= pid <= 251:
                 return tuple(struct.pack('>f', self.irc081.get_voltage_input(pid-236)))
+            case 300:  # Interlock
+                return tuple(struct.pack('B', self.irc081.bitInterlock))
             case 301:  # P3_PID_On/Off
                 d = struct.unpack('B', data)[0] if data is not None else None
                 if cmd == 3 and d == 1:
@@ -406,6 +408,18 @@ class App(ctk.CTk):
                     return tuple(struct.pack('B', 0))
                 else:
                     return tuple(struct.pack('B', self.running))
+            case 302:  # Interlock
+                return tuple(struct.pack('B', self.irc081.bitF))
+            case 303:  # Interlock
+                return tuple(struct.pack('B', self.irc081.bitE))
+            case 304:  # Interlock
+                return tuple(struct.pack('B', self.irc081.bitD))
+            case 305:  # Interlock
+                return tuple(struct.pack('B', self.irc081.bitC))
+            case 306:  # Interlock
+                return tuple(struct.pack('B', self.irc081.bitB))
+            case 307:  # Interlock
+                return tuple(struct.pack('B', self.irc081.bitA))
             case 401:  # Stabilization filter
                 return tuple(struct.pack('B', 0))
             case 801:
