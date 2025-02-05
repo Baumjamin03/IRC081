@@ -319,21 +319,22 @@ class App(ctk.CTk):
                 """
                 return tuple(struct.pack('B', 1))
             case 103:  # P3_PID_RESET
-                if cmd == 3 and data == 1:
+                d = struct.unpack('B', data)[0] if data is not None else None
+                if cmd == 3 and d == 1:
                     self.after(300, os.system("sudo reboot"))
                 return tuple(struct.pack('B', 1))
-            case 151:
+            case 151:  # Baudrate
                 return tuple(struct.pack('B', 4))
             case 200:  # P3_PID_PRODUCTION_NUMBER
                 return tuple(ord(char) for char in self.irc081.getSerialNumber())
             case 201:  # GAUGE STATE
-                if self.running:
-                    return tuple(struct.pack('BB', 0, 1))
-                return tuple(struct.pack('BB', 0, 0))
+                ai = self.irc081.get_digital_outputs()
+
+                return tuple(struct.pack('BB', 0, ai))
             case 207:  # P3_PID_SERIAL_NUMBER
                 """
                 """
-                return tuple(struct.pack('B', 0))
+                return tuple(struct.pack('>I', 0))
             case 208:  # P3_PID_PRODUCT_NAME
                 return tuple(ord(char) for char in "IRG080")
             case 209:  # P3_PID_MANUF_NAME
@@ -344,12 +345,12 @@ class App(ctk.CTk):
                 if self.running:
                     return tuple(struct.pack('B', 0))
                 return tuple(struct.pack('B', 1))
-            case 213:
+            case 213:  # Exception state
                 return tuple(struct.pack('B', 0))
             case 217:
                 return tuple(ord(char) for char in "31133025")
             case 218:  # P3_PID_REVISION
-                return tuple(ord(char) for char in "a1a1a1")
+                return tuple(ord(char) for char in "aaaaaa")
             case 222:  # P3_PID_Pressure
                 pressure_mbar = float(self.irc081.get_pressure_mbar())
                 return tuple(struct.pack('>f', pressure_mbar))
@@ -391,18 +392,21 @@ class App(ctk.CTk):
             case 235:  # P3_PID_CageCurrent
                 cc = float(self.irc081.get_cage_current())
                 return tuple(struct.pack('>f', cc))
-            case 265:
+            case pid if 236 <= pid <= 251:
+                return tuple(struct.pack('>f', self.irc081.get_voltage_input(pid-236)))
+            case 265:  # TripState
                 return tuple(struct.pack('B', 0))
             case 279:
                 return tuple(struct.pack('BB', 0, 0))
             case 286:
                 return tuple(struct.pack('B', 0))
             case 301:  # P3_PID_On/Off
-                if cmd == 3 and data == 1:
+                d = struct.unpack('B', data)[0] if data is not None else None
+                if cmd == 3 and d == 1:
                     self.running = False
                     self.switch_event()
                     return tuple(struct.pack('B', 1))
-                elif cmd == 3 and data == 0:
+                elif cmd == 3 and d == 0:
                     self.running = True
                     self.switch_event()
                     return tuple(struct.pack('B', 0))

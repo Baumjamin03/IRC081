@@ -47,6 +47,7 @@ class IRC081(usb_2408_2AO):
         self.bitE = 1
         self.bitF = 1
         self.bitOn = 1
+        self.bitInterlock = 0
 
         self.ionRange = 0
 
@@ -85,6 +86,7 @@ class IRC081(usb_2408_2AO):
         while not False:
             try:
                 await self.read_analogue_inputs()
+                self.bitInterlock = 0x01 & await self.read_digital_input()
 
                 self.uDeflector = self.aInput[0] * D10d1 * self.factors["factor ai0"]
                 self.uWehnelt = self.aInput[1] * D10d1 * self.factors["factor ai1"]
@@ -111,6 +113,12 @@ class IRC081(usb_2408_2AO):
         for i in range(16):
             self.aInput[i] = await self.async_get_voltage(i)
             await asyncio.sleep(0.01)
+
+    async def read_digital_input(self):
+        """
+        Reads the digital inputs.
+        """
+        return await self.loop.run_in_executor(self.executor, self.DIn)
 
     def calculate_pressure_mbar(self):
         """
@@ -200,7 +208,7 @@ class IRC081(usb_2408_2AO):
         Processes the Bits to a HEX-value for the Digital outputs.
         """
         output_value = ((self.bitA << 7) | (self.bitB << 6) | (self.bitC << 5) | (self.bitD << 4) | (self.bitE << 3) |
-                        (self.bitF << 2) | (self.bitOn << 1))
+                        (self.bitF << 2) | (self.bitOn << 1) | self.bitInterlock)
         if self.dOut != output_value:
             await self.loop.run_in_executor(self.executor, self.DOut, output_value)
             self.dOut = output_value
@@ -277,7 +285,7 @@ class IRC081(usb_2408_2AO):
         Sets the Voltages for the IRG080 configured by the potentiometers on the IRC081.
         """
         print("start")
-        print("interlock < 2.5V = good: " + str(self.get_voltage(4)))
+        print("interlock < 2.5V = good: " + str(self.aInput[4]))
         self.bitOn = 1
         self.update_digital_output()
 
@@ -337,6 +345,15 @@ class IRC081(usb_2408_2AO):
 
     def get_cage_current(self) -> Decimal:
         return self.iCage
+
+    def get_voltage_input(self, channel: int) -> Decimal:
+        return self.aInput[channel]
+
+    def get_digital_outputs(self):
+        return self.dOut
+
+    def get_interlock(self):
+        return self.bitInterlock
 
 
 def get_calibration_values(serial_number) -> dict[str, Decimal]:
