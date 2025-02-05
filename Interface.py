@@ -343,8 +343,8 @@ class App(ctk.CTk):
                 return tuple(ord(char) for char in "IRG080")
             case 212:  # DEVSTATE
                 if self.running:
-                    return tuple(struct.pack('B', 0))
-                return tuple(struct.pack('B', 1))
+                    return tuple(struct.pack('B', 1))
+                return tuple(struct.pack('B', 0))
             case 213:  # Exception state
                 return tuple(struct.pack('B', 0))
             case 217:
