@@ -307,7 +307,7 @@ class App(ctk.CTk):
                     *self.handle_serial_data(1, 201),
                     *self.handle_serial_data(1, 222),
                     *self.handle_serial_data(1, 233),
-                    *self.handle_serial_data(1, 279),
+                    *self.handle_serial_data(1, 201),
                     *self.handle_serial_data(1, 224)
                 )
             case 21:  # P3_PID_INI_NAME
@@ -394,12 +394,6 @@ class App(ctk.CTk):
                 return tuple(struct.pack('>f', cc))
             case pid if 236 <= pid <= 251:
                 return tuple(struct.pack('>f', self.irc081.get_voltage_input(pid-236)))
-            case 265:  # TripState
-                return tuple(struct.pack('B', 0))
-            case 279:
-                return tuple(struct.pack('BB', 0, 0))
-            case 286:
-                return tuple(struct.pack('B', 0))
             case 301:  # P3_PID_On/Off
                 d = struct.unpack('B', data)[0] if data is not None else None
                 if cmd == 3 and d == 1:
