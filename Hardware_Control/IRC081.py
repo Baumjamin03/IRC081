@@ -103,6 +103,7 @@ class IRC081(usb_2408_2AO):
                 self.iFaraday = self.read_faraday_current()
                 self.iCage = self.read_cage_current()
                 self.transmission = (self.get_faraday_current() / self.get_emission_current()) * 100
+                await self.update_digital_output()
 
                 await asyncio.sleep(0.2)
             except Exception as e:
