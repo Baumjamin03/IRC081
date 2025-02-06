@@ -436,7 +436,7 @@ class App(ctk.CTk):
                     return tuple(struct.pack('>d', 2.0))
             case 802:
                 return tuple(struct.pack('>I', 7))
-            case _:
+            case _: # error
                 return -1
 
 
