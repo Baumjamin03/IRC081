@@ -342,11 +342,13 @@ class App(ctk.CTk):
             case 210:  # P3_PID_MANUF_MODEL
                 return tuple(ord(char) for char in "IRG080")
             case 212:  # DEVSTATE
-                if self.running:
-                    return tuple(struct.pack('B', 1))
-                return tuple(struct.pack('B', 0))
+                if self.running and (self.irc081.get_interlock_byte() == 0):
+                    return tuple(struct.pack('B', 1)) # 1 = running with sensor
+                elif self.running:
+                    return tuple(struct.pack('B', 2)) # 2 = running without sensor
+                return tuple(struct.pack('B', 0)) # 0 = not running
             case 213:  # Exception state
-                return tuple(struct.pack('B', 0))
+                return tuple(struct.pack('B', self.irc081.get_interlock_byte()))
             case 217:
                 return tuple(ord(char) for char in "31133025")
             case 218:  # P3_PID_REVISION
