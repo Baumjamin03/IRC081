@@ -427,7 +427,7 @@ class App(ctk.CTk):
                     emission_value = struct.unpack('>f', data)[0]
                     self.irc081.set_emission(emission_value)
                     self.content_frame.pages["Home"].entryEmission.set(emission_value)
-                return tuple(struct.pack('>f', self.irc081.setEmission()))
+                return tuple(struct.pack('>f', self.irc081.setEmission))
             case 401:  # Stabilization filter
                 return tuple(struct.pack('B', 0))
             case 801:
