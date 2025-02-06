@@ -75,7 +75,6 @@ class IRC081(usb_2408_2AO):
             asyncio.set_event_loop(self.loop)
             self.loop.run_forever()
 
-        self.bitOn = 0
         loop_thread = Thread(target=run_loop, daemon=True)
         loop_thread.start()
         asyncio.run_coroutine_threadsafe(self.refresh_controller_data(), self.loop)
