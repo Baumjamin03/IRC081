@@ -356,10 +356,10 @@ class IRC081(usb_2408_2AO):
         return self.bitInterlock
 
     def get_interlock_byte(self):
-        i1 = self.bitInterlock
-        i2 = self.aInput[4] < 2.5
-        i3 = self.aInput[12] > 2
-        return (~(i1 | i2 << 1 | i3 << 2)) & 0xFF
+        i1 = not self.bitInterlock
+        i2 = self.aInput[4] > 2.5
+        i3 = self.aInput[12] < 2
+        return (i1 | i2 << 1 | i3 << 2) & 0xFF
 
 
 def get_calibration_values(serial_number) -> dict[str, Decimal]:
