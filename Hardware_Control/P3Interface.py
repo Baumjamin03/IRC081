@@ -14,7 +14,7 @@ class RS232Communication(Serial):
         """
         Initialize the RS232 communication object with the given port and baudrate.
         """
-        super().__init__(port, baudrate, timeout=0.5)
+        super().__init__(port, baudrate, timeout=0.1)
         self.executor = ThreadPoolExecutor()
         self.loop = asyncio.new_event_loop()
         self.p3 = P3V0(self, data_callback)
