@@ -1,6 +1,5 @@
 import abc
 import struct
-import time
 
 from serial import Serial
 import asyncio

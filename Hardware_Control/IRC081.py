@@ -46,7 +46,7 @@ class IRC081(usb_2408_2AO):
         self.bitD = 1
         self.bitE = 1
         self.bitF = 1
-        self.bitOn = 0
+        self.bitOn = 1
         self.bitInterlock = 0
 
         self.ionRange = 0
@@ -287,20 +287,15 @@ class IRC081(usb_2408_2AO):
         """
         print("start")
         print("interlock < 2.5V = good: " + str(self.aInput[4]))
-        self.bitOn = 1
+        self.bitOn = 0
         self.update_digital_output()
 
     def measurement_end(self):
         """
         Resets IRC081 digital outputs and emission current.
         """
-        self.bitA = 1
-        self.bitB = 1
-        self.bitC = 1
-        self.bitD = 1
-        self.bitE = 1
-        self.bitF = 1
-        self.bitOn = 0
+
+        self.bitOn = 1
         self.update_digital_output()
         self.AOut(1, 0)
         return
