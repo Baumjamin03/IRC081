@@ -328,8 +328,7 @@ class App(ctk.CTk):
             case 200:  # P3_PID_PRODUCTION_NUMBER
                 return tuple(ord(char) for char in self.irc081.getSerialNumber())
             case 201:  # GAUGE STATE
-                di = self.irc081.get_digital_outputs()
-
+                di = self.irc081.get_digital_outputs() ^ 0x02
                 return tuple(struct.pack('BB', di, 0))
             case 207:  # P3_PID_SERIAL_NUMBER
                 """
