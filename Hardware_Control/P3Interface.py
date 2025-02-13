@@ -1,6 +1,5 @@
 import abc
 import struct
-
 from serial import Serial
 import asyncio
 from concurrent.futures.thread import ThreadPoolExecutor
