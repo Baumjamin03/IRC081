@@ -4,6 +4,7 @@ from .PlotPage import *
 from .HomePage import *
 from .SettingsPage import *
 from .PageManager import *
+from .GUI import *
 
 __all__ = [
     'SettingsPageClass',
@@ -11,5 +12,6 @@ __all__ = [
     'InfoPageClass',
     'PlotPageClass',
     'PageManagerClass',
-    'TrapezoidFrame'
+    'TrapezoidFrame',
+    'GraphicalInterface'
 ]

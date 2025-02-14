@@ -1,14 +1,10 @@
-from PIL import Image
 import struct
 import time
 import atexit
 import platform
-import customtkinter as ctk
 import os
-
-from GlobalVariables import infBlue
+import customtkinter as ctk
 from Pages import *
-
 if platform.system() != "Windows":
     from Hardware_Control import *
 
@@ -16,7 +12,7 @@ if platform.system() != "Windows":
 txtColor = "white"
 
 
-class App(ctk.CTk):
+class App(GraphicalInterface):
     def __init__(self):
         super().__init__()
         self.configure(fg_color="white")
@@ -79,52 +75,15 @@ class App(ctk.CTk):
 
         self.running = False
 
-        self.TitleBar = TrapezoidFrame(master=self, logo_path="Pictures/IFCN.SW_BIG.D.png")
-        self.TitleBar.grid(row=0, column=1, sticky="nsew", pady=(0, 5))
-
-        self.NavBar = TrapezoidFrame(master=self, invert=True)
-        self.NavBar.grid(row=2, column=1, sticky="nsew", pady=(5, 0), padx=1)
-        self.NavBar.grid_rowconfigure(0, weight=1)
-
-        self.lblPage = ctk.CTkLabel(self.NavBar, text_color="white", text="", fg_color=infBlue,
-                                    font=("Arial", 24, "bold"), bg_color=infBlue, justify="center")
-        self.lblPage.pack(anchor="center", expand=True)
-
-        # self.lblStatus = ctk.CTkLabel(self.NavBar, text="OFF", anchor="e", text_color="white", bg_color=infBlue,
-        #                               font=("Arial", 18, "bold"), width=100, fg_color=infBlue)
-        # self.lblStatus.grid(row=0, column=1, padx=70, sticky="nsew")
-
-        self.content_frame = PageManagerClass(self, self.lblPage)
-        self.content_frame.grid(row=1, column=0, sticky="nsew", columnspan=3, padx=5)
-
-        self.grid_columnconfigure(1, weight=1)
-        self.grid_rowconfigure(0, minsize=55)  # Ensure TitleBar row height
-        self.grid_rowconfigure(1, weight=1)
-        self.grid_rowconfigure(2, minsize=55)  # Ensure NavBar row height
-
         self.content_frame.add_page("Home", HomePageClass(self.content_frame, sw_event=self.switch_event,
                                                           emission_setter=self.set_emission_curr))
         self.content_frame.add_page("Settings", SettingsPageClass(self.content_frame, range_setter=self.set_range))
         self.content_frame.add_page("Plot", PlotPageClass(self.content_frame))
         self.content_frame.add_page("Info", InfoPageClass(self.content_frame))
 
-        self.corner_buttons = {
-            "top_left": self.create_corner_button(0, 0, lambda: self.content_frame.show_page("Settings"),
-                                                  "Pictures/settings.png"),
-            "top_right": self.create_corner_button(0, 2, lambda: self.content_frame.show_page("Plot"),
-                                                   "Pictures/operation.png"),
-            "bottom_left": self.create_corner_button(2, 0, lambda: self.content_frame.show_page("Home"),
-                                                     "Pictures/basic_user.png"),
-            "bottom_right": self.create_corner_button(2, 2, lambda: self.content_frame.show_page("Info"),
-                                                      "Pictures/help.png")
-        }
-        # Show the default page (Home)
-        self.content_frame.show_page("Home")
-
         if self.irc081 is not None:
             print("starting meas. thread")
             self.irc081.start_refresh_thread()
-
 
     def shutdown(self) -> None:
         """
@@ -134,45 +93,6 @@ class App(ctk.CTk):
             self.irc081.measurement_end()
 
             self.com.close_port()
-
-    def create_corner_button(self,
-                             row: int,
-                             col: int,
-                             command: callable = None,
-                             logo_path: str = None) -> ctk.CTkButton:
-        # Create image if logo path is provided
-        if logo_path:
-            # Open the image and get its original dimensions
-            original_image = Image.open(logo_path)
-            orig_width, orig_height = original_image.size
-
-            # Calculate aspect ratio from original image
-            aspect_ratio = orig_width / orig_height
-
-            target_height = 30
-            target_width = int(target_height * aspect_ratio)
-
-            button_image = ctk.CTkImage(
-                light_image=original_image,
-                dark_image=original_image,
-                size=(target_width, target_height)
-            )
-        else:
-            button_image = None
-
-        button = ctk.CTkButton(
-            self,
-            text="",
-            image=button_image,
-            compound="left",
-            text_color="#5D74A1",
-            command=command,
-            fg_color="white",
-            hover_color=infBlue,
-            hover=False
-        )
-        button.grid(row=row, column=col, sticky="nsew")
-        return button
 
     def switch_event(self) -> None:
         """
@@ -433,14 +353,14 @@ class App(ctk.CTk):
             case 450:  # analogue range upper
                 if cmd == 3 and data is not None:
                     self.upperRange = struct.unpack('>f', data)[0]
-                    self.content_frame.pages["settings"].entryUpper.delete(0, 'end')
-                    self.content_frame.pages["settings"].entryUpper.insert(0, "{:.3f}".format(self.upperRange))
+                    self.content_frame.pages["Settings"].entryUpper.delete(0, 'end')
+                    self.content_frame.pages["Settings"].entryUpper.insert(0, "{:.3f}".format(self.upperRange))
                 return tuple(struct.pack('>f', self.upperRange))
             case 451:  # analogue range lower
                 if cmd == 3 and data is not None:
                     self.lowerRange = struct.unpack('>f', data)[0]
-                    self.content_frame.pages["settings"].entryLower.delete(0, 'end')
-                    self.content_frame.pages["settings"].entryLower.insert(0, "{:.3f}".format(self.lowerRange))
+                    self.content_frame.pages["Settings"].entryLower.delete(0, 'end')
+                    self.content_frame.pages["Settings"].entryLower.insert(0, "{:.3f}".format(self.lowerRange))
                 return tuple(struct.pack('>f', self.lowerRange))
             case 801:
                 if cmd == 3 and data is not None:
