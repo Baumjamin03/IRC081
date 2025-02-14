@@ -430,6 +430,18 @@ class App(ctk.CTk):
                 return tuple(struct.pack('>f', self.irc081.setEmission))
             case 401:  # Stabilization filter
                 return tuple(struct.pack('B', 0))
+            case 450:  # analogue range upper
+                if cmd == 3 and data is not None:
+                    self.upperRange = struct.unpack('>f', data)[0]
+                    self.content_frame.pages["settings"].entryUpper.delete(0, 'end')
+                    self.content_frame.pages["settings"].entryUpper.insert(0, "{:.3f}".format(self.upperRange))
+                return tuple(struct.pack('>f', self.upperRange))
+            case 451:  # analogue range lower
+                if cmd == 3 and data is not None:
+                    self.lowerRange = struct.unpack('>f', data)[0]
+                    self.content_frame.pages["settings"].entryLower.delete(0, 'end')
+                    self.content_frame.pages["settings"].entryLower.insert(0, "{:.3f}".format(self.lowerRange))
+                return tuple(struct.pack('>f', self.lowerRange))
             case 801:
                 if cmd == 3 and data is not None:
                     return tuple(struct.pack('>d', 1.0))
