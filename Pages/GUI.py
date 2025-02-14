@@ -42,8 +42,6 @@ class GraphicalInterface(ctk.CTk):
             "bottom_right": self.create_corner_button(2, 2, lambda: self.content_frame.show_page("Info"),
                                                       "Pictures/help.png")
         }
-        # Show the default page (Home)
-        self.content_frame.show_page("Home")
 
     def create_corner_button(self,
                              row: int,

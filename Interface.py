@@ -81,6 +81,8 @@ class App(GraphicalInterface):
         self.content_frame.add_page("Plot", PlotPageClass(self.content_frame))
         self.content_frame.add_page("Info", InfoPageClass(self.content_frame))
 
+        self.content_frame.show_page("Home")
+
         if self.irc081 is not None:
             print("starting meas. thread")
             self.irc081.start_refresh_thread()
