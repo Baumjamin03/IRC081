@@ -33,6 +33,7 @@ setup_splash_screen() {
 
     sudo update-initramfs -u
 }
+
 # Function to create launcher script
 create_launcher() {
     cat > launcher.sh << EOL
@@ -66,10 +67,6 @@ RestartSec=10
 Type=simple
 KillMode=process
 TimeoutStopSec=20
-
-# Logging setup
-StandardOutput=append:/home/$USER_NAME/irc081.log
-StandardError=append:/home/$USER_NAME/irc081.log
 
 [Install]
 WantedBy=graphical.target
@@ -128,6 +125,9 @@ python3 -m venv venv
 
 echo "-----Activating the virtual environment..."
 source venv/bin/activate
+
+echo "-----Configuring pip to use PyPI only..."
+export PIP_INDEX_URL=https://pypi.org/simple
 
 pip install --upgrade pip setuptools wheel
 

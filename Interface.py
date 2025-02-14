@@ -1,17 +1,18 @@
-from threading import Thread
 from PIL import Image
-import asyncio
+import struct
 import time
 import atexit
 import platform
 import customtkinter as ctk
+import os
 
+from GlobalVariables import infBlue
 from Pages import *
 
 if platform.system() != "Windows":
     from Hardware_Control import *
 
-infBlue = "#24517F"
+
 txtColor = "white"
 
 
@@ -30,21 +31,16 @@ class App(ctk.CTk):
             try:
                 if port_toggle:
                     port_toggle = False
-                    self.com = RS232Communication()
+                    self.com = RS232Communication(data_callback=self.handle_serial_data, port='/dev/ttyAMA10')
                 else:
                     port_toggle = True
-                    self.com = RS232Communication(port='/dev/ttyS0')
+                    self.com = RS232Communication(data_callback=self.handle_serial_data, port='/dev/ttyS0')
                 if self.com.is_open:
                     self.com.close_port()
-                self.com.open_port()
             except Exception as er:
                 print(er)
                 self.com = None
                 time.sleep(1)
-
-        if self.com is not None:
-            self.RS232Listener = SerialListener(self.com, self.handle_serial_data)
-            self.RS232Listener.start()
 
         self.uOut = 0
         self.lowerRange = 0
@@ -77,6 +73,9 @@ class App(ctk.CTk):
                 time.sleep(5)
                 # continue
             break
+
+        if self.com is not None:
+            self.com.start_listener_thread()
 
         self.running = False
 
@@ -124,7 +123,8 @@ class App(ctk.CTk):
 
         if self.irc081 is not None:
             print("starting meas. thread")
-            self.start_loop_in_thread(self.irc081.refresh_controller_data)
+            self.irc081.start_refresh_thread()
+
 
     def shutdown(self) -> None:
         """
@@ -132,7 +132,7 @@ class App(ctk.CTk):
         """
         if self.irc081 is not None:
             self.irc081.measurement_end()
-            self.RS232Listener.stop()
+
             self.com.close_port()
 
     def create_corner_button(self,
@@ -169,6 +169,7 @@ class App(ctk.CTk):
             command=command,
             fg_color="white",
             hover_color=infBlue,
+            hover=False
         )
         button.grid(row=row, column=col, sticky="nsew")
         return button
@@ -212,9 +213,13 @@ class App(ctk.CTk):
         if self.running:
             self.after(1000, self.measurement_loop)
             if self.irc081 is not None:
-                self.update_values()
-                self.update_aout()
-                self.analogue_out_handler()
+                try:
+                    self.update_values()
+                    self.update_aout()
+                    self.analogue_out_handler()
+                    print("Beep Beep (good kind of Beep)")
+                except Exception as er:
+                    print(f"Error in measurement_loop: {er}")
 
     def update_values(self) -> None:
         """
@@ -272,7 +277,7 @@ class App(ctk.CTk):
 
         try:
             self.uOut = (pressure - self.lowerRange) / (self.upperRange - self.lowerRange) * 10
-            print(f"Pressure: {pressure}, Range: {self.lowerRange}-{self.upperRange}, Output: {self.uOut}")
+            #print(f"Pressure: {pressure}, Range: {self.lowerRange}-{self.upperRange}, Output: {self.uOut}")
             self.content_frame.pages["Settings"].lblOut.value.set("{:.3f}".format(self.uOut))
         except DecimalException as er:
             print("Analogue Handler ERR: " + str(er))
@@ -290,110 +295,162 @@ class App(ctk.CTk):
         self.upperRange = upper_range
         print(f"new real ranges: {self.upperRange} to {self.lowerRange}")
 
-    def start_loop_in_thread(self, func) -> None:
-        """
-        Takes a function, creates an async Loop and runs it in a Thread
-        :param func: any function to be run in a separate Thread
-        """
-        def run_loop(_loop):
-            asyncio.set_event_loop(_loop)
-            loop.run_forever()
+    def handle_serial_data(self, cmd: int, pid: int, data=None):
+        # print("data callback called with: " + str(data))
+        # print("cmd: " + str(cmd))
+        # print("pid: " + str(pid))
 
-        loop = asyncio.new_event_loop()
-        loop_thread = Thread(target=run_loop, args=(loop,), daemon=True)
-        loop_thread.start()
-        asyncio.run_coroutine_threadsafe(func(), loop)
-
-    def handle_serial_data(self,
-                           data) -> None | str:
-        """
-        serial data handling for more information visit:
-        https://colla.inficon.com/display/VCRD/RS232+Protocoll
-        """
-        while data.endswith(b'\r') or data.endswith(b'\n'):
-            data = data[:len(data) - 1]
-        response = data + b'\r\n'
-
-        if len(data) < 2:
-            return response + b'Error, cmd too short\r\n'
-
-        command_code = data[:2]
-        print("command: " + str(command_code))
-
-        writing = False
-        value = None
-        if len(data) > 2:
-            writing = data[2:3] == b';'
-            if not writing:
-                return response + b'cmd too long or invalid writing operator\r\n'
-            value = data[3:].decode()
-
-        if command_code == b'AL':  # Analogue range lower
-            if writing:
-                if 'E-' in value:
-                    try:
-                        self.content_frame.pages["Setting"].entryLower.set(value)
-                        self.set_range()
-                    except ValueError:
-                        response += b'value Error'
+        match pid:
+            case 8:
+                return (
+                    *self.handle_serial_data(1, 213),
+                    *self.handle_serial_data(1, 201),
+                    *self.handle_serial_data(1, 222),
+                    *self.handle_serial_data(1, 233),
+                    *self.handle_serial_data(1, 201),
+                    *self.handle_serial_data(1, 224)
+                )
+            case 21:  # P3_PID_INI_NAME
+                return tuple(ord(char) for char in "IRG081")
+            case 22:  # P3_PID_INI_VERSION
+                return tuple(ord(char) for char in "IRG081")
+            case 102:  # P3_PID_PASSWORD
+                """
+                """
+                return tuple(struct.pack('B', 1))
+            case 103:  # P3_PID_RESET
+                d = struct.unpack('B', data)[0] if data is not None else None
+                if cmd == 3 and d == 1:
+                    self.after(300, os.system("sudo reboot"))
+                return tuple(struct.pack('B', 1))
+            case 151:  # Baudrate
+                return tuple(struct.pack('B', 4))
+            case 200:  # P3_PID_PRODUCTION_NUMBER
+                return tuple(ord(char) for char in self.irc081.getSerialNumber())
+            case 201:  # GAUGE STATE
+                di = self.irc081.get_digital_outputs() ^ 0x02
+                return tuple(struct.pack('BB', di, 0))
+            case 207:  # P3_PID_SERIAL_NUMBER
+                """
+                """
+                return tuple(struct.pack('>I', 0))
+            case 208:  # P3_PID_PRODUCT_NAME
+                return tuple(ord(char) for char in "IRG080")
+            case 209:  # P3_PID_MANUF_NAME
+                return tuple(ord(char) for char in "INFICON AG")
+            case 210:  # P3_PID_MANUF_MODEL
+                return tuple(ord(char) for char in "IRG080")
+            case 212:  # DEVSTATE
+                if self.running and (self.irc081.get_interlock_byte() == 0):
+                    return tuple(struct.pack('B', 1)) # 1 = running with sensor
+                elif self.running:
+                    return tuple(struct.pack('B', 2)) # 2 = running without sensor
+                return tuple(struct.pack('B', 0)) # 0 = not running
+            case 213:  # Exception state
+                return tuple(struct.pack('B', self.irc081.get_interlock_byte()))
+            case 217:
+                return tuple(ord(char) for char in "31133025")
+            case 218:  # P3_PID_REVISION
+                return tuple(ord(char) for char in "aaaaaa")
+            case 222:  # P3_PID_Pressure
+                pressure_mbar = float(self.irc081.get_pressure_mbar())
+                return tuple(struct.pack('>f', pressure_mbar))
+            case 223:  # P3_PID_FilCurr
+                fc = float(self.irc081.get_current_filament())
+                return tuple(struct.pack('>f', fc))
+            case 224:  # P3_PID_UNIT
+                return tuple(struct.pack('B', 0))
+            case 225:  # P3_PID_FarVolt
+                fv = float(self.irc081.get_voltage_faraday())
+                return tuple(struct.pack('>f', fv))
+            case 226:  # P3_PID_BiasVolt
+                bv = float(self.irc081.get_voltage_bias())
+                return tuple(struct.pack('>f', bv))
+            case 227:  # P3_PID_WehnVolt
+                wv = float(self.irc081.get_voltage_wehnelt())
+                return tuple(struct.pack('>f', wv))
+            case 228:  # P3_PID_DefVolt
+                df = float(self.irc081.get_voltage_deflector())
+                return tuple(struct.pack('>f', df))
+            case 229:  # P3_PID_IonCurr
+                ic = float(self.irc081.get_ion_current())
+                return tuple(struct.pack('>f', ic))
+            case 230:  # P3_PID_IonVolt
+                iv = float(self.irc081.get_ion_voltage())
+                return tuple(struct.pack('>f', iv))
+            case 231:  # P3_PID_EmissionCurr
+                ec = float(self.irc081.get_emission_current())
+                return tuple(struct.pack('>f', ec))
+            case 232:  # P3_PID_EmissionVolt
+                ev = float(self.irc081.get_emission_voltage())
+                return tuple(struct.pack('>f', ev))
+            case 233:  # P3_PID_Transmission
+                tr = float(self.irc081.get_transmission())
+                return tuple(struct.pack('>f', tr))
+            case 234:  # P3_PID_FaradayCurrent
+                fc = float(self.irc081.get_faraday_current())
+                return tuple(struct.pack('>f', fc))
+            case 235:  # P3_PID_CageCurrent
+                cc = float(self.irc081.get_cage_current())
+                return tuple(struct.pack('>f', cc))
+            case pid if 236 <= pid <= 251:
+                return tuple(struct.pack('>f', self.irc081.get_voltage_input(pid-236)))
+            case 300:  # Interlock
+                return tuple(struct.pack('B', self.irc081.bitInterlock))
+            case 301:  # P3_PID_On/Off
+                d = struct.unpack('B', data)[0] if data is not None else None
+                if cmd == 3 and d == 1:
+                    self.running = False
+                    self.switch_event()
+                    return tuple(struct.pack('B', 1))
+                elif cmd == 3 and d == 0:
+                    self.running = True
+                    self.switch_event()
+                    return tuple(struct.pack('B', 0))
                 else:
-                    response += b'missing [E-]'
-            else:
-                response += str(self.lowerRange).encode()
-        elif command_code == b'AU':  # Analogue range upper
-            if writing:
-                if 'E-' in value:
-                    try:
-                        self.content_frame.pages["Setting"].entryUpper.set(value)
-                        self.set_range()
-                    except ValueError:
-                        response += b'value Error'
+                    return tuple(struct.pack('B', self.running))
+            case 302:  # F
+                return tuple(struct.pack('B', self.irc081.bitF))
+            case 303:  # E
+                return tuple(struct.pack('B', self.irc081.bitE))
+            case 304:  # D
+                return tuple(struct.pack('B', self.irc081.bitD))
+            case 305:  # C
+                return tuple(struct.pack('B', self.irc081.bitC))
+            case 306:  # B
+                return tuple(struct.pack('B', self.irc081.bitB))
+            case 307:  # A
+                return tuple(struct.pack('B', self.irc081.bitA))
+            case 333:  # Emission Current
+                if cmd == 3 and data is not None:
+                    emission_value = struct.unpack('>f', data)[0]
+                    self.irc081.set_emission(emission_value)
+                    self.content_frame.pages["Home"].entryEmission.delete(0, 'end')
+                    self.content_frame.pages["Home"].entryEmission.insert(0, "{:.3f}".format(emission_value))
+                return tuple(struct.pack('>f', self.irc081.setEmission))
+            case 401:  # Stabilization filter
+                return tuple(struct.pack('B', 0))
+            case 450:  # analogue range upper
+                if cmd == 3 and data is not None:
+                    self.upperRange = struct.unpack('>f', data)[0]
+                    self.content_frame.pages["settings"].entryUpper.delete(0, 'end')
+                    self.content_frame.pages["settings"].entryUpper.insert(0, "{:.3f}".format(self.upperRange))
+                return tuple(struct.pack('>f', self.upperRange))
+            case 451:  # analogue range lower
+                if cmd == 3 and data is not None:
+                    self.lowerRange = struct.unpack('>f', data)[0]
+                    self.content_frame.pages["settings"].entryLower.delete(0, 'end')
+                    self.content_frame.pages["settings"].entryLower.insert(0, "{:.3f}".format(self.lowerRange))
+                return tuple(struct.pack('>f', self.lowerRange))
+            case 801:
+                if cmd == 3 and data is not None:
+                    return tuple(struct.pack('>d', 1.0))
                 else:
-                    response += b'missing [E-]'
-            else:
-                response += str(self.upperRange).encode()
-        elif command_code == b'AV':  # Analogue Voltage
-            response += str(self.uOut).encode()
-        elif command_code == b'EC':  # Emission current
-            if writing:
-                self.content_frame.pages["Home"].entryEmission.delete(0, ctk.END)
-                self.content_frame.pages["Home"].entryEmission.insert(0, value)
-                answ = self.set_emission_curr()
-                if answ is not None:
-                    response += answ
-            else:
-                response += str(self.content_frame.pages["Home"].entryEmission.get()).encode()
-        elif command_code == b'ME':  # Measurement on/off
-            if writing:
-                if value == "1":
-                    if not self.running:
-                        self.switch_event()
-                else:
-                    if self.running:
-                        self.switch_event()
-            else:
-                response += self.running
-        elif command_code == b'VW':  # Get Voltage Wehnelt
-            response += str(self.content_frame.pages["Home"].Voltages["Wehnelt"].value.get()).encode()
-        elif command_code == b'VC':  # Get Voltage Cage
-            response += str(self.content_frame.pages["Home"].Voltages["Cage"].value.get()).encode()
-        elif command_code == b'VF':  # Get Voltage Faraday
-            response += str(self.content_frame.pages["Home"].Voltages["Faraday"].value.get()).encode()
-        elif command_code == b'VB':  # Get Voltage Bias
-            response += str(self.content_frame.pages["Home"].Voltages["Bias"].value.get()).encode()
-        elif command_code == b'VD':  # Get Voltage Deflector
-            response += str(self.content_frame.pages["Home"].Voltages["Deflector"].value.get()).encode()
-        elif command_code == b'IF':  # Get Filament Current
-            response += str(self.content_frame.pages["Home"].Voltages["Current"].value.get()).encode()
-        elif command_code == b'PR':  # Get Pressure
-            response += str(self.content_frame.pages["Home"].pressure.get()).encode()
-        else:
-            response += b'unknown command'
-
-        if response.endswith(b'\r\n'):
-            return response
-        else:
-            return response + b'\r\n'
+                    return tuple(struct.pack('>d', 2.0))
+            case 802:
+                return tuple(struct.pack('>I', 7))
+            case _: # error
+                return -1
 
 
 if __name__ == "__main__":

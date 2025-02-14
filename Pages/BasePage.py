@@ -2,7 +2,6 @@ import tkinter as tk
 import customtkinter as ctk
 from PIL import Image
 from GlobalVariables import infBlue
-from Interface import infBlue
 
 
 class BasePageClass(ctk.CTkFrame):

@@ -67,6 +67,9 @@ python3 -m venv venv
 echo "-----Activating the virtual environment..."
 source venv/bin/activate
 
+echo "-----Configuring pip to use PyPI only..."
+export PIP_INDEX_URL=https://pypi.org/simple
+
 if [ -f "./Assets/requirements.txt" ]; then
     echo "-----Installing Python dependencies in the virtual environment..."
     pip install -r ./Assets/requirements.txt
