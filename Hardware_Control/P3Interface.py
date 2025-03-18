@@ -168,6 +168,53 @@ class P3(metaclass=abc.ABCMeta):
     def _encode_package(self, cmd, pid, data=None) -> tuple:
         pass
 
+    def _decode_package(self, cmd, pid, data_rcv: bytes) -> bytes:
+        """
+        Extracts the data from a raw response message.
+        Raises exception in case of an incoming error message.
+
+        Parameters
+        ----------
+        cmd : int
+        pid : int
+        data_rcv : bytes
+            data as received from device
+
+        Returns
+        -------
+        bytes
+
+        Raises
+        ------
+        P3DevError:
+            - if device returns an error message
+        P3CommError:
+            - in case of a correspondence mismatch
+        """
+        dev_id = data_rcv[1]
+        if dev_id in self._known_devices:
+            self._dev_id = ID(dev_id)
+        cmd_rcv = data_rcv[self.POSITION_CMD]
+        pid_rcv = data_rcv[self.POSITION_PID: self.POSITION_PID + 2]
+        pid_rcv = struct.unpack(">H", pid_rcv)[0]
+
+        comm_ok = (cmd_rcv == cmd + 1) and (pid_rcv == pid)
+        dev_error = pid_rcv == 65535
+
+        data = data_rcv[self.POSITION_DATA: -2]
+        if dev_error:
+            error_code = data[0]
+            error_ext = None
+            if len(data) == 2:
+                error_ext = data[1]
+            raise P3DevError(error_code, err_code_ext=error_ext)
+        if not comm_ok:
+            raise P3CommError(
+                "Correspondence mismatch: " "try to run the command again."
+            )
+        else:
+            return data
+
     @staticmethod
     def _send_raw(comm_handle, data_raw: bytes):
         # log.debug("write bytes")
@@ -177,6 +224,53 @@ class P3(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def _receive_raw(self, comm_handle):
         pass
+
+    def send_receive_data(self, cmd, pid, data=None, timeout=None) -> bytes:
+        """
+        check data format and send data as bytearray. The protocol P3
+        requires the acknowledgement of every command, which is why
+        sending and receiving data have to be bundled together
+
+        Parameters
+        ----------
+        cmd : int
+            A decimal integer
+        pid : int
+            Another decimal integer
+        data : tuple[int], list[int]
+            tuple or list of 8-bit ints
+        timeout : float or None
+            communication timeout, can be used for commands that take
+            longer to execute.
+
+        Returns
+        -------
+        bytes
+            raw bytestream sent by device
+
+        Raises
+        ------
+        P3ValueError
+            - if passed list contains values larger than 8-bit
+            - if input data is too large
+        P3CommError
+            - if checksum fails, if pid does not match sent pid
+        P3DevError
+            - if device returns an error
+        """
+        timeout_old = self.comm_handle.timeout
+        set_timeout = timeout is not None
+        if set_timeout:
+            self.comm_handle.timeout = timeout
+
+        pkg_send = bytes(self._encode_package(cmd, pid, data=data))
+        with self.comm_handle as com_obj:
+            self._send_raw(com_obj, pkg_send)
+            pkg_rcv = self._receive_raw(com_obj)
+
+        if set_timeout:
+            self.comm_handle.timeout = timeout_old
+        return self._decode_package(cmd, pid, pkg_rcv)
 
     def receive_send_data(self):
         pkg_rcv = self._receive_raw(self.comm_handle)
@@ -225,14 +319,18 @@ class P3V0(P3):
     POSITION_CMD = 4
     POSITION_DATA = 9
 
-    def __init__(self, interface_obj, data_callback):
+    def __init__(self, interface_obj, data_callback, role='slave'):
         """
         Parameters
         ---------
         interface_obj: InterfaceImpl
+        role: str
+            Role of the communication ('master' or 'slave')
         """
         super().__init__(interface_obj, data_callback)
         self._protocol_version = "P3V0"
+        self.role = role
+        self.preamble_header = self.PREAMBLE_HEADER_MASTER if role == 'master' else self.PREAMBLE_HEADER_SLAVE
 
     def _encode_package(self, cmd, pid, data=None) -> tuple:
         """
@@ -263,9 +361,9 @@ class P3V0(P3):
             raise P3ValueError("At least one entry in list is >256")
 
         # Header
-        pkg_payload = list(self.PREAMBLE_HEADER_SLAVE[0:3])
+        pkg_payload = list(self.preamble_header[0:3])
 
-        len_data = self.PREAMBLE_HEADER_SLAVE[-1]
+        len_data = self.preamble_header[-1]
         if data is not None:
             len_data += len(data)
         pkg_payload.append(len_data)
@@ -288,7 +386,7 @@ class P3V0(P3):
         pkg_rcv = b""
 
         # preamble & header
-        header_size = len(self.PREAMBLE_HEADER_SLAVE)
+        header_size = len(self.preamble_header)
         pkg_rcv += com_obj.read(header_size)
         if len(pkg_rcv) < header_size:
             # may happen when running into timeout problems.
