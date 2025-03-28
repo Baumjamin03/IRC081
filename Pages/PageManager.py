@@ -8,6 +8,7 @@ class PageManagerClass(BasePageClass):
                  lbl_page: ctk.CTkLabel,
                  **kwargs: any):
         super().__init__(master, **kwargs)
+        self.master = master
         self.current_page = None
         self.pages = {}
         self.lbl_page = lbl_page

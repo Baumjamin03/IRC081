@@ -11,3 +11,13 @@ class ControlGauge(Serial):
 
     def write_pid(self, pid, data):
         return self.p3.send_receive_data(pid, 3, data)
+
+    def read_pressure(self):
+        pressure = self.read_pid(222)
+        unit = self.read_pid(224)
+
+
+if __name__ == "__main__":
+    gauge = ControlGauge("COM1")
+    print(gauge.read_pid(222))
+    print(gauge.read_pid(224))

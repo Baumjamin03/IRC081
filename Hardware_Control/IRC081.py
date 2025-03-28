@@ -70,6 +70,7 @@ class IRC081(usb_2408_2AO):
         self.dOut = Decimal(0)
 
     def start_refresh_thread(self):
+        self.measurement_end()
         def run_loop():
             asyncio.set_event_loop(self.loop)
             self.loop.run_forever()

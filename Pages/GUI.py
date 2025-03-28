@@ -7,8 +7,8 @@ from Pages import *
 
 
 class GraphicalInterface(ctk.CTk):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.TitleBar = TrapezoidFrame(master=self, logo_path="Pictures/IFCN.SW_BIG.D.png")
         self.TitleBar.grid(row=0, column=1, sticky="nsew", pady=(0, 5))
 

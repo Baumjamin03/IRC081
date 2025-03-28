@@ -13,8 +13,8 @@ txtColor = "white"
 
 
 class App(GraphicalInterface):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.configure(fg_color="white")
 
         self.geometry("600x280")
