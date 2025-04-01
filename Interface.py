@@ -4,6 +4,7 @@ import atexit
 import platform
 import os
 import customtkinter as ctk
+
 from Pages import *
 if platform.system() != "Windows":
     from Hardware_Control import *
@@ -69,6 +70,10 @@ class App(GraphicalInterface):
                 time.sleep(5)
                 # continue
             break
+
+        self.ctrlGauge = None
+        if platform.system() != "Windows":
+            self.ctrlGauge = ControlGauge('/dev/ttyUSB0')
 
         if self.com is not None:
             self.com.start_listener_thread()
@@ -177,6 +182,8 @@ class App(GraphicalInterface):
                 "{:.3f}".format(self.irc081.get_ion_current()))
             self.content_frame.pages["Settings"].lblOut.value.set(
                 "{:.3f}".format(self.uOut))
+            self.content_frame.pages["Settings"].lblPressure.value.set(
+                "{:.4e}".format(self.ctrlGauge.get_pressure()))
 
         elif self.content_frame.current_page == "Plot":
             self.content_frame.pages["Plot"].update_plot()
