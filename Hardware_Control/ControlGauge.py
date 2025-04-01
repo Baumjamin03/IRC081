@@ -4,8 +4,7 @@ import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from threading import Thread
 
-from Hardware_Control import IRC081
-from P3Interface import P3V0
+from .P3Interface import P3V0
 from serial import Serial
 
 class ControlGauge(Serial):
