@@ -124,6 +124,7 @@ class App(ctk.CTk):
         if self.irc081 is not None:
             print("starting meas. thread")
             self.irc081.start_refresh_thread()
+            self.update_values()
 
 
     def shutdown(self) -> None:
@@ -210,13 +211,10 @@ class App(ctk.CTk):
         """
         Calls itself and periodically updates measurement values.
         """
-        if self.irc081 is not None:
-            self.update_values()
         if self.running:
             self.after(1000, self.measurement_loop)
             if self.irc081 is not None:
                 try:
-
                     self.update_aout()
                     self.analogue_out_handler()
                     print("Beep Beep (good kind of Beep)")
@@ -227,6 +225,7 @@ class App(ctk.CTk):
         """
         Reads the Data from the IRC081 and Displays it.
         """
+        self.after(1000, self.update_values)
         self.content_frame.pages["Plot"].add_point(self.irc081.get_pressure_mbar())
 
         if self.content_frame.current_page == "Home":
