@@ -210,11 +210,13 @@ class App(ctk.CTk):
         """
         Calls itself and periodically updates measurement values.
         """
+        if self.irc081 is not None:
+            self.update_values()
         if self.running:
             self.after(1000, self.measurement_loop)
             if self.irc081 is not None:
                 try:
-                    self.update_values()
+
                     self.update_aout()
                     self.analogue_out_handler()
                     print("Beep Beep (good kind of Beep)")
