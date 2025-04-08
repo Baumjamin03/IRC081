@@ -212,7 +212,7 @@ class App(ctk.CTk):
         Calls itself and periodically updates measurement values.
         """
         if self.running:
-            self.after(1000, self.measurement_loop)
+            self.after(500, self.measurement_loop)
             if self.irc081 is not None:
                 try:
                     self.update_aout()
@@ -225,7 +225,7 @@ class App(ctk.CTk):
         """
         Reads the Data from the IRC081 and Displays it.
         """
-        self.after(1000, self.update_values)
+        self.after(500, self.update_values)
         self.content_frame.pages["Plot"].add_point(self.irc081.get_pressure_mbar())
 
         if self.content_frame.current_page == "Home":
