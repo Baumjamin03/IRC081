@@ -208,7 +208,7 @@ class IRC081(usb_2408_2AO):
         Processes the Bits to a HEX-value for the Digital outputs.
         """
         output_value = ((self.bitA << 7) | (self.bitB << 6) | (self.bitC << 5) | (self.bitD << 4) | (self.bitE << 3) |
-                        (self.bitF << 2) | (self.bitOn << 1) | self.bitInterlock)
+                        (self.bitF << 2) | (self.bitOn << 1) | (1 - self.bitInterlock))
         if self.dOut != output_value:
             await self.loop.run_in_executor(self.executor, self.DOut, output_value)
             self.dOut = output_value
