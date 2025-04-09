@@ -242,8 +242,9 @@ class App(ctk.CTk):
             self.content_frame.pages["Home"].Voltages["Filament"].value.set(
                 "{:.3f}".format(self.irc081.get_current_filament()))
 
-            self.content_frame.pages["Home"].pressure.set("{:.5e}".format(self.irc081.get_pressure_mbar()))
-            self.content_frame.pages["Home"].transmission.set("{:.2f}".format(self.irc081.get_transmission()))
+            if self.running:
+                self.content_frame.pages["Home"].pressure.set("{:.5e}".format(self.irc081.get_pressure_mbar()))
+                self.content_frame.pages["Home"].transmission.set("{:.2f}".format(self.irc081.get_transmission()))
 
         elif self.content_frame.current_page == "Settings":
             self.content_frame.pages["Settings"].values["iEmission"].value.set(
