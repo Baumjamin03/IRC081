@@ -114,7 +114,7 @@ class App(ctk.CTk):
             "top_right": self.create_corner_button(0, 2, lambda: self.content_frame.show_page("Plot"),
                                                    "Pictures/operation.png"),
             "bottom_left": self.create_corner_button(2, 0, lambda: self.content_frame.show_page("Home"),
-                                                     "Pictures/basic_user.png"),
+                                                     "Pictures/houseIcon.png"),
             "bottom_right": self.create_corner_button(2, 2, lambda: self.content_frame.show_page("Info"),
                                                       "Pictures/help.png")
         }
