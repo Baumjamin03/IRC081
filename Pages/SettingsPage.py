@@ -38,7 +38,7 @@ class SettingsPageClass(BasePageClass):
         self.lblOut = ValueDisplay(self.frameAnalogue, "Analogue Out (V):", 0, 0)
 
         self.frameValues = ctk.CTkFrame(self, fg_color=infBlue, bg_color=infBlue)
-        self.frameValues.grid(row=1, column=0, columnspan=2, pady=3)
+        self.frameValues.grid(row=1, column=0, columnspan=2, pady=10)
         self.values = {
             "iFaraday": ValueDisplay(self.frameValues, "Faraday (A):", 0, 0),
             "iCage": ValueDisplay(self.frameValues, "Cage (A):", 0, 1),
