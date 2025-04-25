@@ -34,7 +34,7 @@ class IRC081(usb_2408_2AO):
         self.measGain = self.BP_10V
         self.measRate = self.HZ25
 
-        self.set_filament_current_limitation(2)
+        self.set_filament_current_limitation(2.0)
 
         self.factors = get_calibration_values(self.getSerialNumber())
         self.aInput = [Decimal(0)] * 16
@@ -214,15 +214,15 @@ class IRC081(usb_2408_2AO):
             self.dOut = output_value
         return
 
-    async def set_filament_current_limitation(self, i_fil_max=2):
+    def set_filament_current_limitation(self, i_fil_max=2.0):
         """
-        Sets maximum heater current, 1V = 1A, max 2 A.
+        Sets maximum heater current, 1V = 0.9A, max 2 A.
         """
-        if i_fil_max > 2:
-            i_fil_max = 2
+        if i_fil_max > 2.0:
+            i_fil_max = 2.0
         value = i_fil_max / self.factors["factor ai6"]
         print("filament_current_limitation: " + str(value))
-        await self.loop.run_in_executor(self.executor, self.AOut, (0, float(value)))
+        self.AOut(0, float(value))
         return
 
     def read_faraday_current(self):
