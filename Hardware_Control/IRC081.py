@@ -34,9 +34,8 @@ class IRC081(usb_2408_2AO):
         self.measGain = self.BP_10V
         self.measRate = self.HZ25
 
-        self.set_filament_current_limitation(2.0)
-
         self.factors = get_calibration_values(self.getSerialNumber())
+
         self.aInput = [Decimal(0)] * 16
 
         self.bitA = 1
@@ -68,6 +67,7 @@ class IRC081(usb_2408_2AO):
         self.transmission = Decimal(0)
 
         self.dOut = Decimal(0)
+        self.set_filament_current_limitation(2.0)
 
     def start_refresh_thread(self):
         def run_loop():
