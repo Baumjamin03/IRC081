@@ -67,7 +67,7 @@ class IRC081(usb_2408_2AO):
         self.transmission = Decimal(0)
 
         self.dOut = Decimal(0)
-        self.set_filament_current_limitation(2.0)
+        self.set_filament_current_limitation(1.8)
 
     def start_refresh_thread(self):
         def run_loop():
@@ -220,7 +220,7 @@ class IRC081(usb_2408_2AO):
         """
         if i_fil_max > 2.0:
             i_fil_max = 2.0
-        value = i_fil_max / self.factors["factor ai6"]
+        value = Decimal(i_fil_max) / self.factors["factor ai6"]
         print("filament_current_limitation: " + str(value))
         self.AOut(0, float(value))
         return
