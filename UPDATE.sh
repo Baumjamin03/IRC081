@@ -54,16 +54,26 @@ echo "-----Updating package list and installing dependencies..."
 sudo apt update
 sudo apt install -y $DEPENDENCIES
 
-echo "-----Cloning the repository..."
+echo "-----Setting up the repository..."
 if [ -d "$CLONE_DIR" ]; then
-    rm -rf "$CLONE_DIR"
+    echo "-----Repository directory exists, updating..."
+    cd "$CLONE_DIR" || exit
+    git fetch
+    git checkout main || git checkout -b main origin/main
+    git pull
+else
+    echo "-----Cloning the repository..."
+    git clone -b main $REPO_URL $CLONE_DIR
+    cd "$CLONE_DIR" || exit
 fi
-git clone -b Interface2.0 $REPO_URL $CLONE_DIR
-cd $CLONE_DIR || exit
 
-echo "-----Creating a virtual environment..."
-python3 -m venv venv
-
+echo "-----Setting up the virtual environment..."
+if [ ! -d "venv" ]; then
+    echo "-----Creating a new virtual environment..."
+    python3 -m venv venv
+else
+    echo "-----Using existing virtual environment..."
+fi
 echo "-----Activating the virtual environment..."
 source venv/bin/activate
 
