@@ -226,7 +226,9 @@ class App(ctk.CTk):
         Reads the Data from the IRC081 and Displays it.
         """
         self.after(500, self.update_values)
-        self.content_frame.pages["Plot"].add_point(self.irc081.get_pressure_mbar())
+
+        if self.running:
+            self.content_frame.pages["Plot"].add_point(self.irc081.get_pressure_mbar())
 
         if self.content_frame.current_page == "Home":
             self.content_frame.pages["Home"].Voltages["Wehnelt"].value.set(
@@ -242,7 +244,7 @@ class App(ctk.CTk):
             self.content_frame.pages["Home"].Voltages["Filament"].value.set(
                 "{:.3f}".format(self.irc081.get_current_filament()))
 
-            if self.running:
+            if self.irc081.bitOn:
                 self.content_frame.pages["Home"].pressure.set("{:.5e}".format(self.irc081.get_pressure_mbar()))
                 self.content_frame.pages["Home"].transmission.set("{:.2f}".format(self.irc081.get_transmission()))
 
@@ -279,7 +281,6 @@ class App(ctk.CTk):
 
         try:
             self.uOut = (pressure - self.lowerRange) / (self.upperRange - self.lowerRange) * 10
-            #print(f"Pressure: {pressure}, Range: {self.lowerRange}-{self.upperRange}, Output: {self.uOut}")
             self.content_frame.pages["Settings"].lblOut.value.set("{:.3f}".format(self.uOut))
         except DecimalException as er:
             print("Analogue Handler ERR: " + str(er))
