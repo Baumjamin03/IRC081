@@ -70,13 +70,21 @@ class IRC081(usb_2408_2AO):
         self.set_filament_current_limitation(1.8)
 
     def start_refresh_thread(self):
-        def run_loop():
-            asyncio.set_event_loop(self.loop)
-            self.loop.run_forever()
+        self.Queue[0] = 16  # Number of channels to scan
+        for i in range(16):
+            self.Queue[i + 1].channel = i
+            self.Queue[i + 1].mode = self.measMode  # Or appropriate mode
+            self.Queue[i + 1].gain = self.measGain  # Or appropriate gain
+            self.Queue[i + 1].rate = self.measRate  # Or appropriate rate
 
-        loop_thread = Thread(target=run_loop, daemon=True)
-        loop_thread.start()
-        asyncio.run_coroutine_threadsafe(self.refresh_controller_data(), self.loop)
+        # Write queue to device
+        self.AInScanQueue()
+
+        # Start scanning - 200 Hz, continuous mode (count=0)
+        self.AInScanStart(50, 0, 15)
+
+        # Start a background task to read scan data
+        self.loop.create_task(self.refresh_controller_data())
 
     async def refresh_controller_data(self):
         """
@@ -110,9 +118,23 @@ class IRC081(usb_2408_2AO):
                 await asyncio.sleep(1)
 
     async def read_analogue_inputs(self):
-        for i in range(16):
-            self.aInput[i] = await self.async_get_voltage(i)
-            await asyncio.sleep(0.01)
+        depth, status = self.AInScanStatus()
+
+        if depth >= 16:  # At least one complete scan available
+            # Read one complete scan cycle (all 16 channels)
+            data = await self.loop.run_in_executor(
+                self.executor,
+                self.AInScanRead,
+                1,
+                self.CONTINUOUS
+            )
+
+            for i in range(16):
+                channel_idx = data[i] >> 24
+                channel_value = self.int24ToInt(data[i] & 0xFFFFFF)
+                calibrated = channel_value * self.Cal[self.Queue[channel_idx + 1].gain].slope + \
+                             self.Cal[self.Queue[channel_idx + 1].gain].intercept
+                self.aInput[channel_idx] = Decimal(self.volts(self.Queue[channel_idx + 1].gain, calibrated))
 
     async def read_digital_input(self):
         """
@@ -188,20 +210,6 @@ class IRC081(usb_2408_2AO):
         else:
             value = (emission_voltage * DECIMAL_2E5 + (bias_voltage / RESISTOR1G11)) * self.factors["factor i emission0"]
         return value
-
-    def get_voltage(self, channel: int) -> Decimal:
-        """
-        Reads and returns voltage of selected analog input channel (0-15).
-        """
-        data, flags = self.AIn(channel, self.measMode, self.measGain, self.measRate)
-        data = int(data * self.Cal[self.measGain].slope + self.Cal[self.measGain].intercept)
-        return Decimal(self.volts(self.measGain, data))
-
-    async def async_get_voltage(self, channel):
-        """
-        Reads and returns voltage of selected analog input channel (0-15) asynchronously.
-        """
-        return await self.loop.run_in_executor(self.executor, self.get_voltage, channel)
 
     async def update_digital_output(self):
         """
